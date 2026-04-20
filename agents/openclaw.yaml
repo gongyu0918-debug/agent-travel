@@ -1,0 +1,7 @@
+interface:
+  display_name: "Agent Travel"
+  short_description: "Quiet-window background research for OpenClaw / 面向 OpenClaw 的安静窗口背景研究"
+  default_prompt: "Use $agent-travel only during quiet windows or explicit user commands, keep default search_mode low, and save only advisory-only hints into the isolated suggestion channel. / 仅在安静窗口或用户显式命令下使用 $agent-travel，默认 search_mode 保持 low，并且只把 advisory-only 提示写入隔离建议通道。"
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,199 @@
+{
+  "total_cases": 20,
+  "passed_cases": 20,
+  "crash_count": 0,
+  "validator_cases": 16,
+  "validator_passed": 16,
+  "trigger_cases": 4,
+  "trigger_passed": 4,
+  "results": [
+    {
+      "case": "canonical",
+      "kind": "validator",
+      "expected_pass": true,
+      "actual_pass": true,
+      "ok": true,
+      "crashed": false,
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-e1qxj7ng\\canonical.md"
+    },
+    {
+      "case": "missing_markers",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: missing or invalid agent-travel markers\nERROR: missing top-level fields: advisory_only, budget, expires_at, generated_at, problem_fingerprint, search_mode, source_scope, thread_scope, tool_preference\nERROR: no suggestions found"
+    },
+    {
+      "case": "invalid_dates",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: expires_at must be later than generated_at"
+    },
+    {
+      "case": "missing_source_scope",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: missing top-level fields: source_scope"
+    },
+    {
+      "case": "missing_match_reasoning",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: suggestion-1 needs at least 4 match_reasoning items"
+    },
+    {
+      "case": "no_primary_evidence",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: suggestion-1 needs at least 1 primary evidence item"
+    },
+    {
+      "case": "stray_list_item",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: unexpected list item outside block: - stray item at top level"
+    },
+    {
+      "case": "bad_match_axes",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: suggestion-1 needs at least 4 distinct match_reasoning axes"
+    },
+    {
+      "case": "low_budget_two_suggestions",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: low allows at most 1 suggestion(s)"
+    },
+    {
+      "case": "medium_budget_four_suggestions",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: medium allows at most 3 suggestion(s)"
+    },
+    {
+      "case": "invalid_confidence",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: suggestion-1 confidence must be one of: low, medium, high"
+    },
+    {
+      "case": "ttl_too_long",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: expires_at must be within 14 days of generated_at"
+    },
+    {
+      "case": "invalid_visibility",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: visibility must be one of: show_on_next_relevant_turn, silent_until_relevant"
+    },
+    {
+      "case": "invalid_trigger_reason",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: trigger_reason must be one of: failure_recovery, heartbeat, idle_fallback, scheduled, task_end"
+    },
+    {
+      "case": "invalid_reuse_gate",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: reuse_gate must mention 4 or min_4_of_5"
+    },
+    {
+      "case": "valid_optional_fields",
+      "kind": "validator",
+      "expected_pass": true,
+      "actual_pass": true,
+      "ok": true,
+      "crashed": false,
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-e1qxj7ng\\valid_optional_fields.md"
+    },
+    {
+      "case": "should_travel_heartbeat_quiet_low",
+      "kind": "trigger",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\"}"
+    },
+    {
+      "case": "should_travel_user_active",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"user operation in progress\"}"
+    },
+    {
+      "case": "should_travel_failure_recovery_medium",
+      "kind": "trigger",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "medium",
+      "actual_search_mode": "medium",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"active conversation, quiet window, within cooldown\"}"
+    },
+    {
+      "case": "should_travel_explicit_deep_request_high",
+      "kind": "trigger",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "high",
+      "actual_search_mode": "high",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": true, \"search_mode\": \"high\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\"}"
+    }
+  ]
+}

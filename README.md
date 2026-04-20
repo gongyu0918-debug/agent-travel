@@ -1,0 +1,72 @@
+# agent-travel
+
+热力学第二定律说，封闭系统会走向熵增。Agent 也是。一个长期困在同一套工具、同一份上下文、同一批旧经验里的 agent，会越来越像熟练的惯性机器。`agent-travel` 给它一次低噪声的小型外出学习机制：只在心跳、任务结束、失败恢复、定时或空闲兜底这些安静时刻短途旅行，把外部世界里更贴近当前问题的做法带回来。  
+The second law of thermodynamics says a closed system drifts toward entropy. Agents do too. An agent that stays trapped inside the same tools, the same context window, and the same stale assumptions will slowly confuse repetition with truth. `agent-travel` gives it a low-noise micro-travel loop: step out only during heartbeat, task wrap-up, failure recovery, scheduled windows, or idle fallback, then bring back what is still useful for the current problem.
+
+它不做常驻后台爬虫，也不替用户做决定。它只把外部经验压成 advisory-only hints，隔离存放，等到下一次相关任务出现时再自然引用。  
+It is not a noisy background crawler and it does not make decisions for the user. It compresses outside practice into advisory-only hints, stores them in an isolated channel, and surfaces them only when the next relevant task appears.
+
+## 为什么它是轻量的 / Why It Is Lightweight
+
+- 没有 daemon。调度完全交给宿主 agent 的 heartbeat、cron、task-end 或 failure hooks。 / No daemon. Scheduling stays with the host agent through heartbeat, cron, task-end, or failure hooks.
+- 没有数据库。状态文件只有一个轻量 `state.json`，建议文件只有一个隔离 `suggestions.md`。 / No database. State stays in a lightweight `state.json`, and hints stay in an isolated `suggestions.md`.
+- 默认只用公开搜索面。内部文档、私有连接器、私有仓库都需要用户显式允许。 / Public search surfaces are the default. Internal docs, private connectors, and private repos require explicit user opt-in.
+- 所有脚本只用 Python 标准库。 / Every script uses Python stdlib only.
+- 搜索由宿主工具执行。这个仓库只定义触发、契约、校验和 host adapter。 / Search is executed by the host tools. This repository defines triggers, contracts, validation, and host adapters.
+- 建议通道始终隔离。它不会写进核心 system prompt、persona、长期 memory、AGENT.md/agent.md 核心指令。 / The suggestion channel stays isolated. It does not write into the core system prompt, persona, long-term memory, or core AGENT.md/agent.md instructions.
+
+## 推荐默认值 / Recommended Default
+
+推荐默认策略是低频、低预算、静默触发。  
+The recommended default is low-frequency, low-budget, and silent by design.
+
+- `active_conversation_window = 24h`
+- `default_search_mode = low`
+- `tool_preference = public-only`
+- `quiet_after_user_action = 20m`
+- `quiet_after_agent_action = 5m`
+- `max_runs_per_thread_per_day = 1`
+- `max_runs_per_user_per_day = 3`
+- `visibility = silent_until_relevant`
+
+`medium` 和 `high` 是升档，不是日常后台模式。  
+`medium` and `high` are escalation modes, not the everyday background default.
+
+## 关键点 / Key Points
+
+- 搜索来源分三层：`primary` 是官方文档、发行说明、官方讨论区；`secondary` 是搜索引擎、GitHub issues、Stack Overflow；`tertiary` 是论坛、博客、社交媒体。 / Search uses three tiers: `primary` for official docs, release notes, and official discussions; `secondary` for search engines, GitHub issues, and Stack Overflow; `tertiary` for forums, blogs, and social media.
+- 所有建议都要交叉验证。至少 1 条 `primary` 证据是硬要求。 / Every suggestion is cross-validated. At least 1 `primary` evidence item is mandatory.
+- 每条保留建议都要写 `match_reasoning`，逐轴说明为什么命中了 5 轴中的至少 4 个。 / Every kept suggestion must include `match_reasoning`, with axis-by-axis notes explaining why it matched at least 4 of the 5 axes.
+- 输出始终是 advisory-only，并且只服务 `active_conversation_only`。 / Output is always advisory-only and scoped to `active_conversation_only`.
+- 宿主应在 quiet window 内调用它：没有用户操作、没有 agent 正在输出、没有待确认工具。 / The host should invoke it only inside a quiet window: no user operation, no agent output in progress, and no pending tool approval.
+
+## 不要把它用在这些场景 / Do Not Use This For
+
+- 自动执行网页里的命令。 / Autonomous command execution from web pages.
+- 没有用户允许时搜索私有数据。 / Private-data search without explicit user opt-in.
+- 修改永久 memory、persona、core instructions。 / Permanent memory, persona, or core-instruction mutation.
+- 替用户做最终判断。 / Replacing user decisions.
+
+## 配套技能 / Companion Skill
+
+`agent-travel` 当前是单机背景研究层。它和同作者的 [agent-compute-mesh](https://github.com/gongyu0918-debug/agent-compute-mesh) 是配套关系：前者负责把外部经验压缩成结构化提示，后者负责把类似 `exploration job` 的工作单元放进更严格的 execution lease 里。  
+`agent-travel` is the single-node background research layer today. It pairs with the same author's [agent-compute-mesh](https://github.com/gongyu0918-debug/agent-compute-mesh): this skill compresses outside practice into structured hints, while the mesh skill turns similar `exploration job` units into stricter execution leases.
+
+## 文件 / Files
+
+- [SKILL.md](SKILL.md)
+- [SKILL.en.md](SKILL.en.md)
+- [agents/openai.yaml](agents/openai.yaml)
+- [agents/openclaw.yaml](agents/openclaw.yaml)
+- [agents/hermes.yaml](agents/hermes.yaml)
+- [references/search-playbook.md](references/search-playbook.md)
+- [references/suggestion-contract.md](references/suggestion-contract.md)
+- [references/trigger-policy.md](references/trigger-policy.md)
+- [references/threat-model.md](references/threat-model.md)
+- [references/host-adapters.md](references/host-adapters.md)
+- [scripts/validate_suggestions.py](scripts/validate_suggestions.py)
+- [scripts/should_travel.py](scripts/should_travel.py)
+- [scripts/reliability_test_suggestions.py](scripts/reliability_test_suggestions.py)
+- [scripts/ablation_test_suggestions.py](scripts/ablation_test_suggestions.py)
+- [assets/reliability_report.json](assets/reliability_report.json)
+- [assets/ablation_report.json](assets/ablation_report.json)

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Agent Travel"
+  short_description: "Low-noise micro-travel hints / 低噪声外出学习提示"
+  default_prompt: "Use $agent-travel to run low-budget micro-travel in quiet windows, search public sources first, keep official grounding, and store only advisory-only hints for the next relevant task. / 用 $agent-travel 在安静窗口里执行低预算 micro-travel，先查公开来源并保留官方锚点，只为下一次相关任务存储 advisory-only 提示。"
+
+policy:
+  allow_implicit_invocation: true

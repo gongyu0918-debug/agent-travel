@@ -1,0 +1,94 @@
+{
+  "baseline_ref": "v0.1.0-local-baseline",
+  "current_ref": "agent-travel-current",
+  "summary": {
+    "baseline_guardrail_rejection_rate": 0.0,
+    "current_guardrail_rejection_rate": 1.0,
+    "baseline_safe_acceptance_rate": 1.0,
+    "current_safe_acceptance_rate": 1.0,
+    "baseline_shared_invalid_rejection_rate": 1.0,
+    "current_shared_invalid_rejection_rate": 1.0
+  },
+  "cases": [
+    {
+      "case": "canonical",
+      "kind": "safe",
+      "baseline_passed": true,
+      "current_passed": true,
+      "baseline_crashed": false,
+      "current_crashed": false
+    },
+    {
+      "case": "valid_optional_fields",
+      "kind": "safe",
+      "baseline_passed": true,
+      "current_passed": true,
+      "baseline_crashed": false,
+      "current_crashed": false
+    },
+    {
+      "case": "low_budget_two_suggestions",
+      "kind": "guardrail",
+      "baseline_passed": true,
+      "current_passed": false,
+      "baseline_crashed": false,
+      "current_crashed": false
+    },
+    {
+      "case": "medium_budget_four_suggestions",
+      "kind": "guardrail",
+      "baseline_passed": true,
+      "current_passed": false,
+      "baseline_crashed": false,
+      "current_crashed": false
+    },
+    {
+      "case": "invalid_confidence",
+      "kind": "guardrail",
+      "baseline_passed": true,
+      "current_passed": false,
+      "baseline_crashed": false,
+      "current_crashed": false
+    },
+    {
+      "case": "ttl_too_long",
+      "kind": "guardrail",
+      "baseline_passed": true,
+      "current_passed": false,
+      "baseline_crashed": false,
+      "current_crashed": false
+    },
+    {
+      "case": "invalid_visibility",
+      "kind": "guardrail",
+      "baseline_passed": true,
+      "current_passed": false,
+      "baseline_crashed": false,
+      "current_crashed": false
+    },
+    {
+      "case": "invalid_trigger_reason",
+      "kind": "guardrail",
+      "baseline_passed": true,
+      "current_passed": false,
+      "baseline_crashed": false,
+      "current_crashed": false
+    },
+    {
+      "case": "invalid_reuse_gate",
+      "kind": "guardrail",
+      "baseline_passed": true,
+      "current_passed": false,
+      "baseline_crashed": false,
+      "current_crashed": false
+    },
+    {
+      "case": "invalid_dates",
+      "kind": "shared-invalid",
+      "baseline_passed": false,
+      "current_passed": false,
+      "baseline_crashed": false,
+      "current_crashed": false
+    }
+  ]
+}
