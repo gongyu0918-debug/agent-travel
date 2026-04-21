@@ -24,6 +24,7 @@ Run only when all of these are true:
 - `active_conversation_window = 24h`
 - `quiet_after_user_action = 20m`
 - `quiet_after_agent_action = 5m`
+- `repeat_fingerprint_cooldown = 12h`
 - `max_runs_per_thread_per_day = 1`
 - `max_runs_per_user_per_day = 3`
 
@@ -34,6 +35,14 @@ Run only when all of these are true:
 - `high`: explicit deep research request or repeated blocker after `medium`
 
 `task_end` defaults to `medium` once the host decides the task just finished and the quiet window is open.
+
+`idle_fallback` should run only when one of these is true:
+
+- the host does not support heartbeat
+- the operator explicitly enabled idle fallback
+- the operator explicitly prefers inactivity-based travel
+
+Repeated runs with the same fingerprint should stay quiet until `repeat_fingerprint_cooldown` elapses.
 
 ## Host Note
 

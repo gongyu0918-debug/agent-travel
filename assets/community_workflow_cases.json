@@ -33,7 +33,16 @@
     "expected": {
       "should_run": true,
       "search_mode": "medium",
-      "error_code": "ready"
+      "error_code": "ready",
+      "trigger_reason": "task_end"
+    },
+    "eval": {
+      "mode": "positive",
+      "required_evidence_tiers": ["primary", "secondary"],
+      "expected_visibility": "silent_until_relevant",
+      "pain_terms": ["hook", "task", "quiet window", "official", "next related turn"],
+      "min_term_hits": 4,
+      "min_score": 7
     },
     "output": {
       "generated_at": "2026-04-21T12:10:00+08:00",
@@ -57,8 +66,8 @@
           "confidence": "medium",
           "manual_check": "Verify the target hook event still exists in the current Claude Code build and that the workflow still needs background research.",
           "solves_point": "The operator wants a low-noise way to refresh hook guidance after the task ends without interrupting the coding session.",
-          "new_idea": "Use task-end travel to refresh authoritative guidance only after the implementation settles, then reuse the note on the next similar turn.",
-          "fit_reason": "This fits threads that just finished a hook-related change and want recent guidance before the next edit or rollout.",
+          "new_idea": "Use task-end travel to refresh authoritative guidance only after the implementation settles, then reuse the note on the next related turn.",
+          "fit_reason": "This fits threads that just finished a hook-related change and want recent official guidance before the next edit or rollout.",
           "match_reasoning": [
             "host: matched Claude Code hook workflows and skill-triggered automation",
             "version: matched current Claude Code hooks and skills documentation from April 2026",
@@ -71,6 +80,93 @@
           "evidence": [
             "primary_official: https://code.claude.com/docs/en/hooks",
             "secondary_community: https://www.reddit.com/r/ClaudeCode/comments/1qlzzzf/claude_codes_most_underrated_feature_hooks_wrote/"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "claude_code_failure_recovery_hook_contract",
+    "title": "Claude Code failure-recovery hook contract check",
+    "host": "Claude Code",
+    "workflow": "After repeated hook failures or ignored hook output, the operator wants a recovery pass that checks the official event contract and one community failure report before trying another fix.",
+    "user_context": "Recent hook runs kept failing or appeared to be ignored. The operator wants the next recovery attempt to focus on contract validity instead of adding more shell glue.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "Claude Code Hooks reference",
+        "url": "https://code.claude.com/docs/en/hooks"
+      },
+      {
+        "label": "secondary",
+        "name": "Claude Code hook failure workflow thread",
+        "url": "https://www.reddit.com/r/ClaudeCode/comments/1rn8nxf/some_hooks_not_working_in_claude_code/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "failure_recovery",
+      "now": "2026-04-21T16:00:00+08:00",
+      "last_thread_activity": "2026-04-21T14:30:00+08:00",
+      "last_user_action": "2026-04-21T15:10:00+08:00",
+      "last_agent_action": "2026-04-21T15:35:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "related_failures": 2
+    },
+    "expected": {
+      "should_run": true,
+      "search_mode": "medium",
+      "error_code": "ready",
+      "trigger_reason": "failure_recovery"
+    },
+    "eval": {
+      "mode": "positive",
+      "required_evidence_tiers": ["primary", "secondary"],
+      "expected_visibility": "silent_until_relevant",
+      "pain_terms": ["hook", "json", "failure", "recovery", "feedback"],
+      "min_term_hits": 4,
+      "min_score": 7
+    },
+    "output": {
+      "generated_at": "2026-04-21T16:08:00+08:00",
+      "expires_at": "2026-04-28T16:08:00+08:00",
+      "budget": "medium",
+      "search_mode": "medium",
+      "tool_preference": "public-only",
+      "source_scope": "primary+secondary",
+      "thread_scope": "active_conversation_only",
+      "problem_fingerprint": "claude-code|hooks|failure-recovery-contract|2026-q2",
+      "advisory_only": "true",
+      "trigger_reason": "failure_recovery",
+      "visibility": "silent_until_relevant",
+      "fingerprint_hash": "sha256:96dc60b55e0dc0d03abdb03c5df49d468f6954f801795fe6b650939d2ec5a7d7",
+      "reuse_gate": "min_4_of_5_axes_and_ttl_valid",
+      "suggestions": [
+        {
+          "title": "Validate the hook contract before adding another workaround",
+          "applies_when": "Recent Claude Code hooks failed repeatedly, appeared to be ignored, or stopped feeding useful feedback back into the recovery loop.",
+          "hint": "Check the official event contract first: valid event, valid JSON on stdout, and the right exit behavior for feedback. Use one community failure report only to confirm the failure pattern, then fix the contract instead of piling on more wrapper scripts.",
+          "confidence": "high",
+          "manual_check": "Verify the target hook emits valid JSON or the expected stderr/exit code for that event, and confirm the host still supports the chosen event type.",
+          "solves_point": "The current failure-recovery loop is wasting time on shell tweaks while the real issue may be an invalid hook contract or output shape.",
+          "new_idea": "Treat repeated hook failures as a contract-validation problem first, then tune the implementation after the event and feedback path are confirmed.",
+          "fit_reason": "This fits Claude Code hook workflows where repeated failures or silent ignores are the main blocker and the operator needs a medium-budget recovery pass.",
+          "match_reasoning": [
+            "host: matched Claude Code hook lifecycle and failure-recovery workflows",
+            "version: matched current Claude Code hook event and feedback documentation from April 2026",
+            "symptom: matched repeated hook failures or hooks being ignored",
+            "constraint_pattern: matched a medium-budget recovery pass instead of a broad research crawl",
+            "desired_next_outcome: matched one precise fix path for the next recovery attempt"
+          ],
+          "version_scope": "Claude Code builds where hook output shape, exit behavior, and event support still determine whether recovery feedback is accepted.",
+          "do_not_apply_when": "Skip this hint when the hook contract is already known-good and the current failure comes from an external binary, PATH issue, or tool-specific runtime problem.",
+          "evidence": [
+            "primary_official: https://code.claude.com/docs/en/hooks",
+            "secondary_community: https://www.reddit.com/r/ClaudeCode/comments/1rn8nxf/some_hooks_not_working_in_claude_code/"
           ]
         }
       ]
@@ -115,7 +211,16 @@
     "expected": {
       "should_run": true,
       "search_mode": "low",
-      "error_code": "ready"
+      "error_code": "ready",
+      "trigger_reason": "heartbeat"
+    },
+    "eval": {
+      "mode": "positive",
+      "required_evidence_tiers": ["primary", "secondary"],
+      "expected_visibility": "silent_until_relevant",
+      "pain_terms": ["heartbeat", "memory", "advisory", "public only", "manual review"],
+      "min_term_hits": 4,
+      "min_score": 7
     },
     "output": {
       "generated_at": "2026-04-21T15:05:00+08:00",
@@ -160,6 +265,52 @@
     }
   },
   {
+    "id": "openclaw_idle_fallback_stays_quiet",
+    "title": "OpenClaw idle fallback stays quiet when heartbeat already exists",
+    "host": "OpenClaw",
+    "workflow": "The operator already has heartbeat configured and wants idle fallback to stay off until they explicitly opt in.",
+    "user_context": "Heartbeat is already available. The operator wants one background loop, not two overlapping loops producing the same class of hints.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "OpenClaw Cron vs Heartbeat",
+        "url": "https://docs.openclaw.ai/cron-vs-heartbeat/"
+      },
+      {
+        "label": "primary",
+        "name": "OpenClaw Heartbeat reference",
+        "url": "https://docs.openclaw.ai/gateway/heartbeat"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "idle_fallback",
+      "now": "2026-04-21T17:00:00+08:00",
+      "last_thread_activity": "2026-04-21T15:10:00+08:00",
+      "last_user_action": "2026-04-21T15:40:00+08:00",
+      "last_agent_action": "2026-04-21T16:00:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "host_supports_heartbeat": true,
+      "idle_fallback_enabled": false,
+      "user_prefers_idle_fallback": false
+    },
+    "expected": {
+      "should_run": false,
+      "search_mode": "low",
+      "error_code": "idle_fallback_not_enabled",
+      "trigger_reason": "idle_fallback"
+    },
+    "eval": {
+      "mode": "silent_guardrail",
+      "expected_signal": "idle_fallback_not_opted_in",
+      "min_score": 4
+    }
+  },
+  {
     "id": "hermes_scheduled_doc_drift_scan",
     "title": "Hermes scheduled doc-drift research pass",
     "host": "Hermes",
@@ -199,7 +350,16 @@
     "expected": {
       "should_run": true,
       "search_mode": "low",
-      "error_code": "ready"
+      "error_code": "ready",
+      "trigger_reason": "scheduled"
+    },
+    "eval": {
+      "mode": "positive",
+      "required_evidence_tiers": ["primary", "secondary"],
+      "expected_visibility": "silent_until_relevant",
+      "pain_terms": ["scheduled", "doc drift", "workflow", "low budget", "next related maintenance turn"],
+      "min_term_hits": 4,
+      "min_score": 7
     },
     "output": {
       "generated_at": "2026-04-21T09:05:00+08:00",
@@ -241,6 +401,59 @@
           ]
         }
       ]
+    }
+  },
+  {
+    "id": "hermes_scheduled_duplicate_dedupes",
+    "title": "Hermes scheduled run dedupes repeated fingerprint",
+    "host": "Hermes",
+    "workflow": "A recurring scheduled workflow should stay quiet when the fingerprint has not changed and the last hint is still inside its cooldown window.",
+    "user_context": "The operator wants scheduled research to stay cheap and skip rerunning the same doc-drift pass every few hours.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "Hermes automation templates",
+        "url": "https://hermes-agent.nousresearch.com/docs/guides/automation-templates"
+      },
+      {
+        "label": "primary",
+        "name": "Hermes skills system docs",
+        "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills"
+      },
+      {
+        "label": "secondary",
+        "name": "Hermes community ecosystem page",
+        "url": "https://get-hermes.ai/community/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "scheduled",
+      "now": "2026-04-21T13:00:00+08:00",
+      "last_thread_activity": "2026-04-21T12:10:00+08:00",
+      "last_user_action": "2026-04-21T12:15:00+08:00",
+      "last_agent_action": "2026-04-21T12:20:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "user_configured_periodic_travel": true,
+      "current_fingerprint_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      "last_travel_fingerprint_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      "last_travel_generated_at": "2026-04-21T08:30:00+08:00",
+      "repeat_fingerprint_cooldown": "12h"
+    },
+    "expected": {
+      "should_run": false,
+      "search_mode": "low",
+      "error_code": "duplicate_fingerprint_cooldown",
+      "trigger_reason": "scheduled"
+    },
+    "eval": {
+      "mode": "silent_guardrail",
+      "expected_signal": "fingerprint_repeat_window_active",
+      "min_score": 4
     }
   }
 ]

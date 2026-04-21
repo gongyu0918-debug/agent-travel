@@ -16,10 +16,11 @@ This repository currently ships the protocol layer, trigger gate, output contrac
 - Every script uses Python stdlib only.
 - Search is executed by the host tools. This repository defines triggers, contracts, validation, and host adapters.
 - The suggestion channel stays isolated. It does not write into the core system prompt, persona, long-term memory, or core AGENT.md/agent.md instructions.
+- Implicit invocation is off by default. Background runs should be wired explicitly through the host's heartbeat, cron, or task-end configuration.
 
 ## Scan Note
 
-Some static scans will hit the prompt-injection example text inside [references/threat-model.md](references/threat-model.md). Those examples are defensive fixtures that show what the host should reject, not instructions that the skill should execute.
+Some static scans will hit the prompt-injection example text inside [references/threat-model.md](references/threat-model.md). Those examples now use redacted placeholder wording and remain defensive fixtures that show what the host should reject, not instructions that the skill should execute.
 
 ## Recommended Default
 
@@ -30,11 +31,14 @@ The recommended default is low-frequency, low-budget, and silent by design.
 - `tool_preference = public-only`
 - `quiet_after_user_action = 20m`
 - `quiet_after_agent_action = 5m`
+- `repeat_fingerprint_cooldown = 12h`
 - `max_runs_per_thread_per_day = 1`
 - `max_runs_per_user_per_day = 3`
 - `visibility = silent_until_relevant`
 
 `medium` and `high` are escalation modes, not the everyday background default.
+
+`idle_fallback` fits hosts without heartbeat, or hosts where the operator explicitly enabled it. Heartbeat stays the default background path when available.
 
 ## Key Points
 
@@ -57,7 +61,7 @@ The recommended default is low-frequency, low-budget, and silent by design.
 
 ## Community Workflow Fixtures
 
-This version ships with three real-source workflow fixtures that cover Claude Code task-end refresh, OpenClaw heartbeat advisory isolation, and Hermes scheduled doc-drift scans. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
+This version ships with six real-source workflow fixtures that cover Claude Code task-end refresh, failure recovery, OpenClaw heartbeat advisory isolation, idle-fallback silence guards, Hermes scheduled doc-drift scans, and repeated-fingerprint dedupe. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
 
 For product-side checks, start with these three entry points:
 

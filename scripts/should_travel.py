@@ -15,6 +15,7 @@ DEFAULTS = {
     "active_conversation_window": "24h",
     "quiet_after_user_action": "20m",
     "quiet_after_agent_action": "5m",
+    "repeat_fingerprint_cooldown": "12h",
     "max_runs_per_thread_per_day": 1,
     "max_runs_per_user_per_day": 3,
 }
@@ -123,6 +124,16 @@ def get_event_kind(state: dict[str, object]) -> str:
     return raw
 
 
+def get_optional_timestamp(state: dict[str, object], key: str) -> datetime | None:
+    raw = state.get(key)
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    if not text:
+        return None
+    return parse_timestamp(key, text)
+
+
 def blocked(
     event_kind: str,
     reason: str,
@@ -192,6 +203,7 @@ def decide(state: dict[str, object]) -> Decision:
     active_window = get_duration(state, "active_conversation_window")
     quiet_after_user = get_duration(state, "quiet_after_user_action")
     quiet_after_agent = get_duration(state, "quiet_after_agent_action")
+    repeat_fingerprint_cooldown = get_duration(state, "repeat_fingerprint_cooldown")
     max_runs_per_thread = as_int(
         state.get("max_runs_per_thread_per_day"),
         int(DEFAULTS["max_runs_per_thread_per_day"]),
@@ -217,6 +229,39 @@ def decide(state: dict[str, object]) -> Decision:
         return blocked(event_kind, "thread run budget exhausted", "thread_run_budget_exhausted")
     if as_int(state.get("user_runs_today"), 0) >= max_runs_per_user:
         return blocked(event_kind, "user run budget exhausted", "user_run_budget_exhausted")
+
+    host_supports_heartbeat = as_bool(state.get("host_supports_heartbeat"), True)
+    user_prefers_idle_fallback = as_bool(state.get("user_prefers_idle_fallback"), False)
+    idle_fallback_enabled = as_bool(state.get("idle_fallback_enabled"), False)
+    if event_kind == "idle_fallback" and not (
+        idle_fallback_enabled or not host_supports_heartbeat or user_prefers_idle_fallback
+    ):
+        return blocked(
+            event_kind,
+            "idle fallback needs explicit opt-in or a host without heartbeat support",
+            "idle_fallback_not_enabled",
+            [
+                "host_supports_heartbeat" if host_supports_heartbeat else "host_without_heartbeat",
+                "idle_fallback_not_opted_in",
+            ],
+        )
+
+    current_fingerprint_hash = str(state.get("current_fingerprint_hash", "")).strip()
+    last_travel_fingerprint_hash = str(state.get("last_travel_fingerprint_hash", "")).strip()
+    last_travel_generated_at = get_optional_timestamp(state, "last_travel_generated_at")
+    if (
+        current_fingerprint_hash
+        and last_travel_fingerprint_hash
+        and current_fingerprint_hash == last_travel_fingerprint_hash
+        and last_travel_generated_at is not None
+        and now - last_travel_generated_at < repeat_fingerprint_cooldown
+    ):
+        return blocked(
+            event_kind,
+            "repeat fingerprint cooldown is still active",
+            "duplicate_fingerprint_cooldown",
+            ["fingerprint_repeat_window_active"],
+        )
 
     signals = collect_escalation_signals(state)
     user_configured_periodic_travel = as_bool(state.get("user_configured_periodic_travel"), False)

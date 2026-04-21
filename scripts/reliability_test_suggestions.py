@@ -143,6 +143,26 @@ def mutate_invalid_reuse_gate(text: str) -> str:
     return replace_line(text, "reuse_gate", "ttl_valid_only")
 
 
+def mutate_invalid_source_scope_token(text: str) -> str:
+    return replace_line(text, "source_scope", "primary+quaternary")
+
+
+def mutate_evidence_outside_source_scope(text: str) -> str:
+    return replace_once(
+        text,
+        "- secondary_community: https://example.com/community-thread",
+        "- tertiary_community: https://example.com/community-thread",
+    )
+
+
+def mutate_invalid_fingerprint_hash(text: str) -> str:
+    return replace_line(text, "fingerprint_hash", "sha256:xyz")
+
+
+def mutate_short_problem_fingerprint(text: str) -> str:
+    return replace_line(text, "problem_fingerprint", "host|symptom|version")
+
+
 def mutate_empty_fit_reason(text: str) -> str:
     return replace_line(text, "fit_reason", "")
 
@@ -171,6 +191,10 @@ VALIDATOR_CASES = [
     ("invalid_visibility", mutate_invalid_visibility, False),
     ("invalid_trigger_reason", mutate_invalid_trigger_reason, False),
     ("invalid_reuse_gate", mutate_invalid_reuse_gate, False),
+    ("invalid_source_scope_token", mutate_invalid_source_scope_token, False),
+    ("evidence_outside_source_scope", mutate_evidence_outside_source_scope, False),
+    ("invalid_fingerprint_hash", mutate_invalid_fingerprint_hash, False),
+    ("short_problem_fingerprint", mutate_short_problem_fingerprint, False),
     ("empty_fit_reason", mutate_empty_fit_reason, False),
     ("valid_optional_fields", mutate_valid_optional_fields, True),
 ]
@@ -337,6 +361,74 @@ TRIGGER_CASES = [
         False,
         "low",
         "invalid_duration",
+    ),
+    (
+        "should_travel_idle_fallback_needs_opt_in",
+        {
+            "enabled": True,
+            "event_kind": "idle_fallback",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "host_supports_heartbeat": True,
+            "idle_fallback_enabled": False,
+            "user_prefers_idle_fallback": False,
+        },
+        False,
+        "low",
+        "idle_fallback_not_enabled",
+    ),
+    (
+        "should_travel_idle_fallback_without_heartbeat_runs",
+        {
+            "enabled": True,
+            "event_kind": "idle_fallback",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "host_supports_heartbeat": False,
+        },
+        True,
+        "low",
+        "ready",
+    ),
+    (
+        "should_travel_duplicate_fingerprint_cooldown",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "current_fingerprint_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "last_travel_fingerprint_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "last_travel_generated_at": "2026-04-20T06:30:00+00:00",
+            "repeat_fingerprint_cooldown": "12h",
+        },
+        False,
+        "low",
+        "duplicate_fingerprint_cooldown",
+    ),
+    (
+        "should_travel_duplicate_fingerprint_after_cooldown_runs",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "current_fingerprint_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "last_travel_fingerprint_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "last_travel_generated_at": "2026-04-19T18:00:00+00:00",
+            "repeat_fingerprint_cooldown": "12h",
+        },
+        True,
+        "low",
+        "ready",
     ),
 ]
 

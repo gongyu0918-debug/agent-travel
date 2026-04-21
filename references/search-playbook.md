@@ -10,6 +10,7 @@ Default behavior:
 - `active_conversation_window = 24h`
 - `quiet_after_user_action = 20m`
 - `quiet_after_agent_action = 5m`
+- `repeat_fingerprint_cooldown = 12h`
 - `max_runs_per_thread_per_day = 1`
 - `max_runs_per_user_per_day = 3`
 - `visibility = silent_until_relevant`
@@ -29,6 +30,8 @@ Build the smallest fingerprint that still distinguishes the issue:
 - `goal`: what would count as a useful hint on the next task
 
 Do not include secrets, full file contents, customer data, private repo names when not public, long private paths, or raw tokens.
+
+If the current fingerprint hash matches the last stored fingerprint hash and the previous run is still inside `repeat_fingerprint_cooldown`, skip the trip and reuse the existing advisory note until the cooldown or TTL expires.
 
 ## Micro-Travel Query Policy
 

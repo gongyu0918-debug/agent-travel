@@ -24,7 +24,7 @@ Default trigger policy / 默认触发策略:
 2. Failure recovery trigger: after 2 related failures, 2 user corrections, 1 unresolved blocker, or a detected version mismatch. Default mode is `medium`. / 失败恢复触发：2 次相关失败、2 次用户纠正、1 个未解决阻塞，或检测到版本错配后启用，默认模式是 `medium`。
 3. Task-end trigger: after a multi-step task or manual recovery pass. Default mode is `medium`. / 任务结束触发：多步骤任务或手动恢复结束后启用，默认模式是 `medium`。
 4. Scheduled trigger: host-managed cron or periodic travel. Default mode is `low`. / 定时触发：由宿主管理的 cron 或周期性 travel，默认模式是 `low`。
-5. Idle fallback: when the host has no heartbeat or the user explicitly prefers inactivity-based travel. Default fallback uses `active_conversation_window = 24h`, `quiet_after_user_action = 20m`, and `quiet_after_agent_action = 5m`. / 空闲兜底：宿主没有 heartbeat，或用户明确偏好按空闲时间触发时启用。默认兜底使用 `active_conversation_window = 24h`、`quiet_after_user_action = 20m`、`quiet_after_agent_action = 5m`。
+5. Idle fallback: when the host has no heartbeat, or when the user explicitly enables inactivity-based travel. Default fallback uses `active_conversation_window = 24h`, `quiet_after_user_action = 20m`, and `quiet_after_agent_action = 5m`. / 空闲兜底：宿主没有 heartbeat，或用户明确开启按空闲时间触发时启用。默认兜底使用 `active_conversation_window = 24h`、`quiet_after_user_action = 20m`、`quiet_after_agent_action = 5m`。
 
 Read [references/trigger-policy.md](references/trigger-policy.md) before implementing host-side scheduling.  
 实现宿主侧调度前，先读 [references/trigger-policy.md](references/trigger-policy.md)。
@@ -45,6 +45,7 @@ Default search policy / 默认搜索策略:
 - `active_conversation_window`: `24h`
 - `quiet_after_user_action`: `20m`
 - `quiet_after_agent_action`: `5m`
+- `repeat_fingerprint_cooldown`: `12h`
 - `max_runs_per_thread_per_day`: `1`
 - `max_runs_per_user_per_day`: `3`
 - `visibility`: `silent_until_relevant`
@@ -54,8 +55,8 @@ Default search policy / 默认搜索策略:
 
 ## Procedure / 处理流程
 
-1. Build a problem fingerprint from the current context, memory, and recent failures.  
-   从当前上下文、记忆和最近失败记录构建问题指纹。
+1. Build a problem fingerprint from the current context, memory, and recent failures. Reuse the existing note when the fingerprint hash is unchanged and still inside the repeat cooldown.
+   从当前上下文、记忆和最近失败记录构建问题指纹。指纹哈希没有变化且仍在重复冷却窗口内时，继续复用已有建议。
 2. Redact secrets, private paths, private code, customer data, internal URLs, and tokens before any search.  
    在任何搜索前先脱敏，去掉密钥、私有路径、私有代码、客户数据、内部 URL 和 token。
 3. Read [references/search-playbook.md](references/search-playbook.md) and form the smallest safe query set.  
@@ -137,5 +138,5 @@ Treat [agent-compute-mesh](https://github.com/gongyu0918-debug/agent-compute-mes
 
 ## Verification / 复核
 
-Before reusing a stored hint, re-check symptom match, version match, TTL, evidence consistency, and whether the hint still fits the active conversation.  
-复用存储提示前，重新检查症状匹配、版本匹配、TTL、证据一致性，以及它是否仍然贴合当前活跃线程。
+Before reusing a stored hint, re-check symptom match, version match, TTL, evidence consistency, fingerprint match, and whether the hint still fits the active conversation.
+复用存储提示前，重新检查症状匹配、版本匹配、TTL、证据一致性、指纹匹配，以及它是否仍然贴合当前活跃线程。

@@ -1,7 +1,8 @@
 {
-  "total_cases": 3,
-  "smoke_passed": 3,
-  "ablation_positive": 3,
+  "total_cases": 6,
+  "smoke_passed": 6,
+  "eval_passed": 6,
+  "ablation_positive": 6,
   "results": [
     {
       "id": "claude_code_task_end_guidance_refresh",
@@ -21,11 +22,65 @@
       ],
       "trigger_ok": true,
       "validator_ok": true,
+      "eval_ok": true,
       "trigger_output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"task_end\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"task_end_default\"]}",
-      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-k3kjqpoi\\claude_code_task_end_guidance_refresh.suggestions.md",
-      "with_skill_score": 6,
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-cw9968mo\\claude_code_task_end_guidance_refresh.suggestions.md",
+      "with_skill_score": 8,
       "without_skill_score": 0,
-      "score_delta": 6
+      "score_delta": 8,
+      "score_breakdown": {
+        "mode": "positive",
+        "pain_term_hits": 5,
+        "pain_term_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "score": 8
+      }
+    },
+    {
+      "id": "claude_code_failure_recovery_hook_contract",
+      "title": "Claude Code failure-recovery hook contract check",
+      "host": "Claude Code",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "Claude Code Hooks reference",
+          "url": "https://code.claude.com/docs/en/hooks"
+        },
+        {
+          "label": "secondary",
+          "name": "Claude Code hook failure workflow thread",
+          "url": "https://www.reddit.com/r/ClaudeCode/comments/1rn8nxf/some_hooks_not_working_in_claude_code/"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "eval_ok": true,
+      "trigger_output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"failure_recovery_default\", \"related_failures\"]}",
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-cw9968mo\\claude_code_failure_recovery_hook_contract.suggestions.md",
+      "with_skill_score": 8,
+      "without_skill_score": 0,
+      "score_delta": 8,
+      "score_breakdown": {
+        "mode": "positive",
+        "pain_term_hits": 5,
+        "pain_term_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "score": 8
+      }
     },
     {
       "id": "openclaw_heartbeat_memory_safety",
@@ -50,11 +105,59 @@
       ],
       "trigger_ok": true,
       "validator_ok": true,
+      "eval_ok": true,
       "trigger_output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"heartbeat_default\"]}",
-      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-k3kjqpoi\\openclaw_heartbeat_memory_safety.suggestions.md",
-      "with_skill_score": 6,
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-cw9968mo\\openclaw_heartbeat_memory_safety.suggestions.md",
+      "with_skill_score": 8,
       "without_skill_score": 0,
-      "score_delta": 6
+      "score_delta": 8,
+      "score_breakdown": {
+        "mode": "positive",
+        "pain_term_hits": 4,
+        "pain_term_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "score": 8
+      }
+    },
+    {
+      "id": "openclaw_idle_fallback_stays_quiet",
+      "title": "OpenClaw idle fallback stays quiet when heartbeat already exists",
+      "host": "OpenClaw",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "OpenClaw Cron vs Heartbeat",
+          "url": "https://docs.openclaw.ai/cron-vs-heartbeat/"
+        },
+        {
+          "label": "primary",
+          "name": "OpenClaw Heartbeat reference",
+          "url": "https://docs.openclaw.ai/gateway/heartbeat"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "eval_ok": true,
+      "trigger_output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"idle fallback needs explicit opt-in or a host without heartbeat support\", \"error_code\": \"idle_fallback_not_enabled\", \"observed_signals\": [\"host_supports_heartbeat\", \"idle_fallback_not_opted_in\"]}",
+      "validator_output": "SKIPPED: no output fixture for blocked case",
+      "with_skill_score": 4,
+      "without_skill_score": 0,
+      "score_delta": 4,
+      "score_breakdown": {
+        "mode": "silent_guardrail",
+        "observed_signals": [
+          "host_supports_heartbeat",
+          "idle_fallback_not_opted_in"
+        ],
+        "score": 4
+      }
     },
     {
       "id": "hermes_scheduled_doc_drift_scan",
@@ -79,11 +182,63 @@
       ],
       "trigger_ok": true,
       "validator_ok": true,
+      "eval_ok": true,
       "trigger_output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_default\"]}",
-      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-k3kjqpoi\\hermes_scheduled_doc_drift_scan.suggestions.md",
-      "with_skill_score": 6,
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-cw9968mo\\hermes_scheduled_doc_drift_scan.suggestions.md",
+      "with_skill_score": 8,
       "without_skill_score": 0,
-      "score_delta": 6
+      "score_delta": 8,
+      "score_breakdown": {
+        "mode": "positive",
+        "pain_term_hits": 5,
+        "pain_term_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "score": 8
+      }
+    },
+    {
+      "id": "hermes_scheduled_duplicate_dedupes",
+      "title": "Hermes scheduled run dedupes repeated fingerprint",
+      "host": "Hermes",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "Hermes automation templates",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/automation-templates"
+        },
+        {
+          "label": "primary",
+          "name": "Hermes skills system docs",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills"
+        },
+        {
+          "label": "secondary",
+          "name": "Hermes community ecosystem page",
+          "url": "https://get-hermes.ai/community/"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "eval_ok": true,
+      "trigger_output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"repeat fingerprint cooldown is still active\", \"error_code\": \"duplicate_fingerprint_cooldown\", \"observed_signals\": [\"fingerprint_repeat_window_active\"]}",
+      "validator_output": "SKIPPED: no output fixture for blocked case",
+      "with_skill_score": 4,
+      "without_skill_score": 0,
+      "score_delta": 4,
+      "score_breakdown": {
+        "mode": "silent_guardrail",
+        "observed_signals": [
+          "fingerprint_repeat_window_active"
+        ],
+        "score": 4
+      }
     }
   ]
 }

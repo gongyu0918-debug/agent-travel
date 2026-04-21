@@ -1,11 +1,11 @@
 {
-  "total_cases": 27,
-  "passed_cases": 27,
+  "total_cases": 35,
+  "passed_cases": 35,
   "crash_count": 0,
-  "validator_cases": 19,
-  "validator_passed": 19,
-  "trigger_cases": 8,
-  "trigger_passed": 8,
+  "validator_cases": 23,
+  "validator_passed": 23,
+  "trigger_cases": 12,
+  "trigger_passed": 12,
   "results": [
     {
       "case": "canonical",
@@ -14,7 +14,7 @@
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-_rnxcjjm\\canonical.md"
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-n9erzaqj\\canonical.md"
     },
     {
       "case": "missing_markers",
@@ -50,7 +50,7 @@
       "actual_pass": false,
       "ok": true,
       "crashed": false,
-      "output": "ERROR: missing top-level fields: source_scope"
+      "output": "ERROR: missing top-level fields: source_scope\nERROR: suggestion-1 evidence tier primary must be declared in source_scope\nERROR: suggestion-1 evidence tier secondary must be declared in source_scope"
     },
     {
       "case": "missing_match_reasoning",
@@ -68,7 +68,7 @@
       "actual_pass": false,
       "ok": true,
       "crashed": false,
-      "output": "ERROR: suggestion-1 needs at least 1 primary evidence item"
+      "output": "ERROR: suggestion-1 evidence tier tertiary must be declared in source_scope\nERROR: suggestion-1 needs at least 1 primary evidence item"
     },
     {
       "case": "no_independent_evidence",
@@ -161,6 +161,42 @@
       "output": "ERROR: reuse_gate must be: min_4_of_5_axes_and_ttl_valid"
     },
     {
+      "case": "invalid_source_scope_token",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: source_scope contains unsupported tiers: quaternary\nERROR: suggestion-1 evidence tier secondary must be declared in source_scope"
+    },
+    {
+      "case": "evidence_outside_source_scope",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: suggestion-1 evidence tier tertiary must be declared in source_scope"
+    },
+    {
+      "case": "invalid_fingerprint_hash",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: fingerprint_hash must be formatted as sha256:<64 lowercase hex chars>"
+    },
+    {
+      "case": "short_problem_fingerprint",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: problem_fingerprint must contain at least 4 non-empty segments"
+    },
+    {
       "case": "empty_fit_reason",
       "kind": "validator",
       "expected_pass": false,
@@ -176,7 +212,7 @@
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-_rnxcjjm\\valid_optional_fields.md"
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-n9erzaqj\\valid_optional_fields.md"
     },
     {
       "case": "should_travel_heartbeat_quiet_low",
@@ -281,6 +317,58 @@
       "ok": true,
       "crashed": false,
       "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"duration must be a positive integer with unit: -5m\", \"error_code\": \"invalid_duration\"}"
+    },
+    {
+      "case": "should_travel_idle_fallback_needs_opt_in",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "idle_fallback_not_enabled",
+      "actual_error_code": "idle_fallback_not_enabled",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"idle fallback needs explicit opt-in or a host without heartbeat support\", \"error_code\": \"idle_fallback_not_enabled\", \"observed_signals\": [\"host_supports_heartbeat\", \"idle_fallback_not_opted_in\"]}"
+    },
+    {
+      "case": "should_travel_idle_fallback_without_heartbeat_runs",
+      "kind": "trigger",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "ready",
+      "actual_error_code": "ready",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"idle_fallback_default\"]}"
+    },
+    {
+      "case": "should_travel_duplicate_fingerprint_cooldown",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "duplicate_fingerprint_cooldown",
+      "actual_error_code": "duplicate_fingerprint_cooldown",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"repeat fingerprint cooldown is still active\", \"error_code\": \"duplicate_fingerprint_cooldown\", \"observed_signals\": [\"fingerprint_repeat_window_active\"]}"
+    },
+    {
+      "case": "should_travel_duplicate_fingerprint_after_cooldown_runs",
+      "kind": "trigger",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "ready",
+      "actual_error_code": "ready",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"heartbeat_default\"]}"
     }
   ]
 }

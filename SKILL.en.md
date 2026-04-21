@@ -22,7 +22,7 @@ Default trigger policy:
 2. Failure recovery trigger: after 2 related failures, 2 user corrections, 1 unresolved blocker, or a detected version mismatch. Default mode is `medium`.
 3. Task-end trigger: after a multi-step task or manual recovery pass. Default mode is `medium`.
 4. Scheduled trigger: host-managed cron or periodic travel. Default mode is `low`.
-5. Idle fallback: when the host has no heartbeat or the user explicitly prefers inactivity-based travel. Default fallback uses `active_conversation_window = 24h`, `quiet_after_user_action = 20m`, and `quiet_after_agent_action = 5m`.
+5. Idle fallback: when the host has no heartbeat, or when the user explicitly enables inactivity-based travel. Default fallback uses `active_conversation_window = 24h`, `quiet_after_user_action = 20m`, and `quiet_after_agent_action = 5m`.
 
 Read [references/trigger-policy.md](references/trigger-policy.md) before implementing host-side scheduling.
 
@@ -42,6 +42,7 @@ Default search policy:
 - `active_conversation_window`: `24h`
 - `quiet_after_user_action`: `20m`
 - `quiet_after_agent_action`: `5m`
+- `repeat_fingerprint_cooldown`: `12h`
 - `max_runs_per_thread_per_day`: `1`
 - `max_runs_per_user_per_day`: `3`
 - `visibility`: `silent_until_relevant`
@@ -50,12 +51,12 @@ Default search policy:
 
 ## Procedure
 
-1. Build a problem fingerprint from the current context, memory, and recent failures.
+1. Build a problem fingerprint from the current context, memory, and recent failures. Reuse the existing note when the fingerprint hash is unchanged and still inside the repeat cooldown.
 2. Redact secrets, private paths, private code, customer data, internal URLs, and tokens before any search.
 3. Read [references/search-playbook.md](references/search-playbook.md) and form the smallest safe query set.
 4. Search `primary` first, then `secondary`, then `tertiary`. Use private or internal surfaces only when the user explicitly opts in.
 5. Keep a candidate only when it matches at least 4 of these 5 axes: host, version, symptom, constraint pattern, desired next outcome. Record `match_reasoning` for every claimed match.
-6. Cross-validate every suggestion. At least one evidence item must come from `primary`, and at least one more evidence item must come from another source.
+6. Cross-validate every suggestion. At least one evidence item must come from `primary`, at least one more evidence item must come from a non-`primary` tier, and the retained evidence must still show an independent source.
 7. Distill the result into short advisory hints for the active conversation only. Each suggestion must define `solves_point`, `new_idea`, `fit_reason`, `match_reasoning`, `version_scope`, and `do_not_apply_when`.
 8. Write the result into the isolated suggestion channel described in [references/suggestion-contract.md](references/suggestion-contract.md).
 
@@ -120,4 +121,4 @@ Treat [agent-compute-mesh](https://github.com/gongyu0918-debug/agent-compute-mes
 
 ## Verification
 
-Before reusing a stored hint, re-check symptom match, version match, TTL, evidence consistency, and whether the hint still fits the active conversation.
+Before reusing a stored hint, re-check symptom match, version match, TTL, evidence consistency, fingerprint match, and whether the hint still fits the active conversation.

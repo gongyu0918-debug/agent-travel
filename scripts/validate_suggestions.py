@@ -40,6 +40,7 @@ ITEM_REQUIRED = {
 ALLOWED_LEVELS = {"low", "medium", "high"}
 ALLOWED_TOOL_PREFERENCES = {"public-only", "all-available", "custom"}
 ALLOWED_VISIBILITY = {"silent_until_relevant", "show_on_next_relevant_turn"}
+ALLOWED_SOURCE_SCOPE_TOKENS = {"primary", "secondary", "tertiary"}
 ALLOWED_TRIGGER_REASONS = {
     "heartbeat",
     "scheduled",
@@ -50,6 +51,7 @@ ALLOWED_TRIGGER_REASONS = {
 ALLOWED_REUSE_GATES = {"min_4_of_5_axes_and_ttl_valid"}
 SUGGESTION_LIMITS = {"low": 1, "medium": 3, "high": 5}
 MAX_TTL = timedelta(days=14)
+FINGERPRINT_HASH_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 MATCH_AXES = {
     "host",
     "version",
@@ -217,6 +219,9 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
     source_scope = tokenize_scope(top_level.get("source_scope", ""))
     if "primary" not in source_scope:
         errors.append("source_scope must include primary")
+    invalid_source_scope = sorted(source_scope - ALLOWED_SOURCE_SCOPE_TOKENS)
+    if invalid_source_scope:
+        errors.append(f"source_scope contains unsupported tiers: {', '.join(invalid_source_scope)}")
 
     visibility = top_level.get("visibility")
     if visibility and visibility not in ALLOWED_VISIBILITY:
@@ -231,6 +236,14 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
     reuse_gate = top_level.get("reuse_gate")
     if reuse_gate and reuse_gate not in ALLOWED_REUSE_GATES:
         errors.append("reuse_gate must be: min_4_of_5_axes_and_ttl_valid")
+
+    fingerprint_hash = top_level.get("fingerprint_hash", "")
+    if fingerprint_hash and not FINGERPRINT_HASH_PATTERN.fullmatch(fingerprint_hash):
+        errors.append("fingerprint_hash must be formatted as sha256:<64 lowercase hex chars>")
+
+    fingerprint_parts = [part.strip() for part in top_level.get("problem_fingerprint", "").split("|") if part.strip()]
+    if len(fingerprint_parts) < 4:
+        errors.append("problem_fingerprint must contain at least 4 non-empty segments")
 
     if {"generated_at", "expires_at"} <= set(top_level):
         try:
@@ -250,7 +263,11 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
     return errors
 
 
-def validate_suggestion(index: int, suggestion: dict[str, object]) -> list[str]:
+def validate_suggestion(
+    index: int,
+    suggestion: dict[str, object],
+    declared_source_scope: set[str],
+) -> list[str]:
     errors: list[str] = []
     missing = sorted(ITEM_REQUIRED - set(suggestion))
     if missing:
@@ -280,8 +297,13 @@ def validate_suggestion(index: int, suggestion: dict[str, object]) -> list[str]:
             if not label or not source_key:
                 errors.append(f"suggestion-{index} evidence items must include a non-empty source label and reference")
                 break
-            evidence_tiers.add(label.split("_", 1)[0])
+            tier = label.split("_", 1)[0]
+            evidence_tiers.add(tier)
             evidence_sources.add(source_key)
+            if tier not in declared_source_scope:
+                errors.append(
+                    f"suggestion-{index} evidence tier {tier} must be declared in source_scope"
+                )
         if "primary" not in evidence_tiers:
             errors.append(f"suggestion-{index} needs at least 1 primary evidence item")
         if not any(tier != "primary" for tier in evidence_tiers):
@@ -327,8 +349,9 @@ def main() -> int:
     if not suggestions:
         errors.append("no suggestions found")
 
+    declared_source_scope = tokenize_scope(top_level.get("source_scope", ""))
     for index, suggestion in enumerate(suggestions, start=1):
-        errors.extend(validate_suggestion(index, suggestion))
+        errors.extend(validate_suggestion(index, suggestion, declared_source_scope))
 
     if errors:
         return fail(errors)

@@ -19,10 +19,11 @@ This repository currently ships the protocol layer, trigger gate, output contrac
 - 所有脚本只用 Python 标准库。 / Every script uses Python stdlib only.
 - 搜索由宿主工具执行。这个仓库只定义触发、契约、校验和 host adapter。 / Search is executed by the host tools. This repository defines triggers, contracts, validation, and host adapters.
 - 建议通道始终隔离。它不会写进核心 system prompt、persona、长期 memory、AGENT.md/agent.md 核心指令。 / The suggestion channel stays isolated. It does not write into the core system prompt, persona, long-term memory, or core AGENT.md/agent.md instructions.
+- 默认关闭隐式调用。后台运行交给宿主的 heartbeat、cron 或 task-end 配置显式接线。 / Implicit invocation is off by default. Background runs should be wired explicitly through the host's heartbeat, cron, or task-end configuration.
 
 ## 扫描说明 / Scan Note
 
-某些静态扫描会命中 [references/threat-model.md](references/threat-model.md) 里的 prompt-injection 示例文本。这里的示例是防御样本，用来说明哪些网页内容应该被拒绝，不是要执行的指令。
+某些静态扫描会命中 [references/threat-model.md](references/threat-model.md) 里的 prompt-injection 示例文本。这里的示例已经改成脱敏占位写法，它们是防御样本，用来说明哪些网页内容应该被拒绝，不是要执行的指令。
 Some static scans will hit the prompt-injection example text inside [references/threat-model.md](references/threat-model.md). Those examples are defensive fixtures that show what the host should reject, not instructions that the skill should execute.
 
 ## 推荐默认值 / Recommended Default
@@ -35,12 +36,16 @@ The recommended default is low-frequency, low-budget, and silent by design.
 - `tool_preference = public-only`
 - `quiet_after_user_action = 20m`
 - `quiet_after_agent_action = 5m`
+- `repeat_fingerprint_cooldown = 12h`
 - `max_runs_per_thread_per_day = 1`
 - `max_runs_per_user_per_day = 3`
 - `visibility = silent_until_relevant`
 
 `medium` 和 `high` 是升档，不是日常后台模式。  
 `medium` and `high` are escalation modes, not the everyday background default.
+
+`idle_fallback` 适合没有 heartbeat 的宿主，或者用户明确开启的场景。默认背景路径优先 heartbeat。
+`idle_fallback` fits hosts without heartbeat, or hosts where the operator explicitly enabled it. Heartbeat stays the default background path when available.
 
 ## 关键点 / Key Points
 
@@ -64,8 +69,8 @@ The recommended default is low-frequency, low-budget, and silent by design.
 
 ## 社区工作流夹具 / Community Workflow Fixtures
 
-这次版本附带了三组真实来源驱动的工作流夹具，分别覆盖 Claude Code 的 task-end 刷新、OpenClaw 的 heartbeat 提示隔离、Hermes 的 scheduled 文档漂移扫描。对应资料和来源链接在 [references/community-workflows.md](references/community-workflows.md)，冒烟结果在 [assets/community_smoke_report.json](assets/community_smoke_report.json)。
-This version ships with three real-source workflow fixtures that cover Claude Code task-end refresh, OpenClaw heartbeat advisory isolation, and Hermes scheduled doc-drift scans. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
+这次版本附带了六组真实来源驱动的工作流夹具，覆盖 Claude Code 的 task-end 刷新、failure recovery、OpenClaw 的 heartbeat 提示隔离、idle fallback 静默拦截、Hermes 的 scheduled 文档漂移扫描和重复 fingerprint 去重。对应资料和来源链接在 [references/community-workflows.md](references/community-workflows.md)，冒烟结果在 [assets/community_smoke_report.json](assets/community_smoke_report.json)。
+This version ships with six real-source workflow fixtures that cover Claude Code task-end refresh, failure recovery, OpenClaw heartbeat advisory isolation, idle-fallback silence guards, Hermes scheduled doc-drift scans, and repeated-fingerprint dedupe. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
 
 本地做产品侧检查时，可以先跑这三个入口：
 For product-side checks, start with these three entry points:

@@ -78,6 +78,18 @@ def mutate(text: str, case_id: str) -> str:
         return replace_line(text, "trigger_reason", "manual_override")
     if case_id == "invalid_reuse_gate":
         return replace_line(text, "reuse_gate", "ttl_valid_only")
+    if case_id == "invalid_source_scope_token":
+        return replace_line(text, "source_scope", "primary+quaternary")
+    if case_id == "evidence_outside_source_scope":
+        return replace_once(
+            text,
+            "- secondary_community: https://example.com/community-thread",
+            "- tertiary_community: https://example.com/community-thread",
+        )
+    if case_id == "invalid_fingerprint_hash":
+        return replace_line(text, "fingerprint_hash", "sha256:xyz")
+    if case_id == "short_problem_fingerprint":
+        return replace_line(text, "problem_fingerprint", "host|symptom|version")
     if case_id == "invalid_dates":
         return replace_line(text, "expires_at", "2026-04-18T03:00:00+08:00")
     if case_id == "missing_timezone":
@@ -103,6 +115,10 @@ CASES = [
     {"id": "invalid_visibility", "kind": "guardrail"},
     {"id": "invalid_trigger_reason", "kind": "guardrail"},
     {"id": "invalid_reuse_gate", "kind": "guardrail"},
+    {"id": "invalid_source_scope_token", "kind": "guardrail"},
+    {"id": "evidence_outside_source_scope", "kind": "guardrail"},
+    {"id": "invalid_fingerprint_hash", "kind": "guardrail"},
+    {"id": "short_problem_fingerprint", "kind": "guardrail"},
     {"id": "missing_timezone", "kind": "guardrail"},
     {"id": "no_independent_evidence", "kind": "guardrail"},
     {"id": "empty_fit_reason", "kind": "guardrail"},

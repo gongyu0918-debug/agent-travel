@@ -4,4 +4,4 @@ interface:
   default_prompt: "Use $agent-travel as a progressive-disclosure skill, keep travel low-budget by default, avoid loading large references unless invoked, and store only advisory-only hints for the next relevant turn. / 把 $agent-travel 当成 progressive-disclosure skill 使用，默认 travel 保持低预算，未触发时不要加载大参考文件，并且只为下一次相关回合存储 advisory-only 提示。"
 
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false
