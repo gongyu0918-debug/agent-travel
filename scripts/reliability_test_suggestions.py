@@ -113,12 +113,11 @@ def mutate_bad_match_axes(text: str) -> str:
     return replace_block(text, "match_reasoning:\n", "version_scope:", replacement)
 
 
-def mutate_low_budget_two_suggestions(text: str) -> str:
+def mutate_low_mode_two_suggestions(text: str) -> str:
     return append_suggestions(text, 2)
 
 
-def mutate_medium_budget_four_suggestions(text: str) -> str:
-    text = replace_line(text, "budget", "medium")
+def mutate_medium_mode_four_suggestions(text: str) -> str:
     text = replace_line(text, "search_mode", "medium")
     return append_suggestions(text, 4)
 
@@ -143,7 +142,7 @@ def mutate_invalid_reuse_gate(text: str) -> str:
     return replace_line(text, "reuse_gate", "ttl_valid_only")
 
 
-def mutate_invalid_source_scope_token(text: str) -> str:
+def mutate_invalid_source_scope_part(text: str) -> str:
     return replace_line(text, "source_scope", "primary+quaternary")
 
 
@@ -156,7 +155,7 @@ def mutate_evidence_outside_source_scope(text: str) -> str:
 
 
 def mutate_invalid_fingerprint_hash(text: str) -> str:
-    return replace_line(text, "fingerprint_hash", "sha256:xyz")
+    return replace_line(text, "fingerprint_hash", "h64:xyz")
 
 
 def mutate_short_problem_fingerprint(text: str) -> str:
@@ -184,14 +183,14 @@ VALIDATOR_CASES = [
     ("no_independent_evidence", mutate_no_independent_evidence, False),
     ("stray_list_item", mutate_stray_list_item, False),
     ("bad_match_axes", mutate_bad_match_axes, False),
-    ("low_budget_two_suggestions", mutate_low_budget_two_suggestions, False),
-    ("medium_budget_four_suggestions", mutate_medium_budget_four_suggestions, False),
+    ("low_mode_two_suggestions", mutate_low_mode_two_suggestions, False),
+    ("medium_mode_four_suggestions", mutate_medium_mode_four_suggestions, False),
     ("invalid_confidence", mutate_invalid_confidence, False),
     ("ttl_too_long", mutate_ttl_too_long, False),
     ("invalid_visibility", mutate_invalid_visibility, False),
     ("invalid_trigger_reason", mutate_invalid_trigger_reason, False),
     ("invalid_reuse_gate", mutate_invalid_reuse_gate, False),
-    ("invalid_source_scope_token", mutate_invalid_source_scope_token, False),
+    ("invalid_source_scope_part", mutate_invalid_source_scope_part, False),
     ("evidence_outside_source_scope", mutate_evidence_outside_source_scope, False),
     ("invalid_fingerprint_hash", mutate_invalid_fingerprint_hash, False),
     ("short_problem_fingerprint", mutate_short_problem_fingerprint, False),
@@ -403,8 +402,8 @@ TRIGGER_CASES = [
             "last_thread_activity": "2026-04-20T10:00:00+00:00",
             "last_user_action": "2026-04-20T11:00:00+00:00",
             "last_agent_action": "2026-04-20T11:30:00+00:00",
-            "current_fingerprint_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "last_travel_fingerprint_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "current_fingerprint_hash": "h64:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "last_travel_fingerprint_hash": "h64:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "last_travel_generated_at": "2026-04-20T06:30:00+00:00",
             "repeat_fingerprint_cooldown": "12h",
         },
@@ -421,8 +420,8 @@ TRIGGER_CASES = [
             "last_thread_activity": "2026-04-20T10:00:00+00:00",
             "last_user_action": "2026-04-20T11:00:00+00:00",
             "last_agent_action": "2026-04-20T11:30:00+00:00",
-            "current_fingerprint_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-            "last_travel_fingerprint_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "current_fingerprint_hash": "h64:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "last_travel_fingerprint_hash": "h64:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
             "last_travel_generated_at": "2026-04-19T18:00:00+00:00",
             "repeat_fingerprint_cooldown": "12h",
         },

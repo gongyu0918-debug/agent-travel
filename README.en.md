@@ -24,7 +24,7 @@ Some static scans will pay extra attention to the hostile-payload categories ins
 
 ## Recommended Default
 
-The recommended default is low-frequency, low-budget, and silent by design.
+The recommended default is low-frequency, small-scope, and silent by design.
 
 - `active_conversation_window = 24h`
 - `default_search_mode = low`

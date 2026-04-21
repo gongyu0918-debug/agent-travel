@@ -14,7 +14,7 @@
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-d3rls50h\\canonical.md"
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-qbxixuxo\\canonical.md"
     },
     {
       "case": "missing_markers",
@@ -23,7 +23,7 @@
       "actual_pass": false,
       "ok": true,
       "crashed": false,
-      "output": "ERROR: missing or invalid agent-travel markers\nERROR: missing top-level fields: advisory_only, budget, expires_at, generated_at, problem_fingerprint, search_mode, source_scope, thread_scope, tool_preference\nERROR: no suggestions found"
+      "output": "ERROR: missing or invalid agent-travel markers\nERROR: missing top-level fields: advisory_only, expires_at, generated_at, problem_fingerprint, search_mode, source_scope, thread_scope, tool_preference\nERROR: no suggestions found"
     },
     {
       "case": "invalid_dates",
@@ -98,7 +98,7 @@
       "output": "ERROR: suggestion-1 needs at least 4 distinct match_reasoning axes"
     },
     {
-      "case": "low_budget_two_suggestions",
+      "case": "low_mode_two_suggestions",
       "kind": "validator",
       "expected_pass": false,
       "actual_pass": false,
@@ -107,7 +107,7 @@
       "output": "ERROR: low allows at most 1 suggestion(s)"
     },
     {
-      "case": "medium_budget_four_suggestions",
+      "case": "medium_mode_four_suggestions",
       "kind": "validator",
       "expected_pass": false,
       "actual_pass": false,
@@ -161,7 +161,7 @@
       "output": "ERROR: reuse_gate must be: min_4_of_5_axes_and_ttl_valid"
     },
     {
-      "case": "invalid_source_scope_token",
+      "case": "invalid_source_scope_part",
       "kind": "validator",
       "expected_pass": false,
       "actual_pass": false,
@@ -185,7 +185,7 @@
       "actual_pass": false,
       "ok": true,
       "crashed": false,
-      "output": "ERROR: fingerprint_hash must be formatted as sha256:<64 lowercase hex chars>"
+      "output": "ERROR: fingerprint_hash must be formatted as h64:<64 lowercase hex chars>"
     },
     {
       "case": "short_problem_fingerprint",
@@ -212,7 +212,7 @@
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-d3rls50h\\valid_optional_fields.md"
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-qbxixuxo\\valid_optional_fields.md"
     },
     {
       "case": "should_travel_heartbeat_quiet_low",

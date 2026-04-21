@@ -8,9 +8,9 @@ metadata: {"openclaw":{"requires":{"anyBins":["python","python3"]},"homepage":"h
 
 # Agent Travel
 
-Use this skill to let an agent spend quiet time learning from the outside world without polluting its core instructions.
+Use this skill to let an agent use quiet time to learn from the outside world without polluting its core instructions.
 
-The second law of thermodynamics says a closed system drifts toward entropy. Agents do too. An agent that stays trapped inside the same tools, the same context window, and the same stale assumptions will slowly confuse repetition with truth. `agent-travel` has one job: step out only inside quiet windows, use a low-budget travel loop to find better practice, then return with cross-validated hints for the next relevant task.
+The second law of thermodynamics says a closed system drifts toward entropy. Agents do too. An agent that stays trapped inside the same tools, the same context window, and the same stale assumptions will slowly confuse repetition with truth. `agent-travel` has one job: step out only inside quiet windows, use a small-scope travel loop to find better practice, then return with cross-validated hints for the next relevant task.
 
 ## Run Window
 
@@ -29,7 +29,7 @@ Default trigger policy:
 
 Read [references/trigger-policy.md](references/trigger-policy.md) before implementing host-side scheduling.
 
-## Search Budget
+## Search Mode
 
 - `low`: 1 query, primary first, snippets or 1 official page, keep at most 1 suggestion.
 - `medium`: up to 3 queries, primary plus 2 secondary surfaces, keep at most 3 suggestions.

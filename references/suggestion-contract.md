@@ -29,7 +29,6 @@ If the host supports only a single context file, embed the same block inline und
 # agent-travel suggestions
 generated_at: 2026-04-20T03:00:00+08:00
 expires_at: 2026-04-27T03:00:00+08:00
-budget: low
 search_mode: low
 tool_preference: public-only
 source_scope: primary+secondary
@@ -38,7 +37,7 @@ problem_fingerprint: host|subsystem|symptom|version
 advisory_only: true
 trigger_reason: heartbeat
 visibility: silent_until_relevant
-fingerprint_hash: sha256:2b55f2f02031d480801fd20ab8ce6bea1dd16f5ff5e95f5ff4de73452f6ca1c7
+fingerprint_hash: h64:2b55f2f02031d480801fd20ab8ce6bea1dd16f5ff5e95f5ff4de73452f6ca1c7
 reuse_gate: min_4_of_5_axes_and_ttl_valid
 
 ## suggestion-1
@@ -63,6 +62,6 @@ evidence:
 <!-- agent-travel:suggestions:end -->
 ```
 
-Optional fields such as `trigger_reason`, `visibility`, `fingerprint_hash`, and `reuse_gate` should not break older hosts. Hosts that do not understand them should preserve them when possible and ignore them otherwise.
+Optional fields such as `trigger_reason`, `visibility`, `fingerprint_hash`, and `reuse_gate` should not break older hosts. Hosts that do not understand them should preserve them when possible and ignore them otherwise. Older hosts may still emit an earlier mode field that mirrors `search_mode`.
 
-Timestamps must include an explicit timezone offset. `problem_fingerprint` should contain at least 4 non-empty segments, and `fingerprint_hash` should be formatted as `sha256:<64 lowercase hex chars>`. Each suggestion needs at least one `primary` evidence item, one additional non-`primary` cross-validation evidence item, and one additional independent evidence source. The current standardized `reuse_gate` value is `min_4_of_5_axes_and_ttl_valid`.
+Timestamps must include an explicit timezone offset. `problem_fingerprint` should contain at least 4 non-empty segments, and `fingerprint_hash` should be formatted as `h64:<64 lowercase hex chars>`. Each suggestion needs at least one `primary` evidence item, one additional non-`primary` cross-validation evidence item, and one additional independent evidence source. The current standardized `reuse_gate` value is `min_4_of_5_axes_and_ttl_valid`.

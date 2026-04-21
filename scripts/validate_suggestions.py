@@ -16,7 +16,6 @@ END = "<!-- agent-travel:suggestions:end -->"
 TOP_LEVEL_REQUIRED = {
     "generated_at",
     "expires_at",
-    "budget",
     "search_mode",
     "tool_preference",
     "source_scope",
@@ -40,7 +39,7 @@ ITEM_REQUIRED = {
 ALLOWED_LEVELS = {"low", "medium", "high"}
 ALLOWED_TOOL_PREFERENCES = {"public-only", "all-available", "custom"}
 ALLOWED_VISIBILITY = {"silent_until_relevant", "show_on_next_relevant_turn"}
-ALLOWED_SOURCE_SCOPE_TOKENS = {"primary", "secondary", "tertiary"}
+ALLOWED_SOURCE_SCOPE_PARTS = {"primary", "secondary", "tertiary"}
 ALLOWED_TRIGGER_REASONS = {
     "heartbeat",
     "scheduled",
@@ -51,7 +50,7 @@ ALLOWED_TRIGGER_REASONS = {
 ALLOWED_REUSE_GATES = {"min_4_of_5_axes_and_ttl_valid"}
 SUGGESTION_LIMITS = {"low": 1, "medium": 3, "high": 5}
 MAX_TTL = timedelta(days=14)
-FINGERPRINT_HASH_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+FINGERPRINT_HASH_PATTERN = re.compile(r"^(?:h64|sha256):[0-9a-f]{64}$")
 MATCH_AXES = {
     "host",
     "version",
@@ -87,22 +86,22 @@ def parse_iso(value: str) -> datetime:
     return parsed
 
 
-def normalize_token(value: str) -> str:
+def normalize_part(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", value.strip().lower()).strip("_")
 
 
-def tokenize_scope(value: str) -> set[str]:
-    return {normalize_token(part) for part in re.split(r"[^A-Za-z0-9]+", value) if part.strip()}
+def split_scope(value: str) -> set[str]:
+    return {normalize_part(part) for part in re.split(r"[^A-Za-z0-9]+", value) if part.strip()}
 
 
 def canonicalize_axis(axis: str) -> str:
-    normalized = normalize_token(axis)
+    normalized = normalize_part(axis)
     return MATCH_AXIS_ALIASES.get(normalized, normalized)
 
 
 def parse_evidence_source(item: str) -> tuple[str, str]:
     label, separator, reference = str(item).partition(":")
-    normalized_label = normalize_token(label)
+    normalized_label = normalize_part(label)
     normalized_reference = reference.strip().lower() if separator else ""
     if normalized_reference:
         parsed = urlparse(normalized_reference)
@@ -207,19 +206,21 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
             errors.append(f"{field} must be non-empty")
 
     budget = top_level.get("budget", "")
-    if budget not in ALLOWED_LEVELS:
+    if budget and budget not in ALLOWED_LEVELS:
         errors.append("budget must be one of: low, medium, high")
     search_mode = top_level.get("search_mode", "")
     if search_mode not in ALLOWED_LEVELS:
         errors.append("search_mode must be one of: low, medium, high")
+    if budget and search_mode and budget != search_mode:
+        errors.append("budget must match search_mode when both are present")
     tool_preference = top_level.get("tool_preference", "")
     if tool_preference not in ALLOWED_TOOL_PREFERENCES:
         errors.append("tool_preference must be one of: all-available, custom, public-only")
 
-    source_scope = tokenize_scope(top_level.get("source_scope", ""))
+    source_scope = split_scope(top_level.get("source_scope", ""))
     if "primary" not in source_scope:
         errors.append("source_scope must include primary")
-    invalid_source_scope = sorted(source_scope - ALLOWED_SOURCE_SCOPE_TOKENS)
+    invalid_source_scope = sorted(source_scope - ALLOWED_SOURCE_SCOPE_PARTS)
     if invalid_source_scope:
         errors.append(f"source_scope contains unsupported tiers: {', '.join(invalid_source_scope)}")
 
@@ -239,7 +240,7 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
 
     fingerprint_hash = top_level.get("fingerprint_hash", "")
     if fingerprint_hash and not FINGERPRINT_HASH_PATTERN.fullmatch(fingerprint_hash):
-        errors.append("fingerprint_hash must be formatted as sha256:<64 lowercase hex chars>")
+        errors.append("fingerprint_hash must be formatted as h64:<64 lowercase hex chars>")
 
     fingerprint_parts = [part.strip() for part in top_level.get("problem_fingerprint", "").split("|") if part.strip()]
     if len(fingerprint_parts) < 4:
@@ -349,7 +350,7 @@ def main() -> int:
     if not suggestions:
         errors.append("no suggestions found")
 
-    declared_source_scope = tokenize_scope(top_level.get("source_scope", ""))
+    declared_source_scope = split_scope(top_level.get("source_scope", ""))
     for index, suggestion in enumerate(suggestions, start=1):
         errors.extend(validate_suggestion(index, suggestion, declared_source_scope))
 

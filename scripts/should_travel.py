@@ -233,9 +233,9 @@ def decide(state: dict[str, object]) -> Decision:
     if now - last_agent_action < quiet_after_agent:
         return blocked(event_kind, "quiet window after agent action has not elapsed", "quiet_after_agent_action")
     if as_int(state.get("thread_runs_today"), 0) >= max_runs_per_thread:
-        return blocked(event_kind, "thread run budget exhausted", "thread_run_budget_exhausted")
+        return blocked(event_kind, "thread run limit reached", "thread_run_limit_reached")
     if as_int(state.get("user_runs_today"), 0) >= max_runs_per_user:
-        return blocked(event_kind, "user run budget exhausted", "user_run_budget_exhausted")
+        return blocked(event_kind, "user run limit reached", "user_run_limit_reached")
 
     host_supports_heartbeat = as_bool(state.get("host_supports_heartbeat"), True)
     user_prefers_idle_fallback = as_bool(state.get("user_prefers_idle_fallback"), False)

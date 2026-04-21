@@ -40,7 +40,7 @@ These scenarios come from current official docs, public workflow discussions, an
   - [Hermes skills system docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills)
 - Community source: [Hermes ecosystem page](https://get-hermes.ai/community/)
 - Workflow: the operator already uses skills and scheduled jobs, and wants a narrow recurring pass that checks documentation drift or workflow changes around one maintained skill flow.
-- Why it matters: this models the low-budget scheduled maintenance path where one advisory hint is valuable and a broader research crawl would be waste.
+- Why it matters: this models the small-scope scheduled maintenance path where one advisory hint is valuable and a broader research crawl would be waste.
 
 ## 6. Hermes repeated-fingerprint dedupe
 

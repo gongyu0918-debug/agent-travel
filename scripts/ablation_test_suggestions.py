@@ -62,10 +62,9 @@ def mutate(text: str, case_id: str) -> str:
         text = replace_line(text, "visibility", "show_on_next_relevant_turn")
         text = replace_line(text, "trigger_reason", "heartbeat")
         return replace_line(text, "reuse_gate", "min_4_of_5_axes_and_ttl_valid")
-    if case_id == "low_budget_two_suggestions":
+    if case_id == "low_mode_two_suggestions":
         return append_suggestions(text, 2)
-    if case_id == "medium_budget_four_suggestions":
-        text = replace_line(text, "budget", "medium")
+    if case_id == "medium_mode_four_suggestions":
         text = replace_line(text, "search_mode", "medium")
         return append_suggestions(text, 4)
     if case_id == "invalid_confidence":
@@ -78,7 +77,7 @@ def mutate(text: str, case_id: str) -> str:
         return replace_line(text, "trigger_reason", "manual_override")
     if case_id == "invalid_reuse_gate":
         return replace_line(text, "reuse_gate", "ttl_valid_only")
-    if case_id == "invalid_source_scope_token":
+    if case_id == "invalid_source_scope_part":
         return replace_line(text, "source_scope", "primary+quaternary")
     if case_id == "evidence_outside_source_scope":
         return replace_once(
@@ -87,7 +86,7 @@ def mutate(text: str, case_id: str) -> str:
             "- tertiary_community: https://example.com/community-thread",
         )
     if case_id == "invalid_fingerprint_hash":
-        return replace_line(text, "fingerprint_hash", "sha256:xyz")
+        return replace_line(text, "fingerprint_hash", "h64:xyz")
     if case_id == "short_problem_fingerprint":
         return replace_line(text, "problem_fingerprint", "host|symptom|version")
     if case_id == "invalid_dates":
@@ -108,14 +107,14 @@ def mutate(text: str, case_id: str) -> str:
 CASES = [
     {"id": "canonical", "kind": "safe"},
     {"id": "valid_optional_fields", "kind": "safe"},
-    {"id": "low_budget_two_suggestions", "kind": "guardrail"},
-    {"id": "medium_budget_four_suggestions", "kind": "guardrail"},
+    {"id": "low_mode_two_suggestions", "kind": "guardrail"},
+    {"id": "medium_mode_four_suggestions", "kind": "guardrail"},
     {"id": "invalid_confidence", "kind": "guardrail"},
     {"id": "ttl_too_long", "kind": "guardrail"},
     {"id": "invalid_visibility", "kind": "guardrail"},
     {"id": "invalid_trigger_reason", "kind": "guardrail"},
     {"id": "invalid_reuse_gate", "kind": "guardrail"},
-    {"id": "invalid_source_scope_token", "kind": "guardrail"},
+    {"id": "invalid_source_scope_part", "kind": "guardrail"},
     {"id": "evidence_outside_source_scope", "kind": "guardrail"},
     {"id": "invalid_fingerprint_hash", "kind": "guardrail"},
     {"id": "short_problem_fingerprint", "kind": "guardrail"},

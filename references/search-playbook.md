@@ -32,7 +32,7 @@ Build the smallest fingerprint that still distinguishes the issue:
 - `symptom`: what is failing
 - `error_fragment`: 5-20 words from the most stable error text
 - `attempted_fixes`: short list of what already failed
-- `constraints`: platform, policy, budget, or safety limits
+- `constraints`: platform, policy, search-mode, or safety limits
 - `goal`: what would count as a useful hint on the next task
 
 Do not include secrets, full file contents, customer data, private repo names when not public, long private paths, or raw secret values.

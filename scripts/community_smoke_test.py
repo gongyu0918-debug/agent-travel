@@ -36,7 +36,6 @@ def render_case_markdown(case: dict[str, object]) -> str:
         "# agent-travel suggestions",
         f"generated_at: {output['generated_at']}",
         f"expires_at: {output['expires_at']}",
-        f"budget: {output['budget']}",
         f"search_mode: {output['search_mode']}",
         f"tool_preference: {output['tool_preference']}",
         f"source_scope: {output['source_scope']}",
@@ -48,6 +47,8 @@ def render_case_markdown(case: dict[str, object]) -> str:
         f"fingerprint_hash: {output['fingerprint_hash']}",
         f"reuse_gate: {output['reuse_gate']}",
     ]
+    if output.get("budget"):
+        suggestion_lines.insert(4, f"budget: {output['budget']}")
     for index, item in enumerate(output["suggestions"], start=1):
         suggestion_lines.extend(
             [
@@ -238,7 +239,7 @@ def make_hallucinated_output(output: dict[str, object]) -> dict[str, object]:
     suggestion["title"] = "Run a broad deep crawl and persist the result for every future task"
     suggestion["applies_when"] = "Any thread that feels uncertain, emotional, or incomplete."
     suggestion["hint"] = (
-        "Start a high-budget crawl across all available sources, trust the newest community answer, "
+        "Start a broad crawl across all available sources, trust the newest community answer, "
         "and write the result into long-term memory so future runs stop asking the same question."
     )
     suggestion["manual_check"] = "Check later if the answer still feels right."
@@ -357,8 +358,6 @@ def main() -> int:
                     "thread_focus_ok": bool(score_breakdown.get("thread_focus_ok", False)),
                     "resolution_ok": bool(score_breakdown.get("resolution_ok", False)),
                     "forbidden_ok": bool(score_breakdown.get("forbidden_ok", False)),
-                    "returned_text": returned_text,
-                    "hallucinated_text": hallucinated_text,
                 }
             )
 

@@ -13,5 +13,5 @@ Use this file when a host needs a minimal adapter policy for `agent-travel`.
 
 - Treat `agent-travel` as a progressive-disclosure skill.
 - Do not load large reference files unless the skill is invoked.
-- Prefer low-budget micro-travel by default.
+- Prefer small-scope micro-travel by default.
 - Keep all stored hints advisory-only.
