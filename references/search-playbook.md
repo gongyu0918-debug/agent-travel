@@ -35,7 +35,7 @@ Build the smallest fingerprint that still distinguishes the issue:
 - `constraints`: platform, policy, budget, or safety limits
 - `goal`: what would count as a useful hint on the next task
 
-Do not include secrets, full file contents, customer data, private repo names when not public, long private paths, or raw tokens.
+Do not include secrets, full file contents, customer data, private repo names when not public, long private paths, or raw secret values.
 
 If the current fingerprint hash matches the last stored fingerprint hash and the previous run is still inside `repeat_fingerprint_cooldown`, skip the trip and reuse the existing advisory note until the cooldown or TTL expires.
 
@@ -54,7 +54,7 @@ Use version labels whenever the toolchain moves quickly.
 - private file paths
 - customer names
 - full code blocks
-- auth tokens
+- access secrets
 - internal URLs
 
 ## Search Coverage Matrix

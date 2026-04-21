@@ -1,6 +1,9 @@
 ---
 name: agent-travel
 description: Research unresolved agent problems during heartbeat, scheduled, task-end, failure-recovery, or idle windows; search official docs plus community sources; and save only cross-validated advisory hints for the active conversation. 在心跳、定时、任务结束、失败恢复或空闲窗口研究未解决的 agent 问题，搜索官方文档和社区来源，只保留经过交叉验证、服务当前活跃线程的提示建议。
+user-invocable: true
+disable-model-invocation: true
+metadata: {"openclaw":{"requires":{"anyBins":["python","python3"]},"homepage":"https://github.com/gongyu0918-debug/agent-travel"}}
 ---
 
 # Agent Travel
@@ -57,8 +60,8 @@ Default search policy / 默认搜索策略:
 
 1. Build a problem fingerprint from the current context, memory, and recent failures. Reuse the existing note when the fingerprint hash is unchanged and still inside the repeat cooldown.
    从当前上下文、记忆和最近失败记录构建问题指纹。指纹哈希没有变化且仍在重复冷却窗口内时，继续复用已有建议。
-2. Redact secrets, private paths, private code, customer data, internal URLs, and tokens before any search.  
-   在任何搜索前先脱敏，去掉密钥、私有路径、私有代码、客户数据、内部 URL 和 token。
+2. Redact secrets, private paths, private code, customer data, internal URLs, and other secret values before any search.
+   在任何搜索前先脱敏，去掉密钥、私有路径、私有代码、客户数据、内部 URL 和其他敏感值。
 3. Read [references/search-playbook.md](references/search-playbook.md) and form the smallest safe query set.  
    阅读 [references/search-playbook.md](references/search-playbook.md)，组装最小且安全的查询集。
 4. Search `primary` first, then `secondary`, then `tertiary`. Use private or internal surfaces only when the user explicitly opts in.  

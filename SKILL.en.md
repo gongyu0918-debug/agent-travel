@@ -1,6 +1,9 @@
 ---
 name: agent-travel
 description: Research unresolved agent problems during heartbeat, scheduled, task-end, failure-recovery, or idle windows; search official docs plus community sources; and save only cross-validated advisory hints for the active conversation.
+user-invocable: true
+disable-model-invocation: true
+metadata: {"openclaw":{"requires":{"anyBins":["python","python3"]},"homepage":"https://github.com/gongyu0918-debug/agent-travel"}}
 ---
 
 # Agent Travel
@@ -52,7 +55,7 @@ Default search policy:
 ## Procedure
 
 1. Build a problem fingerprint from the current context, memory, and recent failures. Reuse the existing note when the fingerprint hash is unchanged and still inside the repeat cooldown.
-2. Redact secrets, private paths, private code, customer data, internal URLs, and tokens before any search.
+2. Redact secrets, private paths, private code, customer data, internal URLs, and other secret values before any search.
 3. Read [references/search-playbook.md](references/search-playbook.md) and form the smallest safe query set.
 4. Search `primary` first, then `secondary`, then `tertiary`. Use private or internal surfaces only when the user explicitly opts in.
 5. Keep a candidate only when it matches at least 4 of these 5 axes: host, version, symptom, constraint pattern, desired next outcome. Record `match_reasoning` for every claimed match.
