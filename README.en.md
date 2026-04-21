@@ -20,7 +20,7 @@ This repository currently ships the protocol layer, trigger gate, output contrac
 
 ## Scan Note
 
-Some static scans will hit the prompt-injection example text inside [references/threat-model.md](references/threat-model.md). Those examples now use redacted placeholder wording and remain defensive fixtures that show what the host should reject, not instructions that the skill should execute.
+Some static scans will pay extra attention to the hostile-payload categories inside [references/threat-model.md](references/threat-model.md). They are defensive labels that show what the host should reject, not instructions that the skill should execute.
 
 ## Recommended Default
 

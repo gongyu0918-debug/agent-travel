@@ -23,8 +23,8 @@ This repository currently ships the protocol layer, trigger gate, output contrac
 
 ## 扫描说明 / Scan Note
 
-某些静态扫描会命中 [references/threat-model.md](references/threat-model.md) 里的 prompt-injection 示例文本。这里的示例已经改成脱敏占位写法，它们是防御样本，用来说明哪些网页内容应该被拒绝，不是要执行的指令。
-Some static scans will hit the prompt-injection example text inside [references/threat-model.md](references/threat-model.md). Those examples are defensive fixtures that show what the host should reject, not instructions that the skill should execute.
+某些静态扫描会关注 [references/threat-model.md](references/threat-model.md) 里的 hostile payload 分类说明。这里写的是防御样本类别，用来说明哪些网页内容应该被拒绝，不是要执行的指令。
+Some static scans will pay extra attention to the hostile-payload categories inside [references/threat-model.md](references/threat-model.md). They are defensive labels that show what the host should reject, not instructions that the skill should execute.
 
 ## 推荐默认值 / Recommended Default
 
