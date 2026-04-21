@@ -124,6 +124,13 @@ def get_event_kind(state: dict[str, object]) -> str:
     return raw
 
 
+def normalize_label(value: object, default: str) -> str:
+    if value is None:
+        return default
+    text = str(value).strip().lower()
+    return text or default
+
+
 def get_optional_timestamp(state: dict[str, object], key: str) -> datetime | None:
     raw = state.get(key)
     if raw is None:
@@ -292,6 +299,16 @@ def decide(state: dict[str, object]) -> Decision:
             "scheduled_opt_in_required",
             signals,
         )
+    if event_kind == "scheduled":
+        scheduled_prompt_origin = normalize_label(state.get("scheduled_prompt_origin"), "manual")
+        scheduled_prompt_emotion = normalize_label(state.get("scheduled_prompt_emotion"), "neutral")
+        if scheduled_prompt_origin != "manual" and scheduled_prompt_emotion not in {"neutral", "none"}:
+            return blocked(
+                event_kind,
+                "host-generated scheduled prompts must stay neutral",
+                "scheduled_prompt_must_be_neutral",
+                ["host_generated_scheduled_prompt", f"scheduled_prompt_emotion:{scheduled_prompt_emotion}"],
+            )
 
     search_mode, observed_signals = infer_search_mode(state, event_kind, signals)
     return Decision(

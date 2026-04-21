@@ -39,6 +39,7 @@ The recommended default is low-frequency, low-budget, and silent by design.
 `medium` and `high` are escalation modes, not the everyday background default.
 
 `idle_fallback` fits hosts without heartbeat, or hosts where the operator explicitly enabled it. Heartbeat stays the default background path when available.
+For cron or scheduled travel, host-generated prompts should stay neutral and fact-derived from logs, backlog deltas, docs drift, or collected materials. Manually created scheduled prompts may preserve the operator's original wording.
 
 ## Key Points
 
@@ -61,7 +62,7 @@ The recommended default is low-frequency, low-budget, and silent by design.
 
 ## Community Workflow Fixtures
 
-This version ships with six real-source workflow fixtures that cover Claude Code task-end refresh, failure recovery, OpenClaw heartbeat advisory isolation, idle-fallback silence guards, Hermes scheduled doc-drift scans, and repeated-fingerprint dedupe. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
+This version ships with 12 real-source workflow fixtures that cover Claude Code task-end refresh, failure recovery, manual scheduled `CLAUDE.md` refresh, scheduled log collection, OpenClaw heartbeat advisory isolation, cron research digests, daily summary collection, idle-fallback silence guards, plus Hermes scheduled doc-drift scans, nightly backlog triage, and repeated-fingerprint dedupe. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
 
 For product-side checks, start with these three entry points:
 

@@ -23,7 +23,7 @@ Default trigger policy / 默认触发策略:
 1. Heartbeat trigger: use this first when the host supports heartbeat or background wakeups. Default mode is `low`. / heartbeat 触发：宿主支持 heartbeat 或后台唤醒时优先使用，默认模式是 `low`。
 2. Failure recovery trigger: after 2 related failures, 2 user corrections, 1 unresolved blocker, or a detected version mismatch. Default mode is `medium`. / 失败恢复触发：2 次相关失败、2 次用户纠正、1 个未解决阻塞，或检测到版本错配后启用，默认模式是 `medium`。
 3. Task-end trigger: after a multi-step task or manual recovery pass. Default mode is `medium`. / 任务结束触发：多步骤任务或手动恢复结束后启用，默认模式是 `medium`。
-4. Scheduled trigger: host-managed cron or periodic travel. Default mode is `low`. / 定时触发：由宿主管理的 cron 或周期性 travel，默认模式是 `low`。
+4. Scheduled trigger: host-managed cron or periodic travel. Default mode is `low`. Host-generated scheduled prompts should stay neutral and fact-derived, while manually created scheduled prompts may preserve the operator's original wording. / 定时触发：由宿主管理的 cron 或周期性 travel，默认模式是 `low`。宿主自动生成的定时 prompt 应该保持中性并从事实出发，手工创建的定时任务可以保留操作者原始措辞。
 5. Idle fallback: when the host has no heartbeat, or when the user explicitly enables inactivity-based travel. Default fallback uses `active_conversation_window = 24h`, `quiet_after_user_action = 20m`, and `quiet_after_agent_action = 5m`. / 空闲兜底：宿主没有 heartbeat，或用户明确开启按空闲时间触发时启用。默认兜底使用 `active_conversation_window = 24h`、`quiet_after_user_action = 20m`、`quiet_after_agent_action = 5m`。
 
 Read [references/trigger-policy.md](references/trigger-policy.md) before implementing host-side scheduling.  

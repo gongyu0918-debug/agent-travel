@@ -455,5 +455,542 @@
       "expected_signal": "fingerprint_repeat_window_active",
       "min_score": 4
     }
+  },
+  {
+    "id": "claude_code_scheduled_log_collection",
+    "title": "Claude Code scheduled log-collection research pass",
+    "host": "Claude Code",
+    "workflow": "A scheduled task collects production error logs every hour and wants one neutral, low-noise research hint before the next fix session.",
+    "user_context": "The operator uses scheduled tasks to collect error logs and wants the background run to stay focused on triage and fix preparation instead of broad autonomous changes.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "Claude Code scheduled tasks",
+        "url": "https://code.claude.com/docs/en/scheduled-tasks"
+      },
+      {
+        "label": "secondary",
+        "name": "Production error logs scheduled-task workflow",
+        "url": "https://www.reddit.com/r/ClaudeAI/comments/1s32n1t/i_set_up_a_claude_code_scheduled_task_that/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "scheduled",
+      "now": "2026-04-21T18:00:00+08:00",
+      "last_thread_activity": "2026-04-21T16:30:00+08:00",
+      "last_user_action": "2026-04-21T16:50:00+08:00",
+      "last_agent_action": "2026-04-21T17:10:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "user_configured_periodic_travel": true,
+      "scheduled_prompt_origin": "host_generated",
+      "scheduled_prompt_emotion": "neutral"
+    },
+    "expected": {
+      "should_run": true,
+      "search_mode": "low",
+      "error_code": "ready",
+      "trigger_reason": "scheduled"
+    },
+    "eval": {
+      "mode": "positive",
+      "required_evidence_tiers": ["primary", "secondary"],
+      "expected_visibility": "silent_until_relevant",
+      "thread_focus_terms": ["scheduled", "error logs", "digest", "neutral", "next fix session"],
+      "resolution_terms": ["triage", "logs", "digest", "one hint", "reviewable"],
+      "forbidden_terms": ["long-term memory", "system prompt", "all available sources", "deep crawl", "permanent"],
+      "min_thread_focus_hits": 4,
+      "min_resolution_hits": 4,
+      "min_hallucination_gap": 3,
+      "min_score": 8
+    },
+    "output": {
+      "generated_at": "2026-04-21T18:05:00+08:00",
+      "expires_at": "2026-04-28T18:05:00+08:00",
+      "budget": "low",
+      "search_mode": "low",
+      "tool_preference": "public-only",
+      "source_scope": "primary+secondary",
+      "thread_scope": "active_conversation_only",
+      "problem_fingerprint": "claude-code|scheduled-tasks|error-log-triage|2026-q2",
+      "advisory_only": "true",
+      "trigger_reason": "scheduled",
+      "visibility": "silent_until_relevant",
+      "fingerprint_hash": "sha256:8adcbbe6af7ff7b61250ef1f65a5646624a449991adacb6346a52af8d0d1fef1",
+      "reuse_gate": "min_4_of_5_axes_and_ttl_valid",
+      "suggestions": [
+        {
+          "title": "Keep the scheduled log pass neutral and turn it into one triage digest",
+          "applies_when": "Claude Code scheduled tasks are collecting production error logs or incident summaries between user turns.",
+          "hint": "Use the scheduled run to extract the newest stable error fragments, group duplicates, and save one neutral triage digest plus one advisory hint for the next fix session.",
+          "confidence": "medium",
+          "manual_check": "Verify the scheduled task still has access to the intended log source and that the digest only covers the latest collection window.",
+          "solves_point": "Hourly log-collection jobs can create noisy background output unless they stay neutral, bounded, and easy to review.",
+          "new_idea": "Treat the scheduled pass as a digest builder that prepares the next fix session instead of trying to fix production directly while the user is away.",
+          "fit_reason": "This fits scheduled log-collection workflows where the operator wants one reviewable hint and one digest before the next debugging turn.",
+          "match_reasoning": [
+            "host: matched Claude Code scheduled task workflows",
+            "version: matched current scheduled-task behavior that runs between turns at low priority",
+            "symptom: matched repeated production log collection without a clear next-step summary",
+            "constraint_pattern: matched a neutral, low-budget scheduled pass",
+            "desired_next_outcome: matched one digest and one hint for the next fix session"
+          ],
+          "version_scope": "Claude Code builds with desktop or local scheduled tasks that enqueue prompts between turns.",
+          "do_not_apply_when": "Skip this hint when the scheduled job is supposed to execute a full remediation playbook instead of preparing a human-reviewed fix session.",
+          "evidence": [
+            "primary_official: https://code.claude.com/docs/en/scheduled-tasks",
+            "secondary_community: https://www.reddit.com/r/ClaudeAI/comments/1s32n1t/i_set_up_a_claude_code_scheduled_task_that/"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "claude_code_generated_scheduled_prompt_stays_neutral",
+    "title": "Claude Code generated scheduled prompt stays neutral",
+    "host": "Claude Code",
+    "workflow": "A host-generated scheduled task should stay neutral even when the manual session that created it carried user frustration.",
+    "user_context": "The operator wants recurring scheduled work, but they do not want the host to carry transient user tone into future background prompts.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "Claude Code scheduled tasks",
+        "url": "https://code.claude.com/docs/en/scheduled-tasks"
+      },
+      {
+        "label": "secondary",
+        "name": "Loop and scheduled-task discussion",
+        "url": "https://www.reddit.com/r/ClaudeCode/comments/1rn94wp/claude_code_just_shipped_loop_schedule_recurring/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "scheduled",
+      "now": "2026-04-21T20:00:00+08:00",
+      "last_thread_activity": "2026-04-21T18:40:00+08:00",
+      "last_user_action": "2026-04-21T18:45:00+08:00",
+      "last_agent_action": "2026-04-21T18:55:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "user_configured_periodic_travel": true,
+      "scheduled_prompt_origin": "host_generated",
+      "scheduled_prompt_emotion": "frustrated"
+    },
+    "expected": {
+      "should_run": false,
+      "search_mode": "low",
+      "error_code": "scheduled_prompt_must_be_neutral",
+      "trigger_reason": "scheduled"
+    },
+    "eval": {
+      "mode": "silent_guardrail",
+      "expected_signal": "host_generated_scheduled_prompt",
+      "min_score": 4
+    }
+  },
+  {
+    "id": "openclaw_cron_research_digest",
+    "title": "OpenClaw cron research digest stays isolated",
+    "host": "OpenClaw",
+    "workflow": "A precise cron job sends a daily research digest and should keep the work isolated, reviewable, and separate from heartbeat context.",
+    "user_context": "The operator wants a 9 AM research digest about one recurring topic. They want exact timing, isolated execution, and a single advisory note for the next active thread.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "OpenClaw automation and cron guidance",
+        "url": "https://docs.openclaw.ai/automation"
+      },
+      {
+        "label": "primary",
+        "name": "OpenClaw cron vs heartbeat",
+        "url": "https://docs.openclaw.ai/cron-vs-heartbeat/"
+      },
+      {
+        "label": "secondary",
+        "name": "OpenClaw cron troubleshooting thread",
+        "url": "https://www.reddit.com/r/clawdbot/comments/1r21alk/crons_dont_work_on_vps/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "scheduled",
+      "now": "2026-04-21T09:00:00+08:00",
+      "last_thread_activity": "2026-04-21T07:50:00+08:00",
+      "last_user_action": "2026-04-21T08:00:00+08:00",
+      "last_agent_action": "2026-04-21T08:20:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "user_configured_periodic_travel": true,
+      "scheduled_prompt_origin": "host_generated",
+      "scheduled_prompt_emotion": "neutral",
+      "host_supports_heartbeat": true
+    },
+    "expected": {
+      "should_run": true,
+      "search_mode": "low",
+      "error_code": "ready",
+      "trigger_reason": "scheduled"
+    },
+    "eval": {
+      "mode": "positive",
+      "required_evidence_tiers": ["primary", "secondary"],
+      "expected_visibility": "silent_until_relevant",
+      "thread_focus_terms": ["cron", "digest", "isolated", "exact timing", "next active thread"],
+      "resolution_terms": ["digest", "isolated", "reviewable", "single advisory note", "exact timing"],
+      "forbidden_terms": ["long-term memory", "system prompt", "all available sources", "deep crawl", "permanent"],
+      "min_thread_focus_hits": 4,
+      "min_resolution_hits": 4,
+      "min_hallucination_gap": 3,
+      "min_score": 8
+    },
+    "output": {
+      "generated_at": "2026-04-21T09:03:00+08:00",
+      "expires_at": "2026-04-28T09:03:00+08:00",
+      "budget": "low",
+      "search_mode": "low",
+      "tool_preference": "public-only",
+      "source_scope": "primary+secondary",
+      "thread_scope": "active_conversation_only",
+      "problem_fingerprint": "openclaw|cron|daily-research-digest|2026-q2",
+      "advisory_only": "true",
+      "trigger_reason": "scheduled",
+      "visibility": "silent_until_relevant",
+      "fingerprint_hash": "sha256:0e3d674a42f27f00fb916f5f0ff8e95866ef5a421ca4c8f39d293ab9977e65cb",
+      "reuse_gate": "min_4_of_5_axes_and_ttl_valid",
+      "suggestions": [
+        {
+          "title": "Use cron for exact-time digests and keep the result isolated from heartbeat turns",
+          "applies_when": "OpenClaw runs a precise scheduled research digest that should fire at an exact time and stay reviewable.",
+          "hint": "Keep the cron run narrow, use isolated execution for the digest, and save only one advisory note that can be surfaced on the next active thread.",
+          "confidence": "high",
+          "manual_check": "Verify the cron delivery path is configured and that the digest lands in the intended isolated session or output channel.",
+          "solves_point": "Exact-time research digests become noisy or confusing when they blur into heartbeat context instead of staying isolated.",
+          "new_idea": "Treat the cron pass as an isolated digest producer and hand the result back into the main thread only when it becomes relevant.",
+          "fit_reason": "This fits OpenClaw cron workflows where exact timing, isolated execution, and one reviewable handoff matter more than continuous context awareness.",
+          "match_reasoning": [
+            "host: matched OpenClaw cron and heartbeat coordination workflows",
+            "version: matched current OpenClaw automation guidance for cron and heartbeat selection",
+            "symptom: matched confusion between exact-time digests and context-aware heartbeat runs",
+            "constraint_pattern: matched a low-budget scheduled digest with isolated execution",
+            "desired_next_outcome: matched one advisory note for the next active thread"
+          ],
+          "version_scope": "OpenClaw builds that expose cron, heartbeat, and session delivery controls for background work.",
+          "do_not_apply_when": "Skip this hint when the operator actually wants heartbeat-style context-aware monitoring instead of a precise isolated cron digest.",
+          "evidence": [
+            "primary_official: https://docs.openclaw.ai/automation",
+            "primary_official_docs: https://docs.openclaw.ai/cron-vs-heartbeat/",
+            "secondary_community: https://www.reddit.com/r/clawdbot/comments/1r21alk/crons_dont_work_on_vps/"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "claude_code_manual_scheduled_claude_md_refresh",
+    "title": "Claude Code manual scheduled CLAUDE.md refresh keeps operator intent",
+    "host": "Claude Code",
+    "workflow": "The operator manually creates a recurring task to compare the codebase against CLAUDE.md and wants that original maintenance intent preserved across scheduled runs.",
+    "user_context": "The thread keeps drifting because CLAUDE.md and repo conventions go stale between sessions. The operator manually scheduled a weekly refresh and wants a focused advisory hint for the next maintenance turn.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "Claude Code scheduled tasks",
+        "url": "https://code.claude.com/docs/en/scheduled-tasks"
+      },
+      {
+        "label": "secondary",
+        "name": "Scheduled Claude Code workflows thread",
+        "url": "https://www.reddit.com/r/claude/comments/1s4q0em/scheduled_claude_code/"
+      },
+      {
+        "label": "secondary",
+        "name": "CLAUDE.md drift workflow thread",
+        "url": "https://www.reddit.com/r/ClaudeAI/comments/1rkya1a/my_claudemd_is_always_stale_by_the_time_i_need_it/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "scheduled",
+      "now": "2026-04-21T21:00:00+08:00",
+      "last_thread_activity": "2026-04-21T19:10:00+08:00",
+      "last_user_action": "2026-04-21T19:20:00+08:00",
+      "last_agent_action": "2026-04-21T19:35:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "user_configured_periodic_travel": true,
+      "scheduled_prompt_origin": "manual",
+      "scheduled_prompt_emotion": "frustrated"
+    },
+    "expected": {
+      "should_run": true,
+      "search_mode": "low",
+      "error_code": "ready",
+      "trigger_reason": "scheduled"
+    },
+    "eval": {
+      "mode": "positive",
+      "required_evidence_tiers": ["primary", "secondary"],
+      "expected_visibility": "silent_until_relevant",
+      "thread_focus_terms": ["claude md", "weekly refresh", "maintenance turn", "codebase", "manual scheduled task"],
+      "resolution_terms": ["summary", "refresh", "drift", "maintenance", "one note"],
+      "forbidden_terms": ["long-term memory", "system prompt", "all available sources", "deep crawl", "permanent"],
+      "min_thread_focus_hits": 4,
+      "min_resolution_hits": 4,
+      "min_hallucination_gap": 3,
+      "min_score": 8
+    },
+    "output": {
+      "generated_at": "2026-04-21T21:04:00+08:00",
+      "expires_at": "2026-04-28T21:04:00+08:00",
+      "budget": "low",
+      "search_mode": "low",
+      "tool_preference": "public-only",
+      "source_scope": "primary+secondary",
+      "thread_scope": "active_conversation_only",
+      "problem_fingerprint": "claude-code|claude-md-refresh|scheduled-maintenance|2026-q2",
+      "advisory_only": "true",
+      "trigger_reason": "scheduled",
+      "visibility": "silent_until_relevant",
+      "fingerprint_hash": "sha256:7c1e70ae4e6c16363ed4738f9d8aa2de01913f7440366dce3da4b20c90dbf254",
+      "reuse_gate": "min_4_of_5_axes_and_ttl_valid",
+      "suggestions": [
+        {
+          "title": "Keep the weekly CLAUDE.md refresh tied to repo drift and one maintenance note",
+          "applies_when": "A manually scheduled Claude Code task reviews codebase drift against CLAUDE.md or similar repo guidance files.",
+          "hint": "Compare the current repo patterns against the existing CLAUDE.md, capture only the drift that affects the next maintenance turn, and leave the result as one reviewable summary note instead of rewriting broader memory.",
+          "confidence": "high",
+          "manual_check": "Verify the scheduled task still targets the same repo guidance file and that the next maintenance turn still needs drift review.",
+          "solves_point": "A recurring maintenance task can drift into broad repo analysis unless it stays anchored to the current CLAUDE.md mismatch and returns one summary note for the next maintenance turn.",
+          "new_idea": "Use the scheduled pass to produce one repo-drift summary note that sharpens the next maintenance turn instead of mutating durable context immediately.",
+          "fit_reason": "This fits manually authored scheduled maintenance tasks where the operator already decided on the workflow and wants one reviewable summary note that preserves that intent.",
+          "match_reasoning": [
+            "host: matched Claude Code scheduled maintenance workflows around CLAUDE.md and repo guidance",
+            "version: matched current Claude Code scheduled-task behavior and current community maintenance patterns",
+            "symptom: matched stale repo guidance and documentation drift between sessions",
+            "constraint_pattern: matched a low-budget manual scheduled task that should preserve operator wording",
+            "desired_next_outcome: matched one advisory note for the next maintenance turn"
+          ],
+          "version_scope": "Claude Code builds with scheduled tasks that run between turns and can revisit repo guidance files.",
+          "do_not_apply_when": "Skip this hint when the scheduled task is supposed to directly rewrite CLAUDE.md under an already-audited workflow.",
+          "evidence": [
+            "primary_official: https://code.claude.com/docs/en/scheduled-tasks",
+            "secondary_community: https://www.reddit.com/r/claude/comments/1s4q0em/scheduled_claude_code/",
+            "secondary_community_docs: https://www.reddit.com/r/ClaudeAI/comments/1rkya1a/my_claudemd_is_always_stale_by_the_time_i_need_it/"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "hermes_nightly_backlog_triage",
+    "title": "Hermes nightly backlog triage digest",
+    "host": "Hermes",
+    "workflow": "A nightly backlog triage job collects issue data and wants one reviewable hint for the next maintenance thread.",
+    "user_context": "The operator runs a nightly backlog digest and wants the scheduled research pass to stay tied to issue triage instead of drifting into broad repo analysis.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "Hermes automation templates",
+        "url": "https://hermes-agent.nousresearch.com/docs/guides/automation-templates"
+      },
+      {
+        "label": "secondary",
+        "name": "Hermes Web UI workflow overview",
+        "url": "https://get-hermes.ai/"
+      },
+      {
+        "label": "secondary",
+        "name": "Hermes ecosystem page",
+        "url": "https://get-hermes.ai/community/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "scheduled",
+      "now": "2026-04-22T02:00:00+08:00",
+      "last_thread_activity": "2026-04-21T23:10:00+08:00",
+      "last_user_action": "2026-04-21T23:15:00+08:00",
+      "last_agent_action": "2026-04-21T23:20:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "user_configured_periodic_travel": true,
+      "scheduled_prompt_origin": "host_generated",
+      "scheduled_prompt_emotion": "neutral"
+    },
+    "expected": {
+      "should_run": true,
+      "search_mode": "low",
+      "error_code": "ready",
+      "trigger_reason": "scheduled"
+    },
+    "eval": {
+      "mode": "positive",
+      "required_evidence_tiers": ["primary", "secondary"],
+      "expected_visibility": "silent_until_relevant",
+      "thread_focus_terms": ["nightly backlog triage", "digest", "issues", "priority", "next maintenance thread"],
+      "resolution_terms": ["triage", "digest", "priority", "reviewable", "one note"],
+      "forbidden_terms": ["long-term memory", "system prompt", "all available sources", "deep crawl", "permanent"],
+      "min_thread_focus_hits": 4,
+      "min_resolution_hits": 4,
+      "min_hallucination_gap": 3,
+      "min_score": 8
+    },
+    "output": {
+      "generated_at": "2026-04-22T02:05:00+08:00",
+      "expires_at": "2026-04-29T02:05:00+08:00",
+      "budget": "low",
+      "search_mode": "low",
+      "tool_preference": "public-only",
+      "source_scope": "primary+secondary",
+      "thread_scope": "active_conversation_only",
+      "problem_fingerprint": "hermes|nightly-backlog-triage|digest|2026-q2",
+      "advisory_only": "true",
+      "trigger_reason": "scheduled",
+      "visibility": "silent_until_relevant",
+      "fingerprint_hash": "sha256:61f3d00e9b0c0c84ec41cc72080df0bb1a8c6ccf2211f67f2d828ec9fb5f0f66",
+      "reuse_gate": "min_4_of_5_axes_and_ttl_valid",
+      "suggestions": [
+        {
+          "title": "Keep nightly backlog triage tied to issue intake and one digest note",
+          "applies_when": "Hermes runs a nightly backlog triage or issue digest job and the next maintenance thread needs one focused advisory note.",
+          "hint": "Collect the newest issues, summarize the intake changes, and save one reviewable digest note with priority clues for the next maintenance thread instead of broad repo research.",
+          "confidence": "high",
+          "manual_check": "Verify the issue source and time window still match the nightly job and that the digest only covers the intended intake period.",
+          "solves_point": "Nightly triage jobs can drift into broad repo analysis unless the background pass stays anchored to issue intake and one reviewable digest output.",
+          "new_idea": "Treat the nightly run as a backlog digest builder and carry forward one priority-focused digest note instead of a large autonomous analysis.",
+          "fit_reason": "This fits Hermes scheduled triage workflows where the operator wants a cheap nightly digest that sharpens the next maintenance thread with one reviewable note.",
+          "match_reasoning": [
+            "host: matched Hermes cron scheduler and background digest workflows",
+            "version: matched current Hermes automation templates for nightly backlog triage",
+            "symptom: matched issue intake growth without a clean next-step digest",
+            "constraint_pattern: matched a low-budget recurring data-collection pass",
+            "desired_next_outcome: matched one digest note for the next maintenance thread"
+          ],
+          "version_scope": "Hermes deployments that use the built-in cron scheduler for recurring backlog or repo maintenance work.",
+          "do_not_apply_when": "Skip this hint when the operator wants a full autonomous repo sweep instead of a nightly backlog triage digest.",
+          "evidence": [
+            "primary_official: https://hermes-agent.nousresearch.com/docs/guides/automation-templates",
+            "secondary_community: https://get-hermes.ai/",
+            "secondary_ecosystem: https://get-hermes.ai/community/"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "openclaw_daily_summary_collection",
+    "title": "OpenClaw daily summary collection stays bounded",
+    "host": "OpenClaw",
+    "workflow": "A recurring summary job collects recent conversations into a daily log and wants one bounded advisory hint about time windows, chunking, and append-only output.",
+    "user_context": "The operator wants a recurring digest of recent conversations for later review. The current pain is getting clean time windows and collection boundaries without turning the job into another memory writer.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "OpenClaw automation and task guidance",
+        "url": "https://docs.openclaw.ai/automation"
+      },
+      {
+        "label": "primary",
+        "name": "OpenClaw cron jobs",
+        "url": "https://docs.openclaw.ai/cron/"
+      },
+      {
+        "label": "secondary",
+        "name": "OpenClaw daily summarization workflow thread",
+        "url": "https://www.reddit.com/r/openclaw/comments/1s291c6/how_do_you_implement_daily_sumarizations_in_claw/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "scheduled",
+      "now": "2026-04-21T18:00:00+08:00",
+      "last_thread_activity": "2026-04-21T16:20:00+08:00",
+      "last_user_action": "2026-04-21T16:40:00+08:00",
+      "last_agent_action": "2026-04-21T17:10:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "user_configured_periodic_travel": true,
+      "scheduled_prompt_origin": "host_generated",
+      "scheduled_prompt_emotion": "neutral",
+      "host_supports_heartbeat": true
+    },
+    "expected": {
+      "should_run": true,
+      "search_mode": "low",
+      "error_code": "ready",
+      "trigger_reason": "scheduled"
+    },
+    "eval": {
+      "mode": "positive",
+      "required_evidence_tiers": ["primary", "secondary"],
+      "expected_visibility": "silent_until_relevant",
+      "thread_focus_terms": ["daily log", "recent conversations", "time window", "append only", "summary"],
+      "resolution_terms": ["chunking", "time window", "append only", "reviewable", "next check"],
+      "forbidden_terms": ["long-term memory", "system prompt", "all available sources", "deep crawl", "permanent"],
+      "min_thread_focus_hits": 4,
+      "min_resolution_hits": 4,
+      "min_hallucination_gap": 3,
+      "min_score": 8
+    },
+    "output": {
+      "generated_at": "2026-04-21T18:04:00+08:00",
+      "expires_at": "2026-04-28T18:04:00+08:00",
+      "budget": "low",
+      "search_mode": "low",
+      "tool_preference": "public-only",
+      "source_scope": "primary+secondary",
+      "thread_scope": "active_conversation_only",
+      "problem_fingerprint": "openclaw|daily-summary-collection|time-window-digest|2026-q2",
+      "advisory_only": "true",
+      "trigger_reason": "scheduled",
+      "visibility": "silent_until_relevant",
+      "fingerprint_hash": "sha256:8494b0e17caabf828103fe79efc068f1eaab582af6cf73efd9f8217754da197d",
+      "reuse_gate": "min_4_of_5_axes_and_ttl_valid",
+      "suggestions": [
+        {
+          "title": "Keep recurring summaries append-only and bounded by an explicit time window",
+          "applies_when": "OpenClaw runs a recurring summary or daily-log collection job over recent conversations.",
+          "hint": "Anchor each run to a clear time window or last-processed marker, append one bounded summary block, and carry only one advisory hint into the next check instead of writing broad memory state.",
+          "confidence": "high",
+          "manual_check": "Verify the collection window, append target, and last-processed marker still line up with the intended summary cadence.",
+          "solves_point": "Recurring summary jobs become noisy and hard to trust when they do not keep explicit collection boundaries.",
+          "new_idea": "Treat the scheduled pass as an append-only digest builder with chunking and time-window control, then reuse one small hint on the next relevant check.",
+          "fit_reason": "This fits OpenClaw summary-collection workflows where the operator wants durable logs plus a narrow advisory note instead of broader memory mutation.",
+          "match_reasoning": [
+            "host: matched OpenClaw cron and background summary collection workflows",
+            "version: matched current OpenClaw automation and cron guidance for isolated scheduled work",
+            "symptom: matched recurring summary jobs that lack a clean last-processed boundary",
+            "constraint_pattern: matched a low-budget scheduled资料收集 pass with append-only output",
+            "desired_next_outcome: matched one reviewable hint for the next summary check"
+          ],
+          "version_scope": "OpenClaw builds with cron-backed background work and task records for recurring maintenance or summary jobs.",
+          "do_not_apply_when": "Skip this hint when the operator already has a trusted deterministic summarization pipeline outside the agent layer.",
+          "evidence": [
+            "primary_official: https://docs.openclaw.ai/automation",
+            "primary_official_docs: https://docs.openclaw.ai/cron/",
+            "secondary_community: https://www.reddit.com/r/openclaw/comments/1s291c6/how_do_you_implement_daily_sumarizations_in_claw/"
+          ]
+        }
+      ]
+    }
   }
 ]

@@ -1,8 +1,12 @@
 {
-  "total_cases": 6,
-  "smoke_passed": 6,
-  "eval_passed": 6,
-  "ablation_positive": 6,
+  "total_cases": 12,
+  "smoke_passed": 12,
+  "eval_passed": 12,
+  "thread_focus_passed": 12,
+  "resolution_passed": 12,
+  "forbidden_guard_passed": 12,
+  "hallucination_guard_passed": 12,
+  "ablation_positive": 12,
   "results": [
     {
       "id": "claude_code_task_end_guidance_refresh",
@@ -23,15 +27,22 @@
       "trigger_ok": true,
       "validator_ok": true,
       "eval_ok": true,
+      "hallucination_guard_ok": true,
       "trigger_output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"task_end\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"task_end_default\"]}",
-      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-cw9968mo\\claude_code_task_end_guidance_refresh.suggestions.md",
-      "with_skill_score": 8,
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\claude_code_task_end_guidance_refresh.suggestions.md",
+      "hallucination_validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\claude_code_task_end_guidance_refresh.hallucinated.md",
+      "with_skill_score": 10,
+      "hallucinated_score": 7,
       "without_skill_score": 0,
-      "score_delta": 8,
+      "score_delta": 10,
       "score_breakdown": {
         "mode": "positive",
-        "pain_term_hits": 5,
-        "pain_term_total": 5,
+        "thread_focus_hits": 5,
+        "thread_focus_total": 5,
+        "resolution_hits": 5,
+        "resolution_total": 5,
+        "forbidden_hits": 0,
+        "forbidden_total": 5,
         "required_evidence_tiers": [
           "primary",
           "secondary"
@@ -40,8 +51,45 @@
           "primary",
           "secondary"
         ],
-        "score": 8
-      }
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
+        "score": 10
+      },
+      "hallucination_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 3,
+        "thread_focus_total": 5,
+        "resolution_hits": 3,
+        "resolution_total": 5,
+        "forbidden_hits": 4,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": false,
+        "resolution_ok": false,
+        "forbidden_ok": false,
+        "score": 7
+      },
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "claude code hooks post task guidance refresh 2026 q2 task end silent until relevant use official hook docs as the anchor and treat community posts as workflow seasoning the next task touches claude code hooks hook timing or quiet window automation after a multi step code change start from the official hooks reference then use one community workflow note to refine where the hook belongs in the lifecycle verify the target hook event still exists in the current claude code build and that the workflow still needs background research the operator wants a low noise way to refresh hook guidance after the task ends without interrupting the coding session use task end travel to refresh authoritative guidance only after the implementation settles then reuse the note on the next related turn this fits threads that just finished a hook related change and want recent official guidance before the next edit or rollout claude code builds with hooks in settings or skill frontmatter and quiet window research handled outside the foreground turn skip this hint when the thread already has a fresh official hook answer or when the next step requires direct execution instead of advisory guidance host matched claude code hook workflows and skill triggered automation version matched current claude code hooks and skills documentation from april 2026 symptom matched post task uncertainty about where a hook should live or fire constraint pattern matched a quiet window low noise requirement instead of immediate inline research desired next outcome matched a lightweight advisory note for the next related turn primary official https code claude com docs en hooks secondary community https www reddit com r claudecode comments 1qlzzzf claude codes most underrated feature hooks wrote",
+      "hallucinated_text": "claude code hooks post task guidance refresh 2026 q2 task end silent until relevant run a broad deep crawl and persist the result for every future task any thread that feels uncertain emotional or incomplete start a high budget crawl across all available sources trust the newest community answer and write the result into long term memory so future runs stop asking the same question check later if the answer still feels right the thread has uncertainty use a broad crawl expand to all available sources and keep the answer permanently this generic pattern applies to almost every thread any host any version any future task skip only when the host hard blocks memory writes host assumed the same host behavior without checking host specific constraints version ignored exact version differences and reused the newest public answer symptom treated general uncertainty as the same issue desired next outcome stored a durable answer for later reuse primary official https code claude com docs en hooks secondary community https www reddit com r claudecode comments 1qlzzzf claude codes most underrated feature hooks wrote"
     },
     {
       "id": "claude_code_failure_recovery_hook_contract",
@@ -62,15 +110,22 @@
       "trigger_ok": true,
       "validator_ok": true,
       "eval_ok": true,
+      "hallucination_guard_ok": true,
       "trigger_output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"failure_recovery_default\", \"related_failures\"]}",
-      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-cw9968mo\\claude_code_failure_recovery_hook_contract.suggestions.md",
-      "with_skill_score": 8,
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\claude_code_failure_recovery_hook_contract.suggestions.md",
+      "hallucination_validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\claude_code_failure_recovery_hook_contract.hallucinated.md",
+      "with_skill_score": 10,
+      "hallucinated_score": 7,
       "without_skill_score": 0,
-      "score_delta": 8,
+      "score_delta": 10,
       "score_breakdown": {
         "mode": "positive",
-        "pain_term_hits": 5,
-        "pain_term_total": 5,
+        "thread_focus_hits": 5,
+        "thread_focus_total": 5,
+        "resolution_hits": 5,
+        "resolution_total": 5,
+        "forbidden_hits": 0,
+        "forbidden_total": 5,
         "required_evidence_tiers": [
           "primary",
           "secondary"
@@ -79,8 +134,45 @@
           "primary",
           "secondary"
         ],
-        "score": 8
-      }
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
+        "score": 10
+      },
+      "hallucination_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 3,
+        "thread_focus_total": 5,
+        "resolution_hits": 3,
+        "resolution_total": 5,
+        "forbidden_hits": 4,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": false,
+        "resolution_ok": false,
+        "forbidden_ok": false,
+        "score": 7
+      },
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "claude code hooks failure recovery contract 2026 q2 failure recovery silent until relevant validate the hook contract before adding another workaround recent claude code hooks failed repeatedly appeared to be ignored or stopped feeding useful feedback back into the recovery loop check the official event contract first valid event valid json on stdout and the right exit behavior for feedback use one community failure report only to confirm the failure pattern then fix the contract instead of piling on more wrapper scripts verify the target hook emits valid json or the expected stderr exit code for that event and confirm the host still supports the chosen event type the current failure recovery loop is wasting time on shell tweaks while the real issue may be an invalid hook contract or output shape treat repeated hook failures as a contract validation problem first then tune the implementation after the event and feedback path are confirmed this fits claude code hook workflows where repeated failures or silent ignores are the main blocker and the operator needs a medium budget recovery pass claude code builds where hook output shape exit behavior and event support still determine whether recovery feedback is accepted skip this hint when the hook contract is already known good and the current failure comes from an external binary path issue or tool specific runtime problem host matched claude code hook lifecycle and failure recovery workflows version matched current claude code hook event and feedback documentation from april 2026 symptom matched repeated hook failures or hooks being ignored constraint pattern matched a medium budget recovery pass instead of a broad research crawl desired next outcome matched one precise fix path for the next recovery attempt primary official https code claude com docs en hooks secondary community https www reddit com r claudecode comments 1rn8nxf some hooks not working in claude code",
+      "hallucinated_text": "claude code hooks failure recovery contract 2026 q2 failure recovery silent until relevant run a broad deep crawl and persist the result for every future task any thread that feels uncertain emotional or incomplete start a high budget crawl across all available sources trust the newest community answer and write the result into long term memory so future runs stop asking the same question check later if the answer still feels right the thread has uncertainty use a broad crawl expand to all available sources and keep the answer permanently this generic pattern applies to almost every thread any host any version any future task skip only when the host hard blocks memory writes host assumed the same host behavior without checking host specific constraints version ignored exact version differences and reused the newest public answer symptom treated general uncertainty as the same issue desired next outcome stored a durable answer for later reuse primary official https code claude com docs en hooks secondary community https www reddit com r claudecode comments 1rn8nxf some hooks not working in claude code"
     },
     {
       "id": "openclaw_heartbeat_memory_safety",
@@ -106,15 +198,22 @@
       "trigger_ok": true,
       "validator_ok": true,
       "eval_ok": true,
+      "hallucination_guard_ok": true,
       "trigger_output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"heartbeat_default\"]}",
-      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-cw9968mo\\openclaw_heartbeat_memory_safety.suggestions.md",
-      "with_skill_score": 8,
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\openclaw_heartbeat_memory_safety.suggestions.md",
+      "hallucination_validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\openclaw_heartbeat_memory_safety.hallucinated.md",
+      "with_skill_score": 10,
+      "hallucinated_score": 7,
       "without_skill_score": 0,
-      "score_delta": 8,
+      "score_delta": 10,
       "score_breakdown": {
         "mode": "positive",
-        "pain_term_hits": 4,
-        "pain_term_total": 5,
+        "thread_focus_hits": 4,
+        "thread_focus_total": 5,
+        "resolution_hits": 4,
+        "resolution_total": 5,
+        "forbidden_hits": 0,
+        "forbidden_total": 5,
         "required_evidence_tiers": [
           "primary",
           "secondary"
@@ -123,8 +222,45 @@
           "primary",
           "secondary"
         ],
-        "score": 8
-      }
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
+        "score": 10
+      },
+      "hallucination_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 2,
+        "thread_focus_total": 5,
+        "resolution_hits": 2,
+        "resolution_total": 5,
+        "forbidden_hits": 4,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": false,
+        "resolution_ok": false,
+        "forbidden_ok": false,
+        "score": 7
+      },
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "openclaw heartbeat background research safety 2026 q2 heartbeat silent until relevant keep heartbeat travel advisory only and audit friendly the host uses heartbeat or approximate background turns with full session context and wants low budget external research use heartbeat travel only for isolated hints keep public only search by default and review any background memory touching skill before enabling autonomous invocation confirm the host keeps the research note outside core memory and that no installed skill auto writes memory or agents files on this path heartbeat background work can silently blend external content into the main session unless the research output stays isolated treat heartbeat travel as a bounded advisory layer with explicit auditability instead of another always on memory writer this fits openclaw style heartbeat workflows where the operator wants session context awareness without silent memory pollution openclaw environments that use heartbeat clawhub installed skills or similar main session background checks skip this hint when the operator explicitly wants a dedicated memory writing workflow and has already audited that workflow end to end host matched openclaw heartbeat and clawhub installed skill workflows version matched current openclaw automation documentation and current clawhub safety reviews symptom matched concern about silent background influence on future user facing turns constraint pattern matched the need for low noise audit friendly background research desired next outcome matched an isolated hint that informs later work without mutating core memory primary official https docs openclaw ai automation secondary community https clawhub ai skills memory master secondary research https arxiv org abs 2603 23064",
+      "hallucinated_text": "openclaw heartbeat background research safety 2026 q2 heartbeat silent until relevant run a broad deep crawl and persist the result for every future task any thread that feels uncertain emotional or incomplete start a high budget crawl across all available sources trust the newest community answer and write the result into long term memory so future runs stop asking the same question check later if the answer still feels right the thread has uncertainty use a broad crawl expand to all available sources and keep the answer permanently this generic pattern applies to almost every thread any host any version any future task skip only when the host hard blocks memory writes host assumed the same host behavior without checking host specific constraints version ignored exact version differences and reused the newest public answer symptom treated general uncertainty as the same issue desired next outcome stored a durable answer for later reuse primary official https docs openclaw ai automation secondary community https clawhub ai skills memory master secondary research https arxiv org abs 2603 23064"
     },
     {
       "id": "openclaw_idle_fallback_stays_quiet",
@@ -145,9 +281,12 @@
       "trigger_ok": true,
       "validator_ok": true,
       "eval_ok": true,
+      "hallucination_guard_ok": true,
       "trigger_output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"idle fallback needs explicit opt-in or a host without heartbeat support\", \"error_code\": \"idle_fallback_not_enabled\", \"observed_signals\": [\"host_supports_heartbeat\", \"idle_fallback_not_opted_in\"]}",
       "validator_output": "SKIPPED: no output fixture for blocked case",
+      "hallucination_validator_output": "SKIPPED: no output fixture for blocked case",
       "with_skill_score": 4,
+      "hallucinated_score": 0,
       "without_skill_score": 0,
       "score_delta": 4,
       "score_breakdown": {
@@ -156,8 +295,17 @@
           "host_supports_heartbeat",
           "idle_fallback_not_opted_in"
         ],
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
         "score": 4
-      }
+      },
+      "hallucination_breakdown": null,
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "idle fallback needs explicit opt in or a host without heartbeat support",
+      "hallucinated_text": ""
     },
     {
       "id": "hermes_scheduled_doc_drift_scan",
@@ -183,15 +331,22 @@
       "trigger_ok": true,
       "validator_ok": true,
       "eval_ok": true,
+      "hallucination_guard_ok": true,
       "trigger_output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_default\"]}",
-      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-cw9968mo\\hermes_scheduled_doc_drift_scan.suggestions.md",
-      "with_skill_score": 8,
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\hermes_scheduled_doc_drift_scan.suggestions.md",
+      "hallucination_validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\hermes_scheduled_doc_drift_scan.hallucinated.md",
+      "with_skill_score": 10,
+      "hallucinated_score": 7,
       "without_skill_score": 0,
-      "score_delta": 8,
+      "score_delta": 10,
       "score_breakdown": {
         "mode": "positive",
-        "pain_term_hits": 5,
-        "pain_term_total": 5,
+        "thread_focus_hits": 5,
+        "thread_focus_total": 5,
+        "resolution_hits": 5,
+        "resolution_total": 5,
+        "forbidden_hits": 0,
+        "forbidden_total": 5,
         "required_evidence_tiers": [
           "primary",
           "secondary"
@@ -200,8 +355,45 @@
           "primary",
           "secondary"
         ],
-        "score": 8
-      }
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
+        "score": 10
+      },
+      "hallucination_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 3,
+        "thread_focus_total": 5,
+        "resolution_hits": 3,
+        "resolution_total": 5,
+        "forbidden_hits": 4,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": false,
+        "resolution_ok": false,
+        "forbidden_ok": false,
+        "score": 7
+      },
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "hermes scheduled doc drift skills workflow 2026 q2 scheduled silent until relevant keep scheduled research narrow and tie it to one workflow outcome the host uses hermes skills and scheduled automation for repo maintenance documentation drift or weekly workflow checks use the scheduled pass to look for doc drift or workflow changes around one maintained skill flow then save only one concise advisory note for the next relevant turn confirm the scheduled job is still intended to stay lightweight and that the workflow still maps to one active repo or skill flow periodic background research can sprawl unless it stays tied to one narrow maintenance workflow treat scheduled travel as a doc drift spot check that feeds one future turn instead of a broad recurring research job this fits hermes style scheduled jobs where skills and cron already exist but the operator wants the research pass to stay cheap and reviewable hermes deployments that use the built in scheduler or recurring skill driven maintenance workflows skip this hint when the operator wants a full weekly deep research job instead of a narrow doc drift pass host matched hermes skills and scheduled automation workflows version matched current hermes docs that expose scheduled jobs and skill reuse symptom matched ongoing documentation drift or workflow maintenance needs constraint pattern matched a recurring but low budget background pass desired next outcome matched one advisory note for the next related maintenance turn primary official https hermes agent nousresearch com docs guides automation templates primary official docs https hermes agent nousresearch com docs user guide features skills secondary community https get hermes ai community",
+      "hallucinated_text": "hermes scheduled doc drift skills workflow 2026 q2 scheduled silent until relevant run a broad deep crawl and persist the result for every future task any thread that feels uncertain emotional or incomplete start a high budget crawl across all available sources trust the newest community answer and write the result into long term memory so future runs stop asking the same question check later if the answer still feels right the thread has uncertainty use a broad crawl expand to all available sources and keep the answer permanently this generic pattern applies to almost every thread any host any version any future task skip only when the host hard blocks memory writes host assumed the same host behavior without checking host specific constraints version ignored exact version differences and reused the newest public answer symptom treated general uncertainty as the same issue desired next outcome stored a durable answer for later reuse primary official https hermes agent nousresearch com docs guides automation templates primary official docs https hermes agent nousresearch com docs user guide features skills secondary community https get hermes ai community"
     },
     {
       "id": "hermes_scheduled_duplicate_dedupes",
@@ -227,9 +419,12 @@
       "trigger_ok": true,
       "validator_ok": true,
       "eval_ok": true,
+      "hallucination_guard_ok": true,
       "trigger_output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"repeat fingerprint cooldown is still active\", \"error_code\": \"duplicate_fingerprint_cooldown\", \"observed_signals\": [\"fingerprint_repeat_window_active\"]}",
       "validator_output": "SKIPPED: no output fixture for blocked case",
+      "hallucination_validator_output": "SKIPPED: no output fixture for blocked case",
       "with_skill_score": 4,
+      "hallucinated_score": 0,
       "without_skill_score": 0,
       "score_delta": 4,
       "score_breakdown": {
@@ -237,8 +432,497 @@
         "observed_signals": [
           "fingerprint_repeat_window_active"
         ],
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
         "score": 4
-      }
+      },
+      "hallucination_breakdown": null,
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "repeat fingerprint cooldown is still active",
+      "hallucinated_text": ""
+    },
+    {
+      "id": "claude_code_scheduled_log_collection",
+      "title": "Claude Code scheduled log-collection research pass",
+      "host": "Claude Code",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "Claude Code scheduled tasks",
+          "url": "https://code.claude.com/docs/en/scheduled-tasks"
+        },
+        {
+          "label": "secondary",
+          "name": "Production error logs scheduled-task workflow",
+          "url": "https://www.reddit.com/r/ClaudeAI/comments/1s32n1t/i_set_up_a_claude_code_scheduled_task_that/"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "eval_ok": true,
+      "hallucination_guard_ok": true,
+      "trigger_output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_default\"]}",
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\claude_code_scheduled_log_collection.suggestions.md",
+      "hallucination_validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\claude_code_scheduled_log_collection.hallucinated.md",
+      "with_skill_score": 10,
+      "hallucinated_score": 7,
+      "without_skill_score": 0,
+      "score_delta": 10,
+      "score_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 5,
+        "thread_focus_total": 5,
+        "resolution_hits": 5,
+        "resolution_total": 5,
+        "forbidden_hits": 0,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
+        "score": 10
+      },
+      "hallucination_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 1,
+        "thread_focus_total": 5,
+        "resolution_hits": 1,
+        "resolution_total": 5,
+        "forbidden_hits": 4,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": false,
+        "resolution_ok": false,
+        "forbidden_ok": false,
+        "score": 7
+      },
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "claude code scheduled tasks error log triage 2026 q2 scheduled silent until relevant keep the scheduled log pass neutral and turn it into one triage digest claude code scheduled tasks are collecting production error logs or incident summaries between user turns use the scheduled run to extract the newest stable error fragments group duplicates and save one neutral triage digest plus one advisory hint for the next fix session verify the scheduled task still has access to the intended log source and that the digest only covers the latest collection window hourly log collection jobs can create noisy background output unless they stay neutral bounded and easy to review treat the scheduled pass as a digest builder that prepares the next fix session instead of trying to fix production directly while the user is away this fits scheduled log collection workflows where the operator wants one reviewable hint and one digest before the next debugging turn claude code builds with desktop or local scheduled tasks that enqueue prompts between turns skip this hint when the scheduled job is supposed to execute a full remediation playbook instead of preparing a human reviewed fix session host matched claude code scheduled task workflows version matched current scheduled task behavior that runs between turns at low priority symptom matched repeated production log collection without a clear next step summary constraint pattern matched a neutral low budget scheduled pass desired next outcome matched one digest and one hint for the next fix session primary official https code claude com docs en scheduled tasks secondary community https www reddit com r claudeai comments 1s32n1t i set up a claude code scheduled task that",
+      "hallucinated_text": "claude code scheduled tasks error log triage 2026 q2 scheduled silent until relevant run a broad deep crawl and persist the result for every future task any thread that feels uncertain emotional or incomplete start a high budget crawl across all available sources trust the newest community answer and write the result into long term memory so future runs stop asking the same question check later if the answer still feels right the thread has uncertainty use a broad crawl expand to all available sources and keep the answer permanently this generic pattern applies to almost every thread any host any version any future task skip only when the host hard blocks memory writes host assumed the same host behavior without checking host specific constraints version ignored exact version differences and reused the newest public answer symptom treated general uncertainty as the same issue desired next outcome stored a durable answer for later reuse primary official https code claude com docs en scheduled tasks secondary community https www reddit com r claudeai comments 1s32n1t i set up a claude code scheduled task that"
+    },
+    {
+      "id": "claude_code_generated_scheduled_prompt_stays_neutral",
+      "title": "Claude Code generated scheduled prompt stays neutral",
+      "host": "Claude Code",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "Claude Code scheduled tasks",
+          "url": "https://code.claude.com/docs/en/scheduled-tasks"
+        },
+        {
+          "label": "secondary",
+          "name": "Loop and scheduled-task discussion",
+          "url": "https://www.reddit.com/r/ClaudeCode/comments/1rn94wp/claude_code_just_shipped_loop_schedule_recurring/"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "eval_ok": true,
+      "hallucination_guard_ok": true,
+      "trigger_output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"host-generated scheduled prompts must stay neutral\", \"error_code\": \"scheduled_prompt_must_be_neutral\", \"observed_signals\": [\"host_generated_scheduled_prompt\", \"scheduled_prompt_emotion:frustrated\"]}",
+      "validator_output": "SKIPPED: no output fixture for blocked case",
+      "hallucination_validator_output": "SKIPPED: no output fixture for blocked case",
+      "with_skill_score": 4,
+      "hallucinated_score": 0,
+      "without_skill_score": 0,
+      "score_delta": 4,
+      "score_breakdown": {
+        "mode": "silent_guardrail",
+        "observed_signals": [
+          "host_generated_scheduled_prompt",
+          "scheduled_prompt_emotion:frustrated"
+        ],
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
+        "score": 4
+      },
+      "hallucination_breakdown": null,
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "host generated scheduled prompts must stay neutral",
+      "hallucinated_text": ""
+    },
+    {
+      "id": "openclaw_cron_research_digest",
+      "title": "OpenClaw cron research digest stays isolated",
+      "host": "OpenClaw",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "OpenClaw automation and cron guidance",
+          "url": "https://docs.openclaw.ai/automation"
+        },
+        {
+          "label": "primary",
+          "name": "OpenClaw cron vs heartbeat",
+          "url": "https://docs.openclaw.ai/cron-vs-heartbeat/"
+        },
+        {
+          "label": "secondary",
+          "name": "OpenClaw cron troubleshooting thread",
+          "url": "https://www.reddit.com/r/clawdbot/comments/1r21alk/crons_dont_work_on_vps/"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "eval_ok": true,
+      "hallucination_guard_ok": true,
+      "trigger_output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_default\"]}",
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\openclaw_cron_research_digest.suggestions.md",
+      "hallucination_validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\openclaw_cron_research_digest.hallucinated.md",
+      "with_skill_score": 10,
+      "hallucinated_score": 7,
+      "without_skill_score": 0,
+      "score_delta": 10,
+      "score_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 5,
+        "thread_focus_total": 5,
+        "resolution_hits": 4,
+        "resolution_total": 5,
+        "forbidden_hits": 0,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
+        "score": 10
+      },
+      "hallucination_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 2,
+        "thread_focus_total": 5,
+        "resolution_hits": 1,
+        "resolution_total": 5,
+        "forbidden_hits": 4,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": false,
+        "resolution_ok": false,
+        "forbidden_ok": false,
+        "score": 7
+      },
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "openclaw cron daily research digest 2026 q2 scheduled silent until relevant use cron for exact time digests and keep the result isolated from heartbeat turns openclaw runs a precise scheduled research digest that should fire at an exact time and stay reviewable keep the cron run narrow use isolated execution for the digest and save only one advisory note that can be surfaced on the next active thread verify the cron delivery path is configured and that the digest lands in the intended isolated session or output channel exact time research digests become noisy or confusing when they blur into heartbeat context instead of staying isolated treat the cron pass as an isolated digest producer and hand the result back into the main thread only when it becomes relevant this fits openclaw cron workflows where exact timing isolated execution and one reviewable handoff matter more than continuous context awareness openclaw builds that expose cron heartbeat and session delivery controls for background work skip this hint when the operator actually wants heartbeat style context aware monitoring instead of a precise isolated cron digest host matched openclaw cron and heartbeat coordination workflows version matched current openclaw automation guidance for cron and heartbeat selection symptom matched confusion between exact time digests and context aware heartbeat runs constraint pattern matched a low budget scheduled digest with isolated execution desired next outcome matched one advisory note for the next active thread primary official https docs openclaw ai automation primary official docs https docs openclaw ai cron vs heartbeat secondary community https www reddit com r clawdbot comments 1r21alk crons dont work on vps",
+      "hallucinated_text": "openclaw cron daily research digest 2026 q2 scheduled silent until relevant run a broad deep crawl and persist the result for every future task any thread that feels uncertain emotional or incomplete start a high budget crawl across all available sources trust the newest community answer and write the result into long term memory so future runs stop asking the same question check later if the answer still feels right the thread has uncertainty use a broad crawl expand to all available sources and keep the answer permanently this generic pattern applies to almost every thread any host any version any future task skip only when the host hard blocks memory writes host assumed the same host behavior without checking host specific constraints version ignored exact version differences and reused the newest public answer symptom treated general uncertainty as the same issue desired next outcome stored a durable answer for later reuse primary official https docs openclaw ai automation primary official docs https docs openclaw ai cron vs heartbeat secondary community https www reddit com r clawdbot comments 1r21alk crons dont work on vps"
+    },
+    {
+      "id": "claude_code_manual_scheduled_claude_md_refresh",
+      "title": "Claude Code manual scheduled CLAUDE.md refresh keeps operator intent",
+      "host": "Claude Code",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "Claude Code scheduled tasks",
+          "url": "https://code.claude.com/docs/en/scheduled-tasks"
+        },
+        {
+          "label": "secondary",
+          "name": "Scheduled Claude Code workflows thread",
+          "url": "https://www.reddit.com/r/claude/comments/1s4q0em/scheduled_claude_code/"
+        },
+        {
+          "label": "secondary",
+          "name": "CLAUDE.md drift workflow thread",
+          "url": "https://www.reddit.com/r/ClaudeAI/comments/1rkya1a/my_claudemd_is_always_stale_by_the_time_i_need_it/"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "eval_ok": true,
+      "hallucination_guard_ok": true,
+      "trigger_output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_default\"]}",
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\claude_code_manual_scheduled_claude_md_refresh.suggestions.md",
+      "hallucination_validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\claude_code_manual_scheduled_claude_md_refresh.hallucinated.md",
+      "with_skill_score": 10,
+      "hallucinated_score": 7,
+      "without_skill_score": 0,
+      "score_delta": 10,
+      "score_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 4,
+        "thread_focus_total": 5,
+        "resolution_hits": 4,
+        "resolution_total": 5,
+        "forbidden_hits": 0,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
+        "score": 10
+      },
+      "hallucination_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 1,
+        "thread_focus_total": 5,
+        "resolution_hits": 2,
+        "resolution_total": 5,
+        "forbidden_hits": 4,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": false,
+        "resolution_ok": false,
+        "forbidden_ok": false,
+        "score": 7
+      },
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "claude code claude md refresh scheduled maintenance 2026 q2 scheduled silent until relevant keep the weekly claude md refresh tied to repo drift and one maintenance note a manually scheduled claude code task reviews codebase drift against claude md or similar repo guidance files compare the current repo patterns against the existing claude md capture only the drift that affects the next maintenance turn and leave the result as one reviewable summary note instead of rewriting broader memory verify the scheduled task still targets the same repo guidance file and that the next maintenance turn still needs drift review a recurring maintenance task can drift into broad repo analysis unless it stays anchored to the current claude md mismatch and returns one summary note for the next maintenance turn use the scheduled pass to produce one repo drift summary note that sharpens the next maintenance turn instead of mutating durable context immediately this fits manually authored scheduled maintenance tasks where the operator already decided on the workflow and wants one reviewable summary note that preserves that intent claude code builds with scheduled tasks that run between turns and can revisit repo guidance files skip this hint when the scheduled task is supposed to directly rewrite claude md under an already audited workflow host matched claude code scheduled maintenance workflows around claude md and repo guidance version matched current claude code scheduled task behavior and current community maintenance patterns symptom matched stale repo guidance and documentation drift between sessions constraint pattern matched a low budget manual scheduled task that should preserve operator wording desired next outcome matched one advisory note for the next maintenance turn primary official https code claude com docs en scheduled tasks secondary community https www reddit com r claude comments 1s4q0em scheduled claude code secondary community docs https www reddit com r claudeai comments 1rkya1a my claudemd is always stale by the time i need it",
+      "hallucinated_text": "claude code claude md refresh scheduled maintenance 2026 q2 scheduled silent until relevant run a broad deep crawl and persist the result for every future task any thread that feels uncertain emotional or incomplete start a high budget crawl across all available sources trust the newest community answer and write the result into long term memory so future runs stop asking the same question check later if the answer still feels right the thread has uncertainty use a broad crawl expand to all available sources and keep the answer permanently this generic pattern applies to almost every thread any host any version any future task skip only when the host hard blocks memory writes host assumed the same host behavior without checking host specific constraints version ignored exact version differences and reused the newest public answer symptom treated general uncertainty as the same issue desired next outcome stored a durable answer for later reuse primary official https code claude com docs en scheduled tasks secondary community https www reddit com r claude comments 1s4q0em scheduled claude code secondary community docs https www reddit com r claudeai comments 1rkya1a my claudemd is always stale by the time i need it"
+    },
+    {
+      "id": "hermes_nightly_backlog_triage",
+      "title": "Hermes nightly backlog triage digest",
+      "host": "Hermes",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "Hermes automation templates",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/automation-templates"
+        },
+        {
+          "label": "secondary",
+          "name": "Hermes Web UI workflow overview",
+          "url": "https://get-hermes.ai/"
+        },
+        {
+          "label": "secondary",
+          "name": "Hermes ecosystem page",
+          "url": "https://get-hermes.ai/community/"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "eval_ok": true,
+      "hallucination_guard_ok": true,
+      "trigger_output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_default\"]}",
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\hermes_nightly_backlog_triage.suggestions.md",
+      "hallucination_validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\hermes_nightly_backlog_triage.hallucinated.md",
+      "with_skill_score": 10,
+      "hallucinated_score": 7,
+      "without_skill_score": 0,
+      "score_delta": 10,
+      "score_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 5,
+        "thread_focus_total": 5,
+        "resolution_hits": 4,
+        "resolution_total": 5,
+        "forbidden_hits": 0,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
+        "score": 10
+      },
+      "hallucination_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 2,
+        "thread_focus_total": 5,
+        "resolution_hits": 2,
+        "resolution_total": 5,
+        "forbidden_hits": 4,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": false,
+        "resolution_ok": false,
+        "forbidden_ok": false,
+        "score": 7
+      },
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "hermes nightly backlog triage digest 2026 q2 scheduled silent until relevant keep nightly backlog triage tied to issue intake and one digest note hermes runs a nightly backlog triage or issue digest job and the next maintenance thread needs one focused advisory note collect the newest issues summarize the intake changes and save one reviewable digest note with priority clues for the next maintenance thread instead of broad repo research verify the issue source and time window still match the nightly job and that the digest only covers the intended intake period nightly triage jobs can drift into broad repo analysis unless the background pass stays anchored to issue intake and one reviewable digest output treat the nightly run as a backlog digest builder and carry forward one priority focused digest note instead of a large autonomous analysis this fits hermes scheduled triage workflows where the operator wants a cheap nightly digest that sharpens the next maintenance thread with one reviewable note hermes deployments that use the built in cron scheduler for recurring backlog or repo maintenance work skip this hint when the operator wants a full autonomous repo sweep instead of a nightly backlog triage digest host matched hermes cron scheduler and background digest workflows version matched current hermes automation templates for nightly backlog triage symptom matched issue intake growth without a clean next step digest constraint pattern matched a low budget recurring data collection pass desired next outcome matched one digest note for the next maintenance thread primary official https hermes agent nousresearch com docs guides automation templates secondary community https get hermes ai secondary ecosystem https get hermes ai community",
+      "hallucinated_text": "hermes nightly backlog triage digest 2026 q2 scheduled silent until relevant run a broad deep crawl and persist the result for every future task any thread that feels uncertain emotional or incomplete start a high budget crawl across all available sources trust the newest community answer and write the result into long term memory so future runs stop asking the same question check later if the answer still feels right the thread has uncertainty use a broad crawl expand to all available sources and keep the answer permanently this generic pattern applies to almost every thread any host any version any future task skip only when the host hard blocks memory writes host assumed the same host behavior without checking host specific constraints version ignored exact version differences and reused the newest public answer symptom treated general uncertainty as the same issue desired next outcome stored a durable answer for later reuse primary official https hermes agent nousresearch com docs guides automation templates secondary community https get hermes ai secondary ecosystem https get hermes ai community"
+    },
+    {
+      "id": "openclaw_daily_summary_collection",
+      "title": "OpenClaw daily summary collection stays bounded",
+      "host": "OpenClaw",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "OpenClaw automation and task guidance",
+          "url": "https://docs.openclaw.ai/automation"
+        },
+        {
+          "label": "primary",
+          "name": "OpenClaw cron jobs",
+          "url": "https://docs.openclaw.ai/cron/"
+        },
+        {
+          "label": "secondary",
+          "name": "OpenClaw daily summarization workflow thread",
+          "url": "https://www.reddit.com/r/openclaw/comments/1s291c6/how_do_you_implement_daily_sumarizations_in_claw/"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "eval_ok": true,
+      "hallucination_guard_ok": true,
+      "trigger_output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_default\"]}",
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\openclaw_daily_summary_collection.suggestions.md",
+      "hallucination_validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-8ud3ilnj\\openclaw_daily_summary_collection.hallucinated.md",
+      "with_skill_score": 10,
+      "hallucinated_score": 7,
+      "without_skill_score": 0,
+      "score_delta": 10,
+      "score_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 5,
+        "thread_focus_total": 5,
+        "resolution_hits": 5,
+        "resolution_total": 5,
+        "forbidden_hits": 0,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": true,
+        "resolution_ok": true,
+        "forbidden_ok": true,
+        "score": 10
+      },
+      "hallucination_breakdown": {
+        "mode": "positive",
+        "thread_focus_hits": 2,
+        "thread_focus_total": 5,
+        "resolution_hits": 1,
+        "resolution_total": 5,
+        "forbidden_hits": 4,
+        "forbidden_total": 5,
+        "required_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "actual_evidence_tiers": [
+          "primary",
+          "secondary"
+        ],
+        "thread_focus_min": 4,
+        "resolution_min": 4,
+        "forbidden_max": 0,
+        "tiers_ok": true,
+        "thread_focus_ok": false,
+        "resolution_ok": false,
+        "forbidden_ok": false,
+        "score": 7
+      },
+      "thread_focus_ok": true,
+      "resolution_ok": true,
+      "forbidden_ok": true,
+      "returned_text": "openclaw daily summary collection time window digest 2026 q2 scheduled silent until relevant keep recurring summaries append only and bounded by an explicit time window openclaw runs a recurring summary or daily log collection job over recent conversations anchor each run to a clear time window or last processed marker append one bounded summary block and carry only one advisory hint into the next check instead of writing broad memory state verify the collection window append target and last processed marker still line up with the intended summary cadence recurring summary jobs become noisy and hard to trust when they do not keep explicit collection boundaries treat the scheduled pass as an append only digest builder with chunking and time window control then reuse one small hint on the next relevant check this fits openclaw summary collection workflows where the operator wants durable logs plus a narrow advisory note instead of broader memory mutation openclaw builds with cron backed background work and task records for recurring maintenance or summary jobs skip this hint when the operator already has a trusted deterministic summarization pipeline outside the agent layer host matched openclaw cron and background summary collection workflows version matched current openclaw automation and cron guidance for isolated scheduled work symptom matched recurring summary jobs that lack a clean last processed boundary constraint pattern matched a low budget scheduled pass with append only output desired next outcome matched one reviewable hint for the next summary check primary official https docs openclaw ai automation primary official docs https docs openclaw ai cron secondary community https www reddit com r openclaw comments 1s291c6 how do you implement daily sumarizations in claw",
+      "hallucinated_text": "openclaw daily summary collection time window digest 2026 q2 scheduled silent until relevant run a broad deep crawl and persist the result for every future task any thread that feels uncertain emotional or incomplete start a high budget crawl across all available sources trust the newest community answer and write the result into long term memory so future runs stop asking the same question check later if the answer still feels right the thread has uncertainty use a broad crawl expand to all available sources and keep the answer permanently this generic pattern applies to almost every thread any host any version any future task skip only when the host hard blocks memory writes host assumed the same host behavior without checking host specific constraints version ignored exact version differences and reused the newest public answer symptom treated general uncertainty as the same issue desired next outcome stored a durable answer for later reuse primary official https docs openclaw ai automation primary official docs https docs openclaw ai cron secondary community https www reddit com r openclaw comments 1s291c6 how do you implement daily sumarizations in claw"
     }
   ]
 }

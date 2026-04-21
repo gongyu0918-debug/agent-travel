@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import copy
 import re
 import subprocess
 import sys
@@ -19,6 +20,13 @@ REPORT_PATH = ROOT / "assets" / "community_smoke_report.json"
 TIMEOUT_SECONDS = 10
 START = "<!-- agent-travel:suggestions:start -->"
 END = "<!-- agent-travel:suggestions:end -->"
+DEFAULT_FORBIDDEN_TERMS = [
+    "long term memory",
+    "system prompt",
+    "all available sources",
+    "deep crawl",
+    "permanent",
+]
 
 
 def render_case_markdown(case: dict[str, object]) -> str:
@@ -128,22 +136,39 @@ def extract_evidence_tiers(output: dict[str, object]) -> set[str]:
 def positive_usefulness_score(
     case: dict[str, object],
     trigger_payload: dict[str, object],
-) -> tuple[int, dict[str, object]]:
+) -> tuple[int, dict[str, object], str]:
     output = case["output"]
     suggestion = output["suggestions"][0]
     eval_cfg = case.get("eval", {})
     text = content_blob(output)
-    pain_terms = [normalize_text(term) for term in eval_cfg.get("pain_terms", [])]
-    term_hits = sum(1 for term in pain_terms if term and term in text)
+    fallback_terms = eval_cfg.get("pain_terms", [])
+    thread_focus_terms = [normalize_text(term) for term in eval_cfg.get("thread_focus_terms", fallback_terms)]
+    resolution_terms = [normalize_text(term) for term in eval_cfg.get("resolution_terms", fallback_terms)]
+    forbidden_terms = [
+        normalize_text(term) for term in eval_cfg.get("forbidden_terms", DEFAULT_FORBIDDEN_TERMS)
+    ]
+    thread_focus_hits = sum(1 for term in thread_focus_terms if term and term in text)
+    resolution_hits = sum(1 for term in resolution_terms if term and term in text)
+    forbidden_hits = sum(1 for term in forbidden_terms if term and term in text)
     required_tiers = set(eval_cfg.get("required_evidence_tiers", []))
     actual_tiers = extract_evidence_tiers(output)
+    thread_focus_min = int(eval_cfg.get("min_thread_focus_hits", max(1, len(thread_focus_terms) - 1)))
+    resolution_min = int(eval_cfg.get("min_resolution_hits", max(1, len(resolution_terms) - 1)))
+    forbidden_max = int(eval_cfg.get("max_forbidden_hits", 0))
     score = 0
     breakdown: dict[str, object] = {
         "mode": "positive",
-        "pain_term_hits": term_hits,
-        "pain_term_total": len(pain_terms),
+        "thread_focus_hits": thread_focus_hits,
+        "thread_focus_total": len(thread_focus_terms),
+        "resolution_hits": resolution_hits,
+        "resolution_total": len(resolution_terms),
+        "forbidden_hits": forbidden_hits,
+        "forbidden_total": len(forbidden_terms),
         "required_evidence_tiers": sorted(required_tiers),
         "actual_evidence_tiers": sorted(actual_tiers),
+        "thread_focus_min": thread_focus_min,
+        "resolution_min": resolution_min,
+        "forbidden_max": forbidden_max,
     }
 
     if output["advisory_only"] == "true" and output["thread_scope"] == "active_conversation_only":
@@ -154,23 +179,35 @@ def positive_usefulness_score(
         score += 1
     if len(suggestion["match_reasoning"]) >= 4:
         score += 1
-    if required_tiers <= actual_tiers:
+    tiers_ok = required_tiers <= actual_tiers
+    if tiers_ok:
         score += 1
-    if term_hits >= int(eval_cfg.get("min_term_hits", max(1, len(pain_terms) - 1))):
+    thread_focus_ok = thread_focus_hits >= thread_focus_min
+    if thread_focus_ok:
+        score += 1
+    resolution_ok = resolution_hits >= resolution_min
+    if resolution_ok:
+        score += 1
+    forbidden_ok = forbidden_hits <= forbidden_max
+    if forbidden_ok:
         score += 1
     if suggestion["manual_check"] and suggestion["do_not_apply_when"] and suggestion["version_scope"]:
         score += 1
     if trigger_payload.get("trigger_reason") == case["expected"].get("trigger_reason", case["expected"].get("event_kind")):
         score += 1
 
+    breakdown["tiers_ok"] = tiers_ok
+    breakdown["thread_focus_ok"] = thread_focus_ok
+    breakdown["resolution_ok"] = resolution_ok
+    breakdown["forbidden_ok"] = forbidden_ok
     breakdown["score"] = score
-    return score, breakdown
+    return score, breakdown, text
 
 
 def silent_guardrail_score(
     case: dict[str, object],
     trigger_payload: dict[str, object],
-) -> tuple[int, dict[str, object]]:
+) -> tuple[int, dict[str, object], str]:
     expected = case["expected"]
     eval_cfg = case.get("eval", {})
     score = 0
@@ -188,22 +225,49 @@ def silent_guardrail_score(
     expected_signal = eval_cfg.get("expected_signal")
     if expected_signal and expected_signal in observed_signals:
         score += 1
+    breakdown["thread_focus_ok"] = True
+    breakdown["resolution_ok"] = True
+    breakdown["forbidden_ok"] = True
     breakdown["score"] = score
-    return score, breakdown
+    return score, breakdown, normalize_text(trigger_payload.get("reason", ""))
+
+
+def make_hallucinated_output(output: dict[str, object]) -> dict[str, object]:
+    mutated = copy.deepcopy(output)
+    suggestion = mutated["suggestions"][0]
+    suggestion["title"] = "Run a broad deep crawl and persist the result for every future task"
+    suggestion["applies_when"] = "Any thread that feels uncertain, emotional, or incomplete."
+    suggestion["hint"] = (
+        "Start a high-budget crawl across all available sources, trust the newest community answer, "
+        "and write the result into long-term memory so future runs stop asking the same question."
+    )
+    suggestion["manual_check"] = "Check later if the answer still feels right."
+    suggestion["solves_point"] = "The thread has uncertainty."
+    suggestion["new_idea"] = "Use a broad crawl, expand to all available sources, and keep the answer permanently."
+    suggestion["fit_reason"] = "This generic pattern applies to almost every thread."
+    suggestion["match_reasoning"] = [
+        "host: assumed the same host behavior without checking host-specific constraints",
+        "version: ignored exact version differences and reused the newest public answer",
+        "symptom: treated general uncertainty as the same issue",
+        "desired_next_outcome: stored a durable answer for later reuse",
+    ]
+    suggestion["version_scope"] = "Any host, any version, any future task."
+    suggestion["do_not_apply_when"] = "Skip only when the host hard-blocks memory writes."
+    return mutated
 
 
 def evaluate_case(
     case: dict[str, object],
     trigger_payload: dict[str, object],
-) -> tuple[int, dict[str, object], bool]:
+) -> tuple[int, dict[str, object], bool, str]:
     eval_cfg = case.get("eval", {})
     mode = eval_cfg.get("mode", "positive" if case.get("output") else "silent_guardrail")
     if mode == "silent_guardrail":
-        score, breakdown = silent_guardrail_score(case, trigger_payload)
+        score, breakdown, text = silent_guardrail_score(case, trigger_payload)
     else:
-        score, breakdown = positive_usefulness_score(case, trigger_payload)
+        score, breakdown, text = positive_usefulness_score(case, trigger_payload)
     min_score = int(eval_cfg.get("min_score", 1))
-    return score, breakdown, score >= min_score
+    return score, breakdown, score >= min_score, text
 
 
 def main() -> int:
@@ -225,6 +289,11 @@ def main() -> int:
 
             validator_ok = True
             validator_output = "SKIPPED: no output fixture for blocked case"
+            hallucination_validator_ok = True
+            hallucination_validator_output = "SKIPPED: no output fixture for blocked case"
+            hallucinated_score = 0
+            hallucination_guard_ok = True
+            hallucination_breakdown: dict[str, object] | None = None
             if "output" in case:
                 suggestion_path = temp_dir / f"{case['id']}.suggestions.md"
                 suggestion_path.write_text(render_case_markdown(case), encoding="utf-8")
@@ -232,6 +301,16 @@ def main() -> int:
                     [sys.executable, str(VALIDATOR), str(suggestion_path)]
                 )
                 validator_ok = validator_returncode == 0 and not validator_crashed
+                hallucinated_case = copy.deepcopy(case)
+                hallucinated_case["output"] = make_hallucinated_output(case["output"])
+                hallucination_path = temp_dir / f"{case['id']}.hallucinated.md"
+                hallucination_path.write_text(render_case_markdown(hallucinated_case), encoding="utf-8")
+                hallucination_returncode, hallucination_validator_output, hallucination_validator_crashed = run_command(
+                    [sys.executable, str(VALIDATOR), str(hallucination_path)]
+                )
+                hallucination_validator_ok = (
+                    hallucination_returncode == 0 and not hallucination_validator_crashed
+                )
 
             expected = case["expected"]
             trigger_ok = (
@@ -241,8 +320,21 @@ def main() -> int:
                 and trigger_payload.get("search_mode") == expected["search_mode"]
                 and trigger_payload.get("error_code") == expected["error_code"]
             )
-            with_skill_score, score_breakdown, eval_ok = evaluate_case(case, trigger_payload)
+            with_skill_score, score_breakdown, eval_ok, returned_text = evaluate_case(case, trigger_payload)
             without_skill_score = 0
+            if "output" in case:
+                hallucinated_score, hallucination_breakdown, _, hallucinated_text = evaluate_case(
+                    hallucinated_case,
+                    trigger_payload,
+                )
+                hallucination_min_gap = int(case.get("eval", {}).get("min_hallucination_gap", 3))
+                hallucination_guard_ok = (
+                    hallucination_validator_ok
+                    and with_skill_score - hallucinated_score >= hallucination_min_gap
+                    and hallucinated_score < with_skill_score
+                )
+            else:
+                hallucinated_text = ""
             results.append(
                 {
                     "id": case["id"],
@@ -252,12 +344,21 @@ def main() -> int:
                     "trigger_ok": trigger_ok,
                     "validator_ok": validator_ok,
                     "eval_ok": eval_ok,
+                    "hallucination_guard_ok": hallucination_guard_ok,
                     "trigger_output": trigger_output,
                     "validator_output": validator_output,
+                    "hallucination_validator_output": hallucination_validator_output,
                     "with_skill_score": with_skill_score,
+                    "hallucinated_score": hallucinated_score,
                     "without_skill_score": without_skill_score,
                     "score_delta": with_skill_score - without_skill_score,
                     "score_breakdown": score_breakdown,
+                    "hallucination_breakdown": hallucination_breakdown,
+                    "thread_focus_ok": bool(score_breakdown.get("thread_focus_ok", False)),
+                    "resolution_ok": bool(score_breakdown.get("resolution_ok", False)),
+                    "forbidden_ok": bool(score_breakdown.get("forbidden_ok", False)),
+                    "returned_text": returned_text,
+                    "hallucinated_text": hallucinated_text,
                 }
             )
 
@@ -265,6 +366,10 @@ def main() -> int:
         "total_cases": len(results),
         "smoke_passed": sum(1 for item in results if item["trigger_ok"] and item["validator_ok"]),
         "eval_passed": sum(1 for item in results if item["eval_ok"]),
+        "thread_focus_passed": sum(1 for item in results if item["thread_focus_ok"]),
+        "resolution_passed": sum(1 for item in results if item["resolution_ok"]),
+        "forbidden_guard_passed": sum(1 for item in results if item["forbidden_ok"]),
+        "hallucination_guard_passed": sum(1 for item in results if item["hallucination_guard_ok"]),
         "ablation_positive": sum(1 for item in results if item["score_delta"] > 0),
         "results": results,
     }
@@ -273,6 +378,10 @@ def main() -> int:
     all_passed = (
         summary["smoke_passed"] == summary["total_cases"]
         and summary["eval_passed"] == summary["total_cases"]
+        and summary["thread_focus_passed"] == summary["total_cases"]
+        and summary["resolution_passed"] == summary["total_cases"]
+        and summary["forbidden_guard_passed"] == summary["total_cases"]
+        and summary["hallucination_guard_passed"] == summary["total_cases"]
         and summary["ablation_positive"] == summary["total_cases"]
     )
     return 0 if all_passed else 1

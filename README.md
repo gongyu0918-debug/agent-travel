@@ -45,6 +45,7 @@ The recommended default is low-frequency, low-budget, and silent by design.
 `medium` and `high` are escalation modes, not the everyday background default.
 
 `idle_fallback` 适合没有 heartbeat 的宿主，或者用户明确开启的场景。默认背景路径优先 heartbeat。
+cron 或 scheduled 触发里，宿主自动生成的 prompt 应该保持中性，只从日志、待办、文档漂移、资料采集结果这些事实生成。手工创建的定时任务可以保留用户原始意图。
 `idle_fallback` fits hosts without heartbeat, or hosts where the operator explicitly enabled it. Heartbeat stays the default background path when available.
 
 ## 关键点 / Key Points
@@ -69,8 +70,8 @@ The recommended default is low-frequency, low-budget, and silent by design.
 
 ## 社区工作流夹具 / Community Workflow Fixtures
 
-这次版本附带了六组真实来源驱动的工作流夹具，覆盖 Claude Code 的 task-end 刷新、failure recovery、OpenClaw 的 heartbeat 提示隔离、idle fallback 静默拦截、Hermes 的 scheduled 文档漂移扫描和重复 fingerprint 去重。对应资料和来源链接在 [references/community-workflows.md](references/community-workflows.md)，冒烟结果在 [assets/community_smoke_report.json](assets/community_smoke_report.json)。
-This version ships with six real-source workflow fixtures that cover Claude Code task-end refresh, failure recovery, OpenClaw heartbeat advisory isolation, idle-fallback silence guards, Hermes scheduled doc-drift scans, and repeated-fingerprint dedupe. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
+这次版本附带了 12 组真实来源工作流夹具，覆盖 Claude Code 的 task-end、failure recovery、manual scheduled `CLAUDE.md` 刷新、scheduled log collection，OpenClaw 的 heartbeat、cron 资料摘要、daily summary collection、idle fallback 静默拦截，以及 Hermes 的 scheduled 文档漂移、nightly backlog triage 和重复 fingerprint 去重。对应资料和来源链接在 [references/community-workflows.md](references/community-workflows.md)，冒烟结果在 [assets/community_smoke_report.json](assets/community_smoke_report.json)。
+This version ships with a broader set of real-source workflow fixtures that cover Claude Code task-end, failure recovery, and scheduled log collection, OpenClaw heartbeat, cron research digests, and idle-fallback silence guards, plus Hermes scheduled doc-drift scans, nightly backlog triage, and repeated-fingerprint dedupe. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
 
 本地做产品侧检查时，可以先跑这三个入口：
 For product-side checks, start with these three entry points:

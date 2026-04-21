@@ -17,6 +17,12 @@ Default behavior:
 
 Use public search surfaces by default. Expand to private or internal search surfaces only when the user explicitly asks for that scope.
 
+For cron or scheduled travel, derive the search plan from workflow facts instead of user mood:
+
+- logs, alerts, backlog deltas, docs drift, release notes, inbox summaries
+- stable error fragments, version labels, service names, and maintenance goals
+- neutral host-generated prompt text when the run was not created from a manual user prompt
+
 ## Problem Fingerprint
 
 Build the smallest fingerprint that still distinguishes the issue:

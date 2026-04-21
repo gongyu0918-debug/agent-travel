@@ -21,7 +21,7 @@ Default trigger policy:
 1. Heartbeat trigger: use this first when the host supports heartbeat or background wakeups. Default mode is `low`.
 2. Failure recovery trigger: after 2 related failures, 2 user corrections, 1 unresolved blocker, or a detected version mismatch. Default mode is `medium`.
 3. Task-end trigger: after a multi-step task or manual recovery pass. Default mode is `medium`.
-4. Scheduled trigger: host-managed cron or periodic travel. Default mode is `low`.
+4. Scheduled trigger: host-managed cron or periodic travel. Default mode is `low`. Host-generated scheduled prompts should stay neutral and fact-derived, while manually created scheduled prompts may preserve the operator's original wording.
 5. Idle fallback: when the host has no heartbeat, or when the user explicitly enables inactivity-based travel. Default fallback uses `active_conversation_window = 24h`, `quiet_after_user_action = 20m`, and `quiet_after_agent_action = 5m`.
 
 Read [references/trigger-policy.md](references/trigger-policy.md) before implementing host-side scheduling.

@@ -52,3 +52,9 @@ If the host cannot observe live typing or direct user activity, approximate quie
 - `last_agent_action`
 - pending tool state
 - whether the agent is actively responding
+
+For `scheduled` triggers, distinguish manual prompts from host-generated prompts:
+
+- manual scheduled prompts may preserve the operator's original wording
+- host-generated scheduled prompts should stay neutral and workflow-derived
+- generated scheduled prompts should be built from repo state, logs, backlog items, docs drift, or other task facts
