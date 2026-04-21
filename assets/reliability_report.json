@@ -1,11 +1,11 @@
 {
-  "total_cases": 37,
-  "passed_cases": 37,
+  "total_cases": 40,
+  "passed_cases": 40,
   "crash_count": 0,
   "validator_cases": 23,
   "validator_passed": 23,
-  "trigger_cases": 14,
-  "trigger_passed": 14,
+  "trigger_cases": 17,
+  "trigger_passed": 17,
   "results": [
     {
       "case": "canonical",
@@ -14,7 +14,7 @@
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-qbxixuxo\\canonical.md"
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-8wp0quq3\\canonical.md"
     },
     {
       "case": "missing_markers",
@@ -212,7 +212,7 @@
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-qbxixuxo\\valid_optional_fields.md"
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-8wp0quq3\\valid_optional_fields.md"
     },
     {
       "case": "should_travel_heartbeat_quiet_low",
@@ -252,6 +252,19 @@
       "ok": true,
       "crashed": false,
       "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"failure_recovery_default\", \"related_failures\", \"unresolved_blocker_count\"]}"
+    },
+    {
+      "case": "should_travel_failure_recovery_bypasses_repeat_cooldown",
+      "kind": "trigger",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "medium",
+      "actual_search_mode": "medium",
+      "expected_error_code": "ready",
+      "actual_error_code": "ready",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"repeat_fingerprint_escalation_bypass\", \"failure_recovery_default\", \"related_failures\"]}"
     },
     {
       "case": "should_travel_explicit_deep_request_high",
@@ -381,7 +394,33 @@
       "actual_error_code": "ready",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_default\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_trigger_managed_by_host\", \"scheduled_default\"]}"
+    },
+    {
+      "case": "should_travel_host_managed_schedule_runs_without_manual_opt_in",
+      "kind": "trigger",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "ready",
+      "actual_error_code": "ready",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_trigger_managed_by_host\", \"scheduled_default\"]}"
+    },
+    {
+      "case": "should_travel_scheduled_without_host_or_opt_in_blocks",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "scheduled_opt_in_required",
+      "actual_error_code": "scheduled_opt_in_required",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"scheduled travel needs a host-managed schedule or explicit periodic travel\", \"error_code\": \"scheduled_opt_in_required\"}"
     },
     {
       "case": "should_travel_host_generated_scheduled_prompt_stays_neutral",

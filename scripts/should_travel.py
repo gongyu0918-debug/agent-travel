@@ -253,25 +253,38 @@ def decide(state: dict[str, object]) -> Decision:
             ],
         )
 
+    signals = collect_escalation_signals(state)
     current_fingerprint_hash = str(state.get("current_fingerprint_hash", "")).strip()
     last_travel_fingerprint_hash = str(state.get("last_travel_fingerprint_hash", "")).strip()
     last_travel_generated_at = get_optional_timestamp(state, "last_travel_generated_at")
-    if (
+    cooldown_active = bool(
         current_fingerprint_hash
         and last_travel_fingerprint_hash
         and current_fingerprint_hash == last_travel_fingerprint_hash
         and last_travel_generated_at is not None
         and now - last_travel_generated_at < repeat_fingerprint_cooldown
-    ):
+    )
+    cooldown_bypass_signals = {
+        "related_failures",
+        "user_corrections",
+        "unresolved_blocker_count",
+        "version_mismatch_seen",
+        "user_explicit_search_request",
+        "user_explicit_deep_research_request",
+    }
+    cooldown_bypassed = cooldown_active and bool(set(signals) & cooldown_bypass_signals)
+    if cooldown_active and not cooldown_bypassed:
         return blocked(
             event_kind,
             "repeat fingerprint cooldown is still active",
             "duplicate_fingerprint_cooldown",
             ["fingerprint_repeat_window_active"],
         )
-
-    signals = collect_escalation_signals(state)
     user_configured_periodic_travel = as_bool(state.get("user_configured_periodic_travel"), False)
+    scheduled_trigger_managed_by_host = as_bool(
+        state.get("scheduled_trigger_managed_by_host"),
+        event_kind == "scheduled",
+    )
 
     if event_kind == "failure_recovery":
         has_recovery_signal = any(
@@ -292,10 +305,12 @@ def decide(state: dict[str, object]) -> Decision:
                 signals,
             )
 
-    if event_kind == "scheduled" and not user_configured_periodic_travel:
+    if event_kind == "scheduled" and not (
+        scheduled_trigger_managed_by_host or user_configured_periodic_travel
+    ):
         return blocked(
             event_kind,
-            "scheduled travel requires host scheduling or explicit opt-in",
+            "scheduled travel needs a host-managed schedule or explicit periodic travel",
             "scheduled_opt_in_required",
             signals,
         )
@@ -311,6 +326,13 @@ def decide(state: dict[str, object]) -> Decision:
             )
 
     search_mode, observed_signals = infer_search_mode(state, event_kind, signals)
+    if event_kind == "scheduled":
+        if scheduled_trigger_managed_by_host:
+            observed_signals = ["scheduled_trigger_managed_by_host", *observed_signals]
+        elif user_configured_periodic_travel:
+            observed_signals = ["user_configured_periodic_travel", *observed_signals]
+    if cooldown_bypassed:
+        observed_signals = ["repeat_fingerprint_escalation_bypass", *observed_signals]
     return Decision(
         True,
         search_mode,

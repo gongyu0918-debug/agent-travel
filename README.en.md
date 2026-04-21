@@ -62,7 +62,7 @@ For cron or scheduled travel, host-generated prompts should stay neutral and fac
 
 ## Community Workflow Fixtures
 
-This version ships with 12 real-source workflow fixtures that cover Claude Code task-end refresh, failure recovery, manual scheduled `CLAUDE.md` refresh, scheduled log collection, OpenClaw heartbeat advisory isolation, cron research digests, daily summary collection, idle-fallback silence guards, plus Hermes scheduled doc-drift scans, nightly backlog triage, and repeated-fingerprint dedupe. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
+This version ships with 14 real-source workflow fixtures that cover Claude Code task-end refresh, failure recovery, scheduled log collection, scheduled job health audits, manual scheduled `CLAUDE.md` refresh, weekly reference-sheet refresh, OpenClaw heartbeat advisory isolation, cron research digests, daily summary collection, idle-fallback silence guards, plus Hermes scheduled doc-drift scans, nightly backlog triage, and repeated-fingerprint dedupe. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
 
 For product-side checks, start with these three entry points:
 

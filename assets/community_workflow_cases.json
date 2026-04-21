@@ -114,7 +114,11 @@
       "tool_approval_pending": false,
       "thread_runs_today": 0,
       "user_runs_today": 0,
-      "related_failures": 2
+      "related_failures": 2,
+      "current_fingerprint_hash": "h64:96dc60b55e0dc0d03abdb03c5df49d468f6954f801795fe6b650939d2ec5a7d7",
+      "last_travel_fingerprint_hash": "h64:96dc60b55e0dc0d03abdb03c5df49d468f6954f801795fe6b650939d2ec5a7d7",
+      "last_travel_generated_at": "2026-04-21T11:30:00+08:00",
+      "repeat_fingerprint_cooldown": "12h"
     },
     "expected": {
       "should_run": true,
@@ -342,7 +346,9 @@
       "tool_approval_pending": false,
       "thread_runs_today": 0,
       "user_runs_today": 0,
-      "user_configured_periodic_travel": true
+      "scheduled_trigger_managed_by_host": true,
+      "scheduled_prompt_origin": "host_generated",
+      "scheduled_prompt_emotion": "neutral"
     },
     "expected": {
       "should_run": true,
@@ -482,7 +488,7 @@
       "tool_approval_pending": false,
       "thread_runs_today": 0,
       "user_runs_today": 0,
-      "user_configured_periodic_travel": true,
+      "scheduled_trigger_managed_by_host": true,
       "scheduled_prompt_origin": "host_generated",
       "scheduled_prompt_emotion": "neutral"
     },
@@ -574,7 +580,7 @@
       "tool_approval_pending": false,
       "thread_runs_today": 0,
       "user_runs_today": 0,
-      "user_configured_periodic_travel": true,
+      "scheduled_trigger_managed_by_host": true,
       "scheduled_prompt_origin": "host_generated",
       "scheduled_prompt_emotion": "frustrated"
     },
@@ -625,7 +631,7 @@
       "tool_approval_pending": false,
       "thread_runs_today": 0,
       "user_runs_today": 0,
-      "user_configured_periodic_travel": true,
+      "scheduled_trigger_managed_by_host": true,
       "scheduled_prompt_origin": "host_generated",
       "scheduled_prompt_emotion": "neutral",
       "host_supports_heartbeat": true
@@ -822,7 +828,7 @@
       "tool_approval_pending": false,
       "thread_runs_today": 0,
       "user_runs_today": 0,
-      "user_configured_periodic_travel": true,
+      "scheduled_trigger_managed_by_host": true,
       "scheduled_prompt_origin": "host_generated",
       "scheduled_prompt_emotion": "neutral"
     },
@@ -920,7 +926,7 @@
       "tool_approval_pending": false,
       "thread_runs_today": 0,
       "user_runs_today": 0,
-      "user_configured_periodic_travel": true,
+      "scheduled_trigger_managed_by_host": true,
       "scheduled_prompt_origin": "host_generated",
       "scheduled_prompt_emotion": "neutral",
       "host_supports_heartbeat": true
@@ -979,6 +985,190 @@
             "primary_official: https://docs.openclaw.ai/automation",
             "primary_official_docs: https://docs.openclaw.ai/cron/",
             "secondary_community: https://www.reddit.com/r/openclaw/comments/1s291c6/how_do_you_implement_daily_sumarizations_in_claw/"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "claude_code_scheduled_job_health_audit",
+    "title": "Claude Code scheduled-job health audit stays receipt-first",
+    "host": "Claude Code",
+    "workflow": "A host-managed scheduled task audits the health of recurring jobs and wants one reviewable note about stalled runs, missed windows, and run receipts.",
+    "user_context": "The operator uses several scheduled tasks and wants a periodic audit that checks whether those jobs are still producing output that matters before the next maintenance pass.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "Claude Code scheduled tasks",
+        "url": "https://code.claude.com/docs/en/scheduled-tasks"
+      },
+      {
+        "label": "secondary",
+        "name": "Always-on AI cron audit thread",
+        "url": "https://www.reddit.com/r/ClaudeAI/comments/1srnkda/i_audited_my_alwayson_ai_agent_6_of_10_cron_jobs/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "scheduled",
+      "now": "2026-04-22T07:00:00+08:00",
+      "last_thread_activity": "2026-04-22T05:40:00+08:00",
+      "last_user_action": "2026-04-22T05:55:00+08:00",
+      "last_agent_action": "2026-04-22T06:10:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "scheduled_trigger_managed_by_host": true,
+      "scheduled_prompt_origin": "host_generated",
+      "scheduled_prompt_emotion": "neutral"
+    },
+    "expected": {
+      "should_run": true,
+      "search_mode": "low",
+      "error_code": "ready",
+      "trigger_reason": "scheduled"
+    },
+    "eval": {
+      "mode": "positive",
+      "required_evidence_tiers": ["primary", "secondary"],
+      "expected_visibility": "silent_until_relevant",
+      "thread_focus_terms": ["scheduled jobs", "audit", "run receipts", "missed windows", "maintenance pass"],
+      "resolution_terms": ["audit", "last success", "receipt", "reviewable", "one note"],
+      "forbidden_terms": ["long-term memory", "system prompt", "all available sources", "deep crawl", "permanent"],
+      "min_thread_focus_hits": 4,
+      "min_resolution_hits": 4,
+      "min_hallucination_gap": 3,
+      "min_score": 8
+    },
+    "output": {
+      "generated_at": "2026-04-22T07:04:00+08:00",
+      "expires_at": "2026-04-29T07:04:00+08:00",
+      "search_mode": "low",
+      "tool_preference": "public-only",
+      "source_scope": "primary+secondary",
+      "thread_scope": "active_conversation_only",
+      "problem_fingerprint": "claude-code|scheduled-job-health|receipt-audit|2026-q2",
+      "advisory_only": "true",
+      "trigger_reason": "scheduled",
+      "visibility": "silent_until_relevant",
+      "fingerprint_hash": "h64:8fd78374b3ecf16bbfe32f0be9d7df5a3d30bd802f7eb26ed1c0db4a90731a4d",
+      "reuse_gate": "min_4_of_5_axes_and_ttl_valid",
+      "suggestions": [
+        {
+          "title": "Audit scheduled jobs with last-success markers and one receipt-first note",
+          "applies_when": "Claude Code uses recurring scheduled tasks and the operator wants to verify that those jobs still run, produce output, and matter before the next maintenance pass.",
+          "hint": "Check each scheduled job for a recent last-success marker or run receipt, summarize only the stalled or low-value jobs, and return one reviewable note for the next maintenance turn.",
+          "confidence": "high",
+          "manual_check": "Verify the audited tasks still belong to the active session and that the last-success timestamps or receipts come from the expected job window.",
+          "solves_point": "Scheduled jobs can keep firing in theory while quietly drifting away from useful output, so the operator needs a cheap audit that surfaces stale or silent runs.",
+          "new_idea": "Treat the scheduled pass as a receipt-first audit that checks run health and usefulness before investing in more automation changes.",
+          "fit_reason": "This fits recurring Claude Code task setups where the main pain is silent drift, stale jobs, or missing run receipts rather than a missing schedule definition.",
+          "match_reasoning": [
+            "host: matched Claude Code scheduled task workflows and session-scoped recurring jobs",
+            "version: matched current scheduled-task behavior where tasks queue between turns and expire with the session window",
+            "symptom: matched silent or stale recurring jobs that stop producing useful output",
+            "constraint_pattern: matched a low-noise host-managed audit pass",
+            "desired_next_outcome: matched one reviewable note for the next maintenance turn"
+          ],
+          "version_scope": "Claude Code builds with scheduled tasks that remain tied to the current session and can be audited through task lists or run receipts.",
+          "do_not_apply_when": "Skip this hint when the workflow already has an external scheduler with its own health checks and the session-level audit would duplicate that control plane.",
+          "evidence": [
+            "primary_official: https://code.claude.com/docs/en/scheduled-tasks",
+            "secondary_community: https://www.reddit.com/r/ClaudeAI/comments/1srnkda/i_audited_my_alwayson_ai_agent_6_of_10_cron_jobs/"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "claude_code_weekly_reference_sheet_refresh",
+    "title": "Claude Code weekly reference-sheet refresh stays diff-scoped",
+    "host": "Claude Code",
+    "workflow": "A weekly scheduled task refreshes a reference sheet or cheat sheet from current docs and workflow notes, then returns one bounded update note for the next review session.",
+    "user_context": "The operator keeps a weekly-updated reference sheet for commands, workflows, and repo conventions. They want the scheduled pass to focus on new deltas and avoid broad rewrites.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "Claude Code scheduled tasks",
+        "url": "https://code.claude.com/docs/en/scheduled-tasks"
+      },
+      {
+        "label": "secondary",
+        "name": "Weekly auto-updated cheat sheet thread",
+        "url": "https://www.reddit.com/r/ClaudeAI/comments/1rrm9ud/printable_claude_code_cheat_sheet_autoupdated/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "scheduled",
+      "now": "2026-04-22T09:00:00+08:00",
+      "last_thread_activity": "2026-04-22T07:15:00+08:00",
+      "last_user_action": "2026-04-22T07:30:00+08:00",
+      "last_agent_action": "2026-04-22T07:50:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "scheduled_trigger_managed_by_host": true,
+      "scheduled_prompt_origin": "host_generated",
+      "scheduled_prompt_emotion": "neutral"
+    },
+    "expected": {
+      "should_run": true,
+      "search_mode": "low",
+      "error_code": "ready",
+      "trigger_reason": "scheduled"
+    },
+    "eval": {
+      "mode": "positive",
+      "required_evidence_tiers": ["primary", "secondary"],
+      "expected_visibility": "silent_until_relevant",
+      "thread_focus_terms": ["reference sheet", "weekly refresh", "delta", "docs", "review session"],
+      "resolution_terms": ["delta", "refresh", "reviewable", "one note", "weekly"],
+      "forbidden_terms": ["long-term memory", "system prompt", "all available sources", "deep crawl", "permanent"],
+      "min_thread_focus_hits": 4,
+      "min_resolution_hits": 4,
+      "min_hallucination_gap": 3,
+      "min_score": 8
+    },
+    "output": {
+      "generated_at": "2026-04-22T09:04:00+08:00",
+      "expires_at": "2026-04-29T09:04:00+08:00",
+      "search_mode": "low",
+      "tool_preference": "public-only",
+      "source_scope": "primary+secondary",
+      "thread_scope": "active_conversation_only",
+      "problem_fingerprint": "claude-code|weekly-reference-refresh|diff-scoped|2026-q2",
+      "advisory_only": "true",
+      "trigger_reason": "scheduled",
+      "visibility": "silent_until_relevant",
+      "fingerprint_hash": "h64:f893f2a84462cb43d3295c0d2667ae947f0d89d7c489ce1eeef708efe72d16be",
+      "reuse_gate": "min_4_of_5_axes_and_ttl_valid",
+      "suggestions": [
+        {
+          "title": "Refresh the weekly reference sheet from deltas and keep the output reviewable",
+          "applies_when": "A scheduled Claude Code task refreshes a weekly reference sheet, cheat sheet, or workflow note pack from docs and recent workflow changes.",
+          "hint": "Diff the current sheet against the newest documented commands and workflow changes, tag only the new or changed items, and return one reviewable update note instead of rewriting the whole reference pack.",
+          "confidence": "medium",
+          "manual_check": "Verify the sheet still targets the same toolchain and that the scheduled pass only covers the intended weekly change window.",
+          "solves_point": "Weekly reference refreshes become noisy when they rewrite everything instead of highlighting the few changes that matter for the next review session.",
+          "new_idea": "Treat the scheduled pass as a delta-focused reference refresh that produces one bounded update note and keeps the main sheet stable.",
+          "fit_reason": "This fits recurring Claude Code reference-maintenance workflows where the operator wants a stable artifact plus one concise note about what changed this week.",
+          "match_reasoning": [
+            "host: matched Claude Code scheduled task workflows for recurring maintenance",
+            "version: matched current scheduled-task behavior and current community patterns for automated weekly updates",
+            "symptom: matched stale reference material and noisy full rewrites",
+            "constraint_pattern: matched a low-scope scheduled资料收集 pass that should stay diff-based",
+            "desired_next_outcome: matched one reviewable update note for the next review session"
+          ],
+          "version_scope": "Claude Code builds with scheduled tasks that can revisit docs or local artifacts between interactive turns.",
+          "do_not_apply_when": "Skip this hint when the workflow intentionally regenerates the entire reference artifact from scratch and that regeneration path is already audited.",
+          "evidence": [
+            "primary_official: https://code.claude.com/docs/en/scheduled-tasks",
+            "secondary_community: https://www.reddit.com/r/ClaudeAI/comments/1rrm9ud/printable_claude_code_cheat_sheet_autoupdated/"
           ]
         }
       ]

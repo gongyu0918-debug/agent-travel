@@ -43,6 +43,7 @@ Run only when all of these are true:
 - the operator explicitly prefers inactivity-based travel
 
 Repeated runs with the same fingerprint should stay quiet until `repeat_fingerprint_cooldown` elapses.
+Failure recovery and explicit research escalation can bypass the repeat cooldown when the fingerprint is unchanged but the thread has new evidence that justifies a deeper pass.
 
 ## Host Note
 
@@ -55,6 +56,7 @@ If the host cannot observe live typing or direct user activity, approximate quie
 
 For `scheduled` triggers, distinguish manual prompts from host-generated prompts:
 
+- a host-managed scheduled run is a valid trigger even when the operator did not separately opt in to periodic travel
 - manual scheduled prompts may preserve the operator's original wording
 - host-generated scheduled prompts should stay neutral and workflow-derived
 - generated scheduled prompts should be built from repo state, logs, backlog items, docs drift, or other task facts

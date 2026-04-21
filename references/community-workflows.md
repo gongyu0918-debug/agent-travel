@@ -101,4 +101,18 @@ These scenarios come from current official docs, public workflow discussions, an
 - Workflow: a nightly recurring job collects new issues or backlog items and wants one reviewable hint for the next maintenance thread.
 - Why it matters: this covers scheduled backlog collection and shows how the skill should stay tied to one maintenance workflow instead of drifting into broad repo analysis.
 
+## 13. Claude Code scheduled-job health audit
+
+- Official source: [Claude Code scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks)
+- Community source: [I audited my always-on AI agent. 6 of 10 cron jobs had silently stopped running](https://www.reddit.com/r/ClaudeAI/comments/1srnkda/i_audited_my_alwayson_ai_agent_6_of_10_cron_jobs/)
+- Workflow: a host-managed scheduled audit checks whether recurring jobs still produce timely output and leaves one receipt-first note for the next maintenance pass.
+- Why it matters: this covers cron reliability, last-success markers, and the operational side of scheduled agents instead of only the "what should the prompt say" path.
+
+## 14. Claude Code weekly reference-sheet refresh
+
+- Official source: [Claude Code scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks)
+- Community source: [Printable Claude Code cheat sheet (auto-updated weekly)](https://www.reddit.com/r/ClaudeAI/comments/1rrm9ud/printable_claude_code_cheat_sheet_autoupdated/)
+- Workflow: a weekly scheduled run refreshes a reference sheet or cheat sheet from current docs and workflow notes, then returns one bounded update note for the next review session.
+- Why it matters: this covers recurring资料收集 and artifact refresh workflows where the right output is a small delta note instead of a full rewrite.
+
 These cases are encoded in [community_workflow_cases.json](../assets/community_workflow_cases.json) and exercised by [community_smoke_test.py](../scripts/community_smoke_test.py).
