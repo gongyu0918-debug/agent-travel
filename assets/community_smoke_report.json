@@ -1,0 +1,89 @@
+{
+  "total_cases": 3,
+  "smoke_passed": 3,
+  "ablation_positive": 3,
+  "results": [
+    {
+      "id": "claude_code_task_end_guidance_refresh",
+      "title": "Claude Code task-end authoritative guidance refresh",
+      "host": "Claude Code",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "Claude Code Hooks reference",
+          "url": "https://code.claude.com/docs/en/hooks"
+        },
+        {
+          "label": "secondary",
+          "name": "Claude Code hooks community workflow thread",
+          "url": "https://www.reddit.com/r/ClaudeCode/comments/1qlzzzf/claude_codes_most_underrated_feature_hooks_wrote/"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "trigger_output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"task_end\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"task_end_default\"]}",
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-k3kjqpoi\\claude_code_task_end_guidance_refresh.suggestions.md",
+      "with_skill_score": 6,
+      "without_skill_score": 0,
+      "score_delta": 6
+    },
+    {
+      "id": "openclaw_heartbeat_memory_safety",
+      "title": "OpenClaw heartbeat memory-safety advisory",
+      "host": "OpenClaw",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "OpenClaw Automation and Heartbeat docs",
+          "url": "https://docs.openclaw.ai/automation"
+        },
+        {
+          "label": "secondary",
+          "name": "ClawHub Memory Master review",
+          "url": "https://clawhub.ai/skills/memory-master"
+        },
+        {
+          "label": "secondary",
+          "name": "Heartbeat memory pollution paper",
+          "url": "https://arxiv.org/abs/2603.23064"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "trigger_output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"heartbeat_default\"]}",
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-k3kjqpoi\\openclaw_heartbeat_memory_safety.suggestions.md",
+      "with_skill_score": 6,
+      "without_skill_score": 0,
+      "score_delta": 6
+    },
+    {
+      "id": "hermes_scheduled_doc_drift_scan",
+      "title": "Hermes scheduled doc-drift research pass",
+      "host": "Hermes",
+      "sources": [
+        {
+          "label": "primary",
+          "name": "Hermes automation templates",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/automation-templates"
+        },
+        {
+          "label": "primary",
+          "name": "Hermes skills system docs",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills"
+        },
+        {
+          "label": "secondary",
+          "name": "Hermes community ecosystem page",
+          "url": "https://get-hermes.ai/community/"
+        }
+      ],
+      "trigger_ok": true,
+      "validator_ok": true,
+      "trigger_output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_default\"]}",
+      "validator_output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-community-k3kjqpoi\\hermes_scheduled_doc_drift_scan.suggestions.md",
+      "with_skill_score": 6,
+      "without_skill_score": 0,
+      "score_delta": 6
+    }
+  ]
+}

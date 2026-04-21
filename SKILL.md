@@ -64,8 +64,8 @@ Default search policy / 默认搜索策略:
    先搜 `primary`，再搜 `secondary`，最后才扩到 `tertiary`。私有或内部搜索面只有在用户明确允许时才启用。
 5. Keep a candidate only when it matches at least 4 of these 5 axes: host, version, symptom, constraint pattern, desired next outcome. Record `match_reasoning` for every claimed match.  
    只有命中宿主、版本、症状、约束模式、期望下一步结果这 5 个轴里至少 4 个时，才保留候选。每个保留下来的命中都要写 `match_reasoning`。
-6. Cross-validate every suggestion. At least one evidence item must come from `primary`, and at least one more evidence item must come from another source.  
-   每条建议都要交叉验证。至少 1 条证据必须来自 `primary`，并且还要有另一条独立证据。
+6. Cross-validate every suggestion. At least one evidence item must come from `primary`, at least one more evidence item must come from a non-`primary` tier, and the retained evidence must still show an independent source.
+   每条建议都要交叉验证。至少 1 条证据必须来自 `primary`，至少还有 1 条证据必须来自非 `primary` 层级，同时保留下来的证据还要体现独立来源。
 7. Distill the result into short advisory hints for the active conversation only. Each suggestion must define `solves_point`, `new_idea`, `fit_reason`, `match_reasoning`, `version_scope`, and `do_not_apply_when`.  
    把结果提炼成只服务当前活跃线程的简短提示。每条建议都必须定义 `solves_point`、`new_idea`、`fit_reason`、`match_reasoning`、`version_scope`、`do_not_apply_when`。
 8. Write the result into the isolated suggestion channel described in [references/suggestion-contract.md](references/suggestion-contract.md).  

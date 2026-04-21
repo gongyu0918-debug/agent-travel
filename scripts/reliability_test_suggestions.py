@@ -18,6 +18,7 @@ CANONICAL = ROOT / "references" / "suggestion-contract.md"
 REPORT_PATH = ROOT / "assets" / "reliability_report.json"
 START = "<!-- agent-travel:suggestions:start -->"
 END = "<!-- agent-travel:suggestions:end -->"
+TIMEOUT_SECONDS = 10
 
 
 def replace_once(text: str, old: str, new: str) -> str:
@@ -69,6 +70,10 @@ def mutate_invalid_dates(text: str) -> str:
     return replace_line(text, "expires_at", "2026-04-18T03:00:00+08:00")
 
 
+def mutate_missing_timezone(text: str) -> str:
+    return replace_line(text, "generated_at", "2026-04-20T03:00:00")
+
+
 def mutate_missing_source_scope(text: str) -> str:
     return replace_once(text, "source_scope: primary+secondary\n", "")
 
@@ -81,6 +86,14 @@ def mutate_no_primary_evidence(text: str) -> str:
     return (
         text.replace("primary_official_discussion:", "secondary_discussion:", 1)
         .replace("secondary_community:", "tertiary_community:", 1)
+    )
+
+
+def mutate_no_independent_evidence(text: str) -> str:
+    return replace_once(
+        text,
+        "- secondary_community: https://example.com/community-thread",
+        "- primary_official_discussion: https://example.com/maintainer-thread",
     )
 
 
@@ -130,6 +143,10 @@ def mutate_invalid_reuse_gate(text: str) -> str:
     return replace_line(text, "reuse_gate", "ttl_valid_only")
 
 
+def mutate_empty_fit_reason(text: str) -> str:
+    return replace_line(text, "fit_reason", "")
+
+
 def mutate_valid_optional_fields(text: str) -> str:
     text = replace_line(text, "visibility", "show_on_next_relevant_turn")
     text = replace_line(text, "trigger_reason", "heartbeat")
@@ -140,9 +157,11 @@ VALIDATOR_CASES = [
     ("canonical", lambda text: text, True),
     ("missing_markers", mutate_missing_markers, False),
     ("invalid_dates", mutate_invalid_dates, False),
+    ("missing_timezone", mutate_missing_timezone, False),
     ("missing_source_scope", mutate_missing_source_scope, False),
     ("missing_match_reasoning", mutate_missing_match_reasoning, False),
     ("no_primary_evidence", mutate_no_primary_evidence, False),
+    ("no_independent_evidence", mutate_no_independent_evidence, False),
     ("stray_list_item", mutate_stray_list_item, False),
     ("bad_match_axes", mutate_bad_match_axes, False),
     ("low_budget_two_suggestions", mutate_low_budget_two_suggestions, False),
@@ -152,6 +171,7 @@ VALIDATOR_CASES = [
     ("invalid_visibility", mutate_invalid_visibility, False),
     ("invalid_trigger_reason", mutate_invalid_trigger_reason, False),
     ("invalid_reuse_gate", mutate_invalid_reuse_gate, False),
+    ("empty_fit_reason", mutate_empty_fit_reason, False),
     ("valid_optional_fields", mutate_valid_optional_fields, True),
 ]
 
@@ -180,6 +200,7 @@ TRIGGER_CASES = [
         },
         True,
         "low",
+        "ready",
     ),
     (
         "should_travel_user_active",
@@ -198,6 +219,7 @@ TRIGGER_CASES = [
         },
         False,
         "low",
+        "user_operation_in_progress",
     ),
     (
         "should_travel_failure_recovery_medium",
@@ -222,6 +244,7 @@ TRIGGER_CASES = [
         },
         True,
         "medium",
+        "ready",
     ),
     (
         "should_travel_explicit_deep_request_high",
@@ -241,6 +264,79 @@ TRIGGER_CASES = [
         },
         True,
         "high",
+        "ready",
+    ),
+    (
+        "should_travel_single_failure_stays_blocked",
+        {
+            "enabled": True,
+            "event_kind": "failure_recovery",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "user_operation_in_progress": False,
+            "agent_response_in_progress": False,
+            "tool_approval_pending": False,
+            "thread_runs_today": 0,
+            "user_runs_today": 0,
+            "related_failures": 1,
+            "user_corrections": 0,
+            "unresolved_blocker_count": 0,
+            "version_mismatch_seen": False,
+        },
+        False,
+        "low",
+        "recovery_signal_missing",
+    ),
+    (
+        "should_travel_task_end_defaults_medium",
+        {
+            "enabled": True,
+            "event_kind": "task_end",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "user_operation_in_progress": False,
+            "agent_response_in_progress": False,
+            "tool_approval_pending": False,
+            "thread_runs_today": 0,
+            "user_runs_today": 0,
+        },
+        True,
+        "medium",
+        "ready",
+    ),
+    (
+        "should_travel_invalid_duration",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "quiet_after_user_action": "abc",
+        },
+        False,
+        "low",
+        "invalid_duration",
+    ),
+    (
+        "should_travel_negative_duration",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "quiet_after_user_action": "-5m",
+        },
+        False,
+        "low",
+        "invalid_duration",
     ),
 ]
 
@@ -248,15 +344,21 @@ TRIGGER_CASES = [
 def run_validator_case(name: str, body: str, expected_pass: bool, temp_dir: Path) -> dict[str, object]:
     path = temp_dir / f"{name}.md"
     path.write_text(body, encoding="utf-8")
-    proc = subprocess.run(
-        [sys.executable, str(VALIDATOR), str(path)],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    output = (proc.stdout + proc.stderr).strip()
-    crashed = "Traceback" in output
-    actual_pass = proc.returncode == 0
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(VALIDATOR), str(path)],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=TIMEOUT_SECONDS,
+        )
+        output = (proc.stdout + proc.stderr).strip()
+        crashed = "Traceback" in output
+        actual_pass = proc.returncode == 0
+    except subprocess.TimeoutExpired:
+        output = f"TIMEOUT after {TIMEOUT_SECONDS}s"
+        crashed = True
+        actual_pass = False
     return {
         "case": name,
         "kind": "validator",
@@ -273,28 +375,38 @@ def run_trigger_case(
     state: dict[str, object],
     expected_should_run: bool,
     expected_search_mode: str,
+    expected_error_code: str,
     temp_dir: Path,
 ) -> dict[str, object]:
     path = temp_dir / f"{name}.json"
     path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-    proc = subprocess.run(
-        [sys.executable, str(SHOULD_TRAVEL), str(path)],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    output = (proc.stdout + proc.stderr).strip()
-    crashed = "Traceback" in output
     try:
-        payload = json.loads(proc.stdout or "{}")
-    except json.JSONDecodeError:
-        payload = {}
+        proc = subprocess.run(
+            [sys.executable, str(SHOULD_TRAVEL), str(path)],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=TIMEOUT_SECONDS,
+        )
+        output = (proc.stdout + proc.stderr).strip()
+        crashed = "Traceback" in output
+        try:
+            payload = json.loads(proc.stdout or "{}")
+        except json.JSONDecodeError:
+            payload = {}
+            crashed = True
+    except subprocess.TimeoutExpired:
+        output = f"TIMEOUT after {TIMEOUT_SECONDS}s"
         crashed = True
+        payload = {}
+        proc = subprocess.CompletedProcess([], 1)
     actual_should_run = payload.get("should_run")
     actual_search_mode = payload.get("search_mode")
+    actual_error_code = payload.get("error_code")
     ok = (
         actual_should_run == expected_should_run
         and actual_search_mode == expected_search_mode
+        and actual_error_code == expected_error_code
         and proc.returncode == 0
         and not crashed
     )
@@ -305,6 +417,8 @@ def run_trigger_case(
         "actual_should_run": actual_should_run,
         "expected_search_mode": expected_search_mode,
         "actual_search_mode": actual_search_mode,
+        "expected_error_code": expected_error_code,
+        "actual_error_code": actual_error_code,
         "ok": ok,
         "crashed": crashed,
         "output": output,
@@ -318,9 +432,16 @@ def main() -> int:
         temp_dir = Path(temp)
         for name, mutator, expected_pass in VALIDATOR_CASES:
             results.append(run_validator_case(name, mutator(canonical), expected_pass, temp_dir))
-        for name, state, expected_should_run, expected_search_mode in TRIGGER_CASES:
+        for name, state, expected_should_run, expected_search_mode, expected_error_code in TRIGGER_CASES:
             results.append(
-                run_trigger_case(name, state, expected_should_run, expected_search_mode, temp_dir)
+                run_trigger_case(
+                    name,
+                    state,
+                    expected_should_run,
+                    expected_search_mode,
+                    expected_error_code,
+                    temp_dir,
+                )
             )
 
     validator_results = [item for item in results if item["kind"] == "validator"]

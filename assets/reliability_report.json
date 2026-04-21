@@ -1,11 +1,11 @@
 {
-  "total_cases": 20,
-  "passed_cases": 20,
+  "total_cases": 27,
+  "passed_cases": 27,
   "crash_count": 0,
-  "validator_cases": 16,
-  "validator_passed": 16,
-  "trigger_cases": 4,
-  "trigger_passed": 4,
+  "validator_cases": 19,
+  "validator_passed": 19,
+  "trigger_cases": 8,
+  "trigger_passed": 8,
   "results": [
     {
       "case": "canonical",
@@ -14,7 +14,7 @@
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-e1qxj7ng\\canonical.md"
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-_rnxcjjm\\canonical.md"
     },
     {
       "case": "missing_markers",
@@ -33,6 +33,15 @@
       "ok": true,
       "crashed": false,
       "output": "ERROR: expires_at must be later than generated_at"
+    },
+    {
+      "case": "missing_timezone",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: invalid ISO date: timestamp must include a timezone offset"
     },
     {
       "case": "missing_source_scope",
@@ -60,6 +69,15 @@
       "ok": true,
       "crashed": false,
       "output": "ERROR: suggestion-1 needs at least 1 primary evidence item"
+    },
+    {
+      "case": "no_independent_evidence",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: suggestion-1 needs at least 1 non-primary cross-validation evidence item\nERROR: suggestion-1 needs at least 1 independent evidence source"
     },
     {
       "case": "stray_list_item",
@@ -140,7 +158,16 @@
       "actual_pass": false,
       "ok": true,
       "crashed": false,
-      "output": "ERROR: reuse_gate must mention 4 or min_4_of_5"
+      "output": "ERROR: reuse_gate must be: min_4_of_5_axes_and_ttl_valid"
+    },
+    {
+      "case": "empty_fit_reason",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: suggestion-1 field fit_reason must be non-empty"
     },
     {
       "case": "valid_optional_fields",
@@ -149,7 +176,7 @@
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-e1qxj7ng\\valid_optional_fields.md"
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-_rnxcjjm\\valid_optional_fields.md"
     },
     {
       "case": "should_travel_heartbeat_quiet_low",
@@ -158,9 +185,11 @@
       "actual_should_run": true,
       "expected_search_mode": "low",
       "actual_search_mode": "low",
+      "expected_error_code": "ready",
+      "actual_error_code": "ready",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\"}"
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"heartbeat_default\"]}"
     },
     {
       "case": "should_travel_user_active",
@@ -169,9 +198,11 @@
       "actual_should_run": false,
       "expected_search_mode": "low",
       "actual_search_mode": "low",
+      "expected_error_code": "user_operation_in_progress",
+      "actual_error_code": "user_operation_in_progress",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"user operation in progress\"}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"user operation in progress\", \"error_code\": \"user_operation_in_progress\"}"
     },
     {
       "case": "should_travel_failure_recovery_medium",
@@ -180,9 +211,11 @@
       "actual_should_run": true,
       "expected_search_mode": "medium",
       "actual_search_mode": "medium",
+      "expected_error_code": "ready",
+      "actual_error_code": "ready",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"active conversation, quiet window, within cooldown\"}"
+      "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"failure_recovery_default\", \"related_failures\", \"unresolved_blocker_count\"]}"
     },
     {
       "case": "should_travel_explicit_deep_request_high",
@@ -191,9 +224,63 @@
       "actual_should_run": true,
       "expected_search_mode": "high",
       "actual_search_mode": "high",
+      "expected_error_code": "ready",
+      "actual_error_code": "ready",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"high\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\"}"
+      "output": "{\"should_run\": true, \"search_mode\": \"high\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"user_explicit_deep_research_request\"]}"
+    },
+    {
+      "case": "should_travel_single_failure_stays_blocked",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "recovery_signal_missing",
+      "actual_error_code": "recovery_signal_missing",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"failure recovery needs 2 related failures, 2 user corrections, 1 blocker, or version mismatch\", \"error_code\": \"recovery_signal_missing\"}"
+    },
+    {
+      "case": "should_travel_task_end_defaults_medium",
+      "kind": "trigger",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "medium",
+      "actual_search_mode": "medium",
+      "expected_error_code": "ready",
+      "actual_error_code": "ready",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"task_end\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"task_end_default\"]}"
+    },
+    {
+      "case": "should_travel_invalid_duration",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "invalid_duration",
+      "actual_error_code": "invalid_duration",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"invalid duration: abc\", \"error_code\": \"invalid_duration\"}"
+    },
+    {
+      "case": "should_travel_negative_duration",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "invalid_duration",
+      "actual_error_code": "invalid_duration",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"duration must be a positive integer with unit: -5m\", \"error_code\": \"invalid_duration\"}"
     }
   ]
 }

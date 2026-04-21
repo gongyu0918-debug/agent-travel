@@ -2,7 +2,7 @@
   "baseline_ref": "v0.1.0-local-baseline",
   "current_ref": "agent-travel-current",
   "summary": {
-    "baseline_guardrail_rejection_rate": 0.0,
+    "baseline_guardrail_rejection_rate": 0.2,
     "current_guardrail_rejection_rate": 1.0,
     "baseline_safe_acceptance_rate": 1.0,
     "current_safe_acceptance_rate": 1.0,
@@ -78,6 +78,30 @@
       "case": "invalid_reuse_gate",
       "kind": "guardrail",
       "baseline_passed": true,
+      "current_passed": false,
+      "baseline_crashed": false,
+      "current_crashed": false
+    },
+    {
+      "case": "missing_timezone",
+      "kind": "guardrail",
+      "baseline_passed": false,
+      "current_passed": false,
+      "baseline_crashed": true,
+      "current_crashed": false
+    },
+    {
+      "case": "no_independent_evidence",
+      "kind": "guardrail",
+      "baseline_passed": true,
+      "current_passed": false,
+      "baseline_crashed": false,
+      "current_crashed": false
+    },
+    {
+      "case": "empty_fit_reason",
+      "kind": "guardrail",
+      "baseline_passed": false,
       "current_passed": false,
       "baseline_crashed": false,
       "current_crashed": false

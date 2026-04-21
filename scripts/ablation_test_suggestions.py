@@ -17,6 +17,7 @@ BASELINE_VALIDATOR = ROOT / "scripts" / "baselines" / "validate_suggestions_v0_1
 CANONICAL = ROOT / "references" / "suggestion-contract.md"
 REPORT_PATH = ROOT / "assets" / "ablation_report.json"
 END = "<!-- agent-travel:suggestions:end -->"
+TIMEOUT_SECONDS = 10
 
 
 def replace_line(text: str, key: str, value: str) -> str:
@@ -25,6 +26,12 @@ def replace_line(text: str, key: str, value: str) -> str:
     if count != 1:
         raise ValueError(f"missing line for {key}")
     return updated
+
+
+def replace_once(text: str, old: str, new: str) -> str:
+    if old not in text:
+        raise ValueError(f"missing expected text: {old}")
+    return text.replace(old, new, 1)
 
 
 def extract_suggestion_block(text: str) -> str:
@@ -73,6 +80,16 @@ def mutate(text: str, case_id: str) -> str:
         return replace_line(text, "reuse_gate", "ttl_valid_only")
     if case_id == "invalid_dates":
         return replace_line(text, "expires_at", "2026-04-18T03:00:00+08:00")
+    if case_id == "missing_timezone":
+        return replace_line(text, "generated_at", "2026-04-20T03:00:00")
+    if case_id == "no_independent_evidence":
+        return replace_once(
+            text,
+            "- secondary_community: https://example.com/community-thread",
+            "- primary_official_discussion: https://example.com/maintainer-thread",
+        )
+    if case_id == "empty_fit_reason":
+        return replace_line(text, "fit_reason", "")
     raise ValueError(f"unknown case: {case_id}")
 
 
@@ -86,22 +103,33 @@ CASES = [
     {"id": "invalid_visibility", "kind": "guardrail"},
     {"id": "invalid_trigger_reason", "kind": "guardrail"},
     {"id": "invalid_reuse_gate", "kind": "guardrail"},
+    {"id": "missing_timezone", "kind": "guardrail"},
+    {"id": "no_independent_evidence", "kind": "guardrail"},
+    {"id": "empty_fit_reason", "kind": "guardrail"},
     {"id": "invalid_dates", "kind": "shared-invalid"},
 ]
 
 
 def invoke(validator: Path, target: Path) -> dict[str, object]:
-    proc = subprocess.run(
-        [sys.executable, str(validator), str(target)],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    output = (proc.stdout + proc.stderr).strip()
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(validator), str(target)],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=TIMEOUT_SECONDS,
+        )
+        output = (proc.stdout + proc.stderr).strip()
+        crashed = "Traceback" in output
+        passed = proc.returncode == 0
+    except subprocess.TimeoutExpired:
+        output = f"TIMEOUT after {TIMEOUT_SECONDS}s"
+        crashed = True
+        passed = False
     return {
-        "passed": proc.returncode == 0,
+        "passed": passed,
         "output": output,
-        "crashed": "Traceback" in output,
+        "crashed": crashed,
     }
 
 

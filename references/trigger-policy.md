@@ -33,6 +33,8 @@ Run only when all of these are true:
 - `medium`: 2 related failures, 2 user corrections, 1 unresolved blocker, or version mismatch
 - `high`: explicit deep research request or repeated blocker after `medium`
 
+`task_end` defaults to `medium` once the host decides the task just finished and the quiet window is open.
+
 ## Host Note
 
 If the host cannot observe live typing or direct user activity, approximate quiet conditions with:

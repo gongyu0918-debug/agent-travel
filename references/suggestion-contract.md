@@ -64,3 +64,5 @@ evidence:
 ```
 
 Optional fields such as `trigger_reason`, `visibility`, `fingerprint_hash`, and `reuse_gate` should not break older hosts. Hosts that do not understand them should preserve them when possible and ignore them otherwise.
+
+Timestamps must include an explicit timezone offset. Each suggestion needs at least one `primary` evidence item, one additional non-`primary` cross-validation evidence item, and one additional independent evidence source. The current standardized `reuse_gate` value is `min_4_of_5_axes_and_ttl_valid`.

@@ -1,0 +1,246 @@
+[
+  {
+    "id": "claude_code_task_end_guidance_refresh",
+    "title": "Claude Code task-end authoritative guidance refresh",
+    "host": "Claude Code",
+    "workflow": "After a multi-step coding task, the operator wants a quiet-window background pass that checks recent official hook guidance plus one community workflow note before the next related task.",
+    "user_context": "The thread just finished a hook-heavy refactor. The operator wants recent guidance without interrupting the foreground conversation.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "Claude Code Hooks reference",
+        "url": "https://code.claude.com/docs/en/hooks"
+      },
+      {
+        "label": "secondary",
+        "name": "Claude Code hooks community workflow thread",
+        "url": "https://www.reddit.com/r/ClaudeCode/comments/1qlzzzf/claude_codes_most_underrated_feature_hooks_wrote/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "task_end",
+      "now": "2026-04-21T12:00:00+08:00",
+      "last_thread_activity": "2026-04-21T10:00:00+08:00",
+      "last_user_action": "2026-04-21T11:00:00+08:00",
+      "last_agent_action": "2026-04-21T11:30:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0
+    },
+    "expected": {
+      "should_run": true,
+      "search_mode": "medium",
+      "error_code": "ready"
+    },
+    "output": {
+      "generated_at": "2026-04-21T12:10:00+08:00",
+      "expires_at": "2026-04-28T12:10:00+08:00",
+      "budget": "medium",
+      "search_mode": "medium",
+      "tool_preference": "public-only",
+      "source_scope": "primary+secondary",
+      "thread_scope": "active_conversation_only",
+      "problem_fingerprint": "claude-code|hooks|post-task-guidance-refresh|2026-q2",
+      "advisory_only": "true",
+      "trigger_reason": "task_end",
+      "visibility": "silent_until_relevant",
+      "fingerprint_hash": "sha256:4f0a24d7b640e118ab7aa44886790a2e714494fa31ad5d4a0d36ff97358b2cb0",
+      "reuse_gate": "min_4_of_5_axes_and_ttl_valid",
+      "suggestions": [
+        {
+          "title": "Use official hook docs as the anchor and treat community posts as workflow seasoning",
+          "applies_when": "The next task touches Claude Code hooks, hook timing, or quiet-window automation after a multi-step code change.",
+          "hint": "Start from the official hooks reference, then use one community workflow note to refine where the hook belongs in the lifecycle.",
+          "confidence": "medium",
+          "manual_check": "Verify the target hook event still exists in the current Claude Code build and that the workflow still needs background research.",
+          "solves_point": "The operator wants a low-noise way to refresh hook guidance after the task ends without interrupting the coding session.",
+          "new_idea": "Use task-end travel to refresh authoritative guidance only after the implementation settles, then reuse the note on the next similar turn.",
+          "fit_reason": "This fits threads that just finished a hook-related change and want recent guidance before the next edit or rollout.",
+          "match_reasoning": [
+            "host: matched Claude Code hook workflows and skill-triggered automation",
+            "version: matched current Claude Code hooks and skills documentation from April 2026",
+            "symptom: matched post-task uncertainty about where a hook should live or fire",
+            "constraint_pattern: matched a quiet-window, low-noise requirement instead of immediate inline research",
+            "desired_next_outcome: matched a lightweight advisory note for the next related turn"
+          ],
+          "version_scope": "Claude Code builds with hooks in settings or skill frontmatter and quiet-window research handled outside the foreground turn.",
+          "do_not_apply_when": "Skip this hint when the thread already has a fresh official hook answer or when the next step requires direct execution instead of advisory guidance.",
+          "evidence": [
+            "primary_official: https://code.claude.com/docs/en/hooks",
+            "secondary_community: https://www.reddit.com/r/ClaudeCode/comments/1qlzzzf/claude_codes_most_underrated_feature_hooks_wrote/"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "openclaw_heartbeat_memory_safety",
+    "title": "OpenClaw heartbeat memory-safety advisory",
+    "host": "OpenClaw",
+    "workflow": "The operator uses heartbeat-style background turns and wants research hints without turning that background loop into silent memory pollution.",
+    "user_context": "The workspace uses heartbeat and background checks. The operator wants low-budget external research while keeping memory writes and autonomous side effects contained.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "OpenClaw Automation and Heartbeat docs",
+        "url": "https://docs.openclaw.ai/automation"
+      },
+      {
+        "label": "secondary",
+        "name": "ClawHub Memory Master review",
+        "url": "https://clawhub.ai/skills/memory-master"
+      },
+      {
+        "label": "secondary",
+        "name": "Heartbeat memory pollution paper",
+        "url": "https://arxiv.org/abs/2603.23064"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "heartbeat",
+      "now": "2026-04-21T15:00:00+08:00",
+      "last_thread_activity": "2026-04-21T13:20:00+08:00",
+      "last_user_action": "2026-04-21T13:50:00+08:00",
+      "last_agent_action": "2026-04-21T14:10:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0
+    },
+    "expected": {
+      "should_run": true,
+      "search_mode": "low",
+      "error_code": "ready"
+    },
+    "output": {
+      "generated_at": "2026-04-21T15:05:00+08:00",
+      "expires_at": "2026-04-28T15:05:00+08:00",
+      "budget": "low",
+      "search_mode": "low",
+      "tool_preference": "public-only",
+      "source_scope": "primary+secondary",
+      "thread_scope": "active_conversation_only",
+      "problem_fingerprint": "openclaw|heartbeat|background-research-safety|2026-q2",
+      "advisory_only": "true",
+      "trigger_reason": "heartbeat",
+      "visibility": "silent_until_relevant",
+      "fingerprint_hash": "sha256:2f9b8ffdf0d7388d3f1614b2ef7c963fbfb6e2412ff3af01db0f64b1aa49ac5d",
+      "reuse_gate": "min_4_of_5_axes_and_ttl_valid",
+      "suggestions": [
+        {
+          "title": "Keep heartbeat travel advisory-only and audit-friendly",
+          "applies_when": "The host uses heartbeat or approximate background turns with full session context and wants low-budget external research.",
+          "hint": "Use heartbeat travel only for isolated hints, keep public-only search by default, and review any background memory-touching skill before enabling autonomous invocation.",
+          "confidence": "high",
+          "manual_check": "Confirm the host keeps the research note outside core memory and that no installed skill auto-writes memory or AGENTS files on this path.",
+          "solves_point": "Heartbeat background work can silently blend external content into the main session unless the research output stays isolated.",
+          "new_idea": "Treat heartbeat travel as a bounded advisory layer with explicit auditability instead of another always-on memory writer.",
+          "fit_reason": "This fits OpenClaw-style heartbeat workflows where the operator wants session-context awareness without silent memory pollution.",
+          "match_reasoning": [
+            "host: matched OpenClaw heartbeat and ClawHub-installed skill workflows",
+            "version: matched current OpenClaw automation documentation and current ClawHub safety reviews",
+            "symptom: matched concern about silent background influence on future user-facing turns",
+            "constraint_pattern: matched the need for low-noise, audit-friendly background research",
+            "desired_next_outcome: matched an isolated hint that informs later work without mutating core memory"
+          ],
+          "version_scope": "OpenClaw environments that use heartbeat, ClawHub-installed skills, or similar main-session background checks.",
+          "do_not_apply_when": "Skip this hint when the operator explicitly wants a dedicated memory-writing workflow and has already audited that workflow end to end.",
+          "evidence": [
+            "primary_official: https://docs.openclaw.ai/automation",
+            "secondary_community: https://clawhub.ai/skills/memory-master",
+            "secondary_research: https://arxiv.org/abs/2603.23064"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "hermes_scheduled_doc_drift_scan",
+    "title": "Hermes scheduled doc-drift research pass",
+    "host": "Hermes",
+    "workflow": "The operator schedules a lightweight recurring research pass to check documentation drift and workflow changes around an active skill-driven repo workflow.",
+    "user_context": "The agent already uses skills and scheduled jobs. The operator wants a periodic documentation drift check that stays lightweight until a blocker appears.",
+    "sources": [
+      {
+        "label": "primary",
+        "name": "Hermes automation templates",
+        "url": "https://hermes-agent.nousresearch.com/docs/guides/automation-templates"
+      },
+      {
+        "label": "primary",
+        "name": "Hermes skills system docs",
+        "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills"
+      },
+      {
+        "label": "secondary",
+        "name": "Hermes community ecosystem page",
+        "url": "https://get-hermes.ai/community/"
+      }
+    ],
+    "state": {
+      "enabled": true,
+      "event_kind": "scheduled",
+      "now": "2026-04-21T09:00:00+08:00",
+      "last_thread_activity": "2026-04-21T08:10:00+08:00",
+      "last_user_action": "2026-04-21T08:20:00+08:00",
+      "last_agent_action": "2026-04-21T08:35:00+08:00",
+      "user_operation_in_progress": false,
+      "agent_response_in_progress": false,
+      "tool_approval_pending": false,
+      "thread_runs_today": 0,
+      "user_runs_today": 0,
+      "user_configured_periodic_travel": true
+    },
+    "expected": {
+      "should_run": true,
+      "search_mode": "low",
+      "error_code": "ready"
+    },
+    "output": {
+      "generated_at": "2026-04-21T09:05:00+08:00",
+      "expires_at": "2026-04-28T09:05:00+08:00",
+      "budget": "low",
+      "search_mode": "low",
+      "tool_preference": "public-only",
+      "source_scope": "primary+secondary",
+      "thread_scope": "active_conversation_only",
+      "problem_fingerprint": "hermes|scheduled-doc-drift|skills-workflow|2026-q2",
+      "advisory_only": "true",
+      "trigger_reason": "scheduled",
+      "visibility": "silent_until_relevant",
+      "fingerprint_hash": "sha256:6b68ee5f9ef1e11ca6c77d4dad2b585cc0d53cd48c9b5de22349f7d35ae4a992",
+      "reuse_gate": "min_4_of_5_axes_and_ttl_valid",
+      "suggestions": [
+        {
+          "title": "Keep scheduled research narrow and tie it to one workflow outcome",
+          "applies_when": "The host uses Hermes skills and scheduled automation for repo maintenance, documentation drift, or weekly workflow checks.",
+          "hint": "Use the scheduled pass to look for doc drift or workflow changes around one maintained skill flow, then save only one concise advisory note for the next relevant turn.",
+          "confidence": "medium",
+          "manual_check": "Confirm the scheduled job is still intended to stay lightweight and that the workflow still maps to one active repo or skill flow.",
+          "solves_point": "Periodic background research can sprawl unless it stays tied to one narrow maintenance workflow.",
+          "new_idea": "Treat scheduled travel as a doc-drift spot check that feeds one future turn instead of a broad recurring research job.",
+          "fit_reason": "This fits Hermes-style scheduled jobs where skills and cron already exist, but the operator wants the research pass to stay cheap and reviewable.",
+          "match_reasoning": [
+            "host: matched Hermes skills and scheduled automation workflows",
+            "version: matched current Hermes docs that expose scheduled jobs and skill reuse",
+            "symptom: matched ongoing documentation drift or workflow maintenance needs",
+            "constraint_pattern: matched a recurring but low-budget background pass",
+            "desired_next_outcome: matched one advisory note for the next related maintenance turn"
+          ],
+          "version_scope": "Hermes deployments that use the built-in scheduler or recurring skill-driven maintenance workflows.",
+          "do_not_apply_when": "Skip this hint when the operator wants a full weekly deep-research job instead of a narrow doc-drift pass.",
+          "evidence": [
+            "primary_official: https://hermes-agent.nousresearch.com/docs/guides/automation-templates",
+            "primary_official_docs: https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+            "secondary_community: https://get-hermes.ai/community/"
+          ]
+        }
+      ]
+    }
+  }
+]

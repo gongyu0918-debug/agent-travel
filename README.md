@@ -6,6 +6,11 @@ The second law of thermodynamics says a closed system drifts toward entropy. Age
 它不做常驻后台爬虫，也不替用户做决定。它只把外部经验压成 advisory-only hints，隔离存放，等到下一次相关任务出现时再自然引用。  
 It is not a noisy background crawler and it does not make decisions for the user. It compresses outside practice into advisory-only hints, stores them in an isolated channel, and surfaces them only when the next relevant task appears.
 
+## 当前边界 / Current Scope
+
+这个仓库当前交付的是协议层、触发判定、输出契约、校验器和 host adapter。真实搜索执行、查询脱敏器、成熟度评分器、候选排序器，仍然由宿主 agent 或后续集成层负责。
+This repository currently ships the protocol layer, trigger gate, output contract, validator, and host adapters. Real search execution, query redaction, maturity scoring, and candidate ranking still belong to the host agent or a later integration layer.
+
 ## 为什么它是轻量的 / Why It Is Lightweight
 
 - 没有 daemon。调度完全交给宿主 agent 的 heartbeat、cron、task-end 或 failure hooks。 / No daemon. Scheduling stays with the host agent through heartbeat, cron, task-end, or failure hooks.
@@ -14,6 +19,11 @@ It is not a noisy background crawler and it does not make decisions for the user
 - 所有脚本只用 Python 标准库。 / Every script uses Python stdlib only.
 - 搜索由宿主工具执行。这个仓库只定义触发、契约、校验和 host adapter。 / Search is executed by the host tools. This repository defines triggers, contracts, validation, and host adapters.
 - 建议通道始终隔离。它不会写进核心 system prompt、persona、长期 memory、AGENT.md/agent.md 核心指令。 / The suggestion channel stays isolated. It does not write into the core system prompt, persona, long-term memory, or core AGENT.md/agent.md instructions.
+
+## 扫描说明 / Scan Note
+
+某些静态扫描会命中 [references/threat-model.md](references/threat-model.md) 里的 prompt-injection 示例文本。这里的示例是防御样本，用来说明哪些网页内容应该被拒绝，不是要执行的指令。
+Some static scans will hit the prompt-injection example text inside [references/threat-model.md](references/threat-model.md). Those examples are defensive fixtures that show what the host should reject, not instructions that the skill should execute.
 
 ## 推荐默认值 / Recommended Default
 
@@ -35,7 +45,7 @@ The recommended default is low-frequency, low-budget, and silent by design.
 ## 关键点 / Key Points
 
 - 搜索来源分三层：`primary` 是官方文档、发行说明、官方讨论区；`secondary` 是搜索引擎、GitHub issues、Stack Overflow；`tertiary` 是论坛、博客、社交媒体。 / Search uses three tiers: `primary` for official docs, release notes, and official discussions; `secondary` for search engines, GitHub issues, and Stack Overflow; `tertiary` for forums, blogs, and social media.
-- 所有建议都要交叉验证。至少 1 条 `primary` 证据是硬要求。 / Every suggestion is cross-validated. At least 1 `primary` evidence item is mandatory.
+- 所有建议都要交叉验证。至少 1 条 `primary` 证据是硬要求，并且还要有 1 条非 `primary` 交叉验证证据。 / Every suggestion is cross-validated. At least 1 `primary` evidence item is mandatory, plus 1 non-`primary` cross-validation evidence item.
 - 每条保留建议都要写 `match_reasoning`，逐轴说明为什么命中了 5 轴中的至少 4 个。 / Every kept suggestion must include `match_reasoning`, with axis-by-axis notes explaining why it matched at least 4 of the 5 axes.
 - 输出始终是 advisory-only，并且只服务 `active_conversation_only`。 / Output is always advisory-only and scoped to `active_conversation_only`.
 - 宿主应在 quiet window 内调用它：没有用户操作、没有 agent 正在输出、没有待确认工具。 / The host should invoke it only inside a quiet window: no user operation, no agent output in progress, and no pending tool approval.
@@ -52,6 +62,18 @@ The recommended default is low-frequency, low-budget, and silent by design.
 `agent-travel` 当前是单机背景研究层。它和同作者的 [agent-compute-mesh](https://github.com/gongyu0918-debug/agent-compute-mesh) 是配套关系：前者负责把外部经验压缩成结构化提示，后者负责把类似 `exploration job` 的工作单元放进更严格的 execution lease 里。  
 `agent-travel` is the single-node background research layer today. It pairs with the same author's [agent-compute-mesh](https://github.com/gongyu0918-debug/agent-compute-mesh): this skill compresses outside practice into structured hints, while the mesh skill turns similar `exploration job` units into stricter execution leases.
 
+## 社区工作流夹具 / Community Workflow Fixtures
+
+这次版本附带了三组真实来源驱动的工作流夹具，分别覆盖 Claude Code 的 task-end 刷新、OpenClaw 的 heartbeat 提示隔离、Hermes 的 scheduled 文档漂移扫描。对应资料和来源链接在 [references/community-workflows.md](references/community-workflows.md)，冒烟结果在 [assets/community_smoke_report.json](assets/community_smoke_report.json)。
+This version ships with three real-source workflow fixtures that cover Claude Code task-end refresh, OpenClaw heartbeat advisory isolation, and Hermes scheduled doc-drift scans. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
+
+本地做产品侧检查时，可以先跑这三个入口：
+For product-side checks, start with these three entry points:
+
+- `python scripts/should_travel.py <state.json>`
+- `python scripts/validate_suggestions.py references/suggestion-contract.md`
+- `python scripts/community_smoke_test.py`
+
 ## 文件 / Files
 
 - [SKILL.md](SKILL.md)
@@ -64,9 +86,12 @@ The recommended default is low-frequency, low-budget, and silent by design.
 - [references/trigger-policy.md](references/trigger-policy.md)
 - [references/threat-model.md](references/threat-model.md)
 - [references/host-adapters.md](references/host-adapters.md)
+- [references/community-workflows.md](references/community-workflows.md)
 - [scripts/validate_suggestions.py](scripts/validate_suggestions.py)
 - [scripts/should_travel.py](scripts/should_travel.py)
 - [scripts/reliability_test_suggestions.py](scripts/reliability_test_suggestions.py)
 - [scripts/ablation_test_suggestions.py](scripts/ablation_test_suggestions.py)
+- [scripts/community_smoke_test.py](scripts/community_smoke_test.py)
 - [assets/reliability_report.json](assets/reliability_report.json)
 - [assets/ablation_report.json](assets/ablation_report.json)
+- [assets/community_smoke_report.json](assets/community_smoke_report.json)

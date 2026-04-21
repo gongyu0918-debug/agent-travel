@@ -8,6 +8,7 @@ import re
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 START = "<!-- agent-travel:suggestions:start -->"
@@ -46,15 +47,18 @@ ALLOWED_TRIGGER_REASONS = {
     "failure_recovery",
     "idle_fallback",
 }
+ALLOWED_REUSE_GATES = {"min_4_of_5_axes_and_ttl_valid"}
 SUGGESTION_LIMITS = {"low": 1, "medium": 3, "high": 5}
 MAX_TTL = timedelta(days=14)
 MATCH_AXES = {
     "host",
     "version",
     "symptom",
-    "constraint",
     "constraint_pattern",
     "desired_next_outcome",
+}
+MATCH_AXIS_ALIASES = {
+    "constraint": "constraint_pattern",
 }
 
 
@@ -71,9 +75,14 @@ def fail(errors: list[str]) -> int:
 
 
 def parse_iso(value: str) -> datetime:
+    if not value.strip():
+        raise ValueError("timestamp must be non-empty")
     if value.endswith("Z"):
         value = value[:-1] + "+00:00"
-    return datetime.fromisoformat(value)
+    parsed = datetime.fromisoformat(value)
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise ValueError("timestamp must include a timezone offset")
+    return parsed
 
 
 def normalize_token(value: str) -> str:
@@ -82,6 +91,22 @@ def normalize_token(value: str) -> str:
 
 def tokenize_scope(value: str) -> set[str]:
     return {normalize_token(part) for part in re.split(r"[^A-Za-z0-9]+", value) if part.strip()}
+
+
+def canonicalize_axis(axis: str) -> str:
+    normalized = normalize_token(axis)
+    return MATCH_AXIS_ALIASES.get(normalized, normalized)
+
+
+def parse_evidence_source(item: str) -> tuple[str, str]:
+    label, separator, reference = str(item).partition(":")
+    normalized_label = normalize_token(label)
+    normalized_reference = reference.strip().lower() if separator else ""
+    if normalized_reference:
+        parsed = urlparse(normalized_reference)
+        if parsed.scheme and parsed.netloc:
+            normalized_reference = f"{parsed.netloc}{parsed.path}".rstrip("/")
+    return normalized_label, normalized_reference
 
 
 def parse_block(path: Path) -> tuple[dict[str, str], list[dict[str, object]], list[str]]:
@@ -100,7 +125,7 @@ def parse_block(path: Path) -> tuple[dict[str, str], list[dict[str, object]], li
     current_evidence: list[str] | None = None
     current_match_reasoning: list[str] | None = None
 
-    key_pattern = re.compile(r"^([a-z_]+):\s*(.+)$")
+    key_pattern = re.compile(r"^([a-z_]+):\s*(.*)$")
     heading_pattern = re.compile(r"^##\s+suggestion-\d+\s*$")
 
     for raw_line in lines:
@@ -175,6 +200,9 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
         errors.append("advisory_only must be true")
     if top_level.get("thread_scope") != "active_conversation_only":
         errors.append("thread_scope must be active_conversation_only")
+    for field in sorted(TOP_LEVEL_REQUIRED - {"advisory_only"}):
+        if not top_level.get(field, "").strip():
+            errors.append(f"{field} must be non-empty")
 
     budget = top_level.get("budget", "")
     if budget not in ALLOWED_LEVELS:
@@ -201,13 +229,8 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
         )
 
     reuse_gate = top_level.get("reuse_gate")
-    if reuse_gate:
-        lowered = reuse_gate.lower()
-        if "min_4_of_5" not in lowered and "4" not in lowered:
-            errors.append("reuse_gate must mention 4 or min_4_of_5")
-
-    if not top_level.get("problem_fingerprint", "").strip():
-        errors.append("problem_fingerprint must be non-empty")
+    if reuse_gate and reuse_gate not in ALLOWED_REUSE_GATES:
+        errors.append("reuse_gate must be: min_4_of_5_axes_and_ttl_valid")
 
     if {"generated_at", "expires_at"} <= set(top_level):
         try:
@@ -217,7 +240,7 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
                 errors.append("expires_at must be later than generated_at")
             if expires - generated > MAX_TTL:
                 errors.append("expires_at must be within 14 days of generated_at")
-        except ValueError as exc:
+        except (TypeError, ValueError) as exc:
             errors.append(f"invalid ISO date: {exc}")
 
     limit = suggestion_limit(top_level)
@@ -234,7 +257,7 @@ def validate_suggestion(index: int, suggestion: dict[str, object]) -> list[str]:
         errors.append(f"suggestion-{index} is missing fields: {', '.join(missing)}")
         return errors
 
-    for field in ("title", "applies_when", "hint", "manual_check", "do_not_apply_when"):
+    for field in sorted(ITEM_REQUIRED - {"match_reasoning"}):
         value = str(suggestion.get(field, "")).strip()
         if not value:
             errors.append(f"suggestion-{index} field {field} must be non-empty")
@@ -247,13 +270,24 @@ def validate_suggestion(index: int, suggestion: dict[str, object]) -> list[str]:
     if not isinstance(evidence, list) or len(evidence) < 2:
         errors.append(f"suggestion-{index} needs at least 2 evidence items")
     else:
-        evidence_tiers = []
+        evidence_tiers = set()
+        evidence_sources = set()
         for item in evidence:
-            label = str(item).split(":", 1)[0]
-            normalized = normalize_token(label)
-            evidence_tiers.append(normalized.split("_", 1)[0] if normalized else "")
+            if ":" not in str(item):
+                errors.append(f"suggestion-{index} evidence items must use source_label: reference format")
+                break
+            label, source_key = parse_evidence_source(str(item))
+            if not label or not source_key:
+                errors.append(f"suggestion-{index} evidence items must include a non-empty source label and reference")
+                break
+            evidence_tiers.add(label.split("_", 1)[0])
+            evidence_sources.add(source_key)
         if "primary" not in evidence_tiers:
             errors.append(f"suggestion-{index} needs at least 1 primary evidence item")
+        if not any(tier != "primary" for tier in evidence_tiers):
+            errors.append(f"suggestion-{index} needs at least 1 non-primary cross-validation evidence item")
+        if len(evidence_sources) < 2:
+            errors.append(f"suggestion-{index} needs at least 1 independent evidence source")
 
     match_reasoning = suggestion.get("match_reasoning", [])
     if not isinstance(match_reasoning, list) or len(match_reasoning) < 4:
@@ -265,7 +299,7 @@ def validate_suggestion(index: int, suggestion: dict[str, object]) -> list[str]:
                 errors.append(f"suggestion-{index} match_reasoning items must use axis: explanation format")
                 break
             axis, explanation = str(item).split(":", 1)
-            normalized_axis = normalize_token(axis)
+            normalized_axis = canonicalize_axis(axis)
             if normalized_axis not in MATCH_AXES:
                 continue
             if not explanation.strip():
