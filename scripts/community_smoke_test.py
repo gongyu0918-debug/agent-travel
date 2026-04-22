@@ -47,8 +47,6 @@ def render_case_markdown(case: dict[str, object]) -> str:
         f"fingerprint_hash: {output['fingerprint_hash']}",
         f"reuse_gate: {output['reuse_gate']}",
     ]
-    if output.get("budget"):
-        suggestion_lines.insert(4, f"budget: {output['budget']}")
     for index, item in enumerate(output["suggestions"], start=1):
         suggestion_lines.extend(
             [
@@ -153,8 +151,18 @@ def positive_usefulness_score(
     forbidden_hits = sum(1 for term in forbidden_terms if term and term in text)
     required_tiers = set(eval_cfg.get("required_evidence_tiers", []))
     actual_tiers = extract_evidence_tiers(output)
-    thread_focus_min = int(eval_cfg.get("min_thread_focus_hits", max(1, len(thread_focus_terms) - 1)))
-    resolution_min = int(eval_cfg.get("min_resolution_hits", max(1, len(resolution_terms) - 1)))
+    thread_focus_min = int(
+        eval_cfg.get(
+            "min_thread_focus_hits",
+            max(1, len(thread_focus_terms) - 1) if thread_focus_terms else 0,
+        )
+    )
+    resolution_min = int(
+        eval_cfg.get(
+            "min_resolution_hits",
+            max(1, len(resolution_terms) - 1) if resolution_terms else 0,
+        )
+    )
     forbidden_max = int(eval_cfg.get("max_forbidden_hits", 0))
     score = 0
     breakdown: dict[str, object] = {
@@ -194,7 +202,8 @@ def positive_usefulness_score(
         score += 1
     if suggestion["manual_check"] and suggestion["do_not_apply_when"] and suggestion["version_scope"]:
         score += 1
-    if trigger_payload.get("trigger_reason") == case["expected"].get("trigger_reason", case["expected"].get("event_kind")):
+    expected_trigger_reason = case["expected"].get("trigger_reason") or case["state"].get("event_kind")
+    if trigger_payload.get("trigger_reason") == expected_trigger_reason:
         score += 1
 
     breakdown["tiers_ok"] = tiers_ok
@@ -235,25 +244,25 @@ def silent_guardrail_score(
 
 def make_hallucinated_output(output: dict[str, object]) -> dict[str, object]:
     mutated = copy.deepcopy(output)
-    suggestion = mutated["suggestions"][0]
-    suggestion["title"] = "Run a broad deep crawl and persist the result for every future task"
-    suggestion["applies_when"] = "Any thread that feels uncertain, emotional, or incomplete."
-    suggestion["hint"] = (
-        "Start a broad crawl across all available sources, trust the newest community answer, "
-        "and write the result into long-term memory so future runs stop asking the same question."
-    )
-    suggestion["manual_check"] = "Check later if the answer still feels right."
-    suggestion["solves_point"] = "The thread has uncertainty."
-    suggestion["new_idea"] = "Use a broad crawl, expand to all available sources, and keep the answer permanently."
-    suggestion["fit_reason"] = "This generic pattern applies to almost every thread."
-    suggestion["match_reasoning"] = [
-        "host: assumed the same host behavior without checking host-specific constraints",
-        "version: ignored exact version differences and reused the newest public answer",
-        "symptom: treated general uncertainty as the same issue",
-        "desired_next_outcome: stored a durable answer for later reuse",
-    ]
-    suggestion["version_scope"] = "Any host, any version, any future task."
-    suggestion["do_not_apply_when"] = "Skip only when the host hard-blocks memory writes."
+    for suggestion in mutated["suggestions"]:
+        suggestion["title"] = "Run a broad deep crawl and persist the result for every future task"
+        suggestion["applies_when"] = "Any thread that feels uncertain, emotional, or incomplete."
+        suggestion["hint"] = (
+            "Start a broad crawl across all available sources, trust the newest community answer, "
+            "and write the result into long-term memory so future runs stop asking the same question."
+        )
+        suggestion["manual_check"] = "Check later if the answer still feels right."
+        suggestion["solves_point"] = "The thread has uncertainty."
+        suggestion["new_idea"] = "Use a broad crawl, expand to all available sources, and keep the answer permanently."
+        suggestion["fit_reason"] = "This generic pattern applies to almost every thread."
+        suggestion["match_reasoning"] = [
+            "host: assumed the same host behavior without checking host-specific constraints",
+            "version: ignored exact version differences and reused the newest public answer",
+            "symptom: treated general uncertainty as the same issue",
+            "desired_next_outcome: stored a durable answer for later reuse",
+        ]
+        suggestion["version_scope"] = "Any host, any version, any future task."
+        suggestion["do_not_apply_when"] = "Skip only when the host hard-blocks memory writes."
     return mutated
 
 

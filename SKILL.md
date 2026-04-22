@@ -26,7 +26,7 @@ Default trigger policy / 默认触发策略:
 1. Heartbeat trigger: use this first when the host supports heartbeat or background wakeups. Default mode is `low`. / heartbeat 触发：宿主支持 heartbeat 或后台唤醒时优先使用，默认模式是 `low`。
 2. Failure recovery trigger: after 2 related failures, 2 user corrections, 1 unresolved blocker, or a detected version mismatch. Default mode is `medium`. / 失败恢复触发：2 次相关失败、2 次用户纠正、1 个未解决阻塞，或检测到版本错配后启用，默认模式是 `medium`。
 3. Task-end trigger: after a multi-step task or manual recovery pass. Default mode is `medium`. / 任务结束触发：多步骤任务或手动恢复结束后启用，默认模式是 `medium`。
-4. Scheduled trigger: host-managed cron or periodic travel. Default mode is `low`. Host-generated scheduled prompts should stay neutral and fact-derived, while manually created scheduled prompts may preserve the operator's original wording. / 定时触发：由宿主管理的 cron 或周期性 travel，默认模式是 `low`。宿主自动生成的定时 prompt 应该保持中性并从事实出发，手工创建的定时任务可以保留操作者原始措辞。
+4. Scheduled trigger: host-managed cron or periodic travel. Default mode is `low`. The gate stays closed until the host marks the run as host-managed or the operator opts in to periodic travel. Host-generated scheduled prompts should stay neutral and fact-derived, while manually created scheduled prompts may preserve the operator's original wording. / 定时触发：由宿主管理的 cron 或周期性 travel，默认模式是 `low`。只有宿主明确标记为 host-managed，或者操作者显式开启周期性 travel，调度门才会打开。宿主自动生成的定时 prompt 应该保持中性并从事实出发，手工创建的定时任务可以保留操作者原始措辞。
 5. Idle fallback: when the host has no heartbeat, or when the user explicitly enables inactivity-based travel. Default fallback uses `active_conversation_window = 24h`, `quiet_after_user_action = 20m`, and `quiet_after_agent_action = 5m`. / 空闲兜底：宿主没有 heartbeat，或用户明确开启按空闲时间触发时启用。默认兜底使用 `active_conversation_window = 24h`、`quiet_after_user_action = 20m`、`quiet_after_agent_action = 5m`。
 
 Read [references/trigger-policy.md](references/trigger-policy.md) before implementing host-side scheduling.
@@ -90,8 +90,28 @@ Read [references/threat-model.md](references/threat-model.md) before changing an
 
 ## Output Contract / 输出契约
 
-Every stored suggestion must include:
-每条存储建议必须包含：
+Every stored suggestion file must include a top-level envelope:
+每个存储建议文件都必须包含一层顶层包络：
+
+- `generated_at`
+- `expires_at`
+- `search_mode`
+- `tool_preference`
+- `source_scope`
+- `thread_scope: active_conversation_only`
+- `problem_fingerprint`
+- `advisory_only: true`
+
+Optional top-level fields / 可选顶层字段:
+
+- `trigger_reason`
+- `visibility`
+- `fingerprint_hash`
+- `reuse_gate`
+- legacy `budget` when an older host still mirrors `search_mode`
+
+Each suggestion item must include:
+每条 suggestion 项必须包含：
 
 - `title`
 - `applies_when`
@@ -105,20 +125,6 @@ Every stored suggestion must include:
 - `version_scope`
 - `do_not_apply_when`
 - `evidence`
-- `generated_at`
-- `expires_at`
-- `advisory_only: true`
-- `thread_scope: active_conversation_only`
-- `search_mode`
-- `tool_preference`
-- `source_scope`
-
-Optional fields / 可选字段:
-
-- `trigger_reason`
-- `visibility`
-- `fingerprint_hash`
-- `reuse_gate`
 
 These optional fields should not break older hosts.
 这些可选字段不应该让旧宿主失效。

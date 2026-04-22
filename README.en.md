@@ -17,6 +17,7 @@ This repository currently ships the protocol layer, trigger gate, output contrac
 - Search is executed by the host tools. This repository defines triggers, contracts, validation, and host adapters.
 - The suggestion channel stays isolated. It does not write into the core system prompt, persona, long-term memory, or core AGENT.md/agent.md instructions.
 - Implicit invocation is off by default. Background runs should be wired explicitly through the host's heartbeat, cron, or task-end configuration.
+- `user-invocable: true` keeps manual invocation available, and `disable-model-invocation: true` keeps automatic model-side invocation off.
 
 ## Scan Note
 
@@ -39,7 +40,7 @@ The recommended default is low-frequency, small-scope, and silent by design.
 `medium` and `high` are escalation modes, not the everyday background default.
 
 `idle_fallback` fits hosts without heartbeat, or hosts where the operator explicitly enabled it. Heartbeat stays the default background path when available.
-For cron or scheduled travel, host-generated prompts should stay neutral and fact-derived from logs, backlog deltas, docs drift, or collected materials. Manually created scheduled prompts may preserve the operator's original wording.
+For cron or scheduled travel, the scheduling gate stays closed until the host marks the run as host-managed or the operator opts in to periodic travel. Host-generated prompts should stay neutral and fact-derived from logs, backlog deltas, docs drift, or collected materials. Manually created scheduled prompts may preserve the operator's original wording.
 
 ## Key Points
 

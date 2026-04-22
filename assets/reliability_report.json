@@ -1,11 +1,11 @@
 {
-  "total_cases": 40,
-  "passed_cases": 40,
+  "total_cases": 45,
+  "passed_cases": 45,
   "crash_count": 0,
-  "validator_cases": 23,
-  "validator_passed": 23,
-  "trigger_cases": 17,
-  "trigger_passed": 17,
+  "validator_cases": 25,
+  "validator_passed": 25,
+  "trigger_cases": 20,
+  "trigger_passed": 20,
   "results": [
     {
       "case": "canonical",
@@ -14,7 +14,7 @@
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-8wp0quq3\\canonical.md"
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-cfz22_8c\\canonical.md"
     },
     {
       "case": "missing_markers",
@@ -206,13 +206,31 @@
       "output": "ERROR: suggestion-1 field fit_reason must be non-empty"
     },
     {
+      "case": "misplaced_top_level_visibility",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: top-level field visibility must appear before the first suggestion heading"
+    },
+    {
+      "case": "malformed_evidence_item",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: suggestion-1 evidence items must use source_label: reference format"
+    },
+    {
       "case": "valid_optional_fields",
       "kind": "validator",
       "expected_pass": true,
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-8wp0quq3\\valid_optional_fields.md"
+      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-cfz22_8c\\valid_optional_fields.md"
     },
     {
       "case": "should_travel_heartbeat_quiet_low",
@@ -226,6 +244,19 @@
       "ok": true,
       "crashed": false,
       "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"heartbeat_default\"]}"
+    },
+    {
+      "case": "should_travel_required_timestamp_null_is_missing",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "missing_required_field",
+      "actual_error_code": "missing_required_field",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"missing required field: last_thread_activity\", \"error_code\": \"missing_required_field\"}"
     },
     {
       "case": "should_travel_user_active",
@@ -394,7 +425,7 @@
       "actual_error_code": "ready",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_trigger_managed_by_host\", \"scheduled_default\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"user_configured_periodic_travel\", \"scheduled_default\"]}"
     },
     {
       "case": "should_travel_host_managed_schedule_runs_without_manual_opt_in",
@@ -408,6 +439,19 @@
       "ok": true,
       "crashed": false,
       "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_trigger_managed_by_host\", \"scheduled_default\"]}"
+    },
+    {
+      "case": "should_travel_scheduled_defaults_closed_without_host_signal",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "scheduled_opt_in_required",
+      "actual_error_code": "scheduled_opt_in_required",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"scheduled travel needs a host-managed schedule or explicit periodic travel\", \"error_code\": \"scheduled_opt_in_required\"}"
     },
     {
       "case": "should_travel_scheduled_without_host_or_opt_in_blocks",
@@ -434,6 +478,19 @@
       "ok": true,
       "crashed": false,
       "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"host-generated scheduled prompts must stay neutral\", \"error_code\": \"scheduled_prompt_must_be_neutral\", \"observed_signals\": [\"host_generated_scheduled_prompt\", \"scheduled_prompt_emotion:frustrated\"]}"
+    },
+    {
+      "case": "should_travel_idle_fallback_stays_low_with_passive_signals",
+      "kind": "trigger",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "ready",
+      "actual_error_code": "ready",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"idle_fallback_default\"]}"
     }
   ]
 }

@@ -24,7 +24,7 @@ Default trigger policy:
 1. Heartbeat trigger: use this first when the host supports heartbeat or background wakeups. Default mode is `low`.
 2. Failure recovery trigger: after 2 related failures, 2 user corrections, 1 unresolved blocker, or a detected version mismatch. Default mode is `medium`.
 3. Task-end trigger: after a multi-step task or manual recovery pass. Default mode is `medium`.
-4. Scheduled trigger: host-managed cron or periodic travel. Default mode is `low`. Host-generated scheduled prompts should stay neutral and fact-derived, while manually created scheduled prompts may preserve the operator's original wording.
+4. Scheduled trigger: host-managed cron or periodic travel. Default mode is `low`. The gate stays closed until the host marks the run as host-managed or the operator opts in to periodic travel. Host-generated scheduled prompts should stay neutral and fact-derived, while manually created scheduled prompts may preserve the operator's original wording.
 5. Idle fallback: when the host has no heartbeat, or when the user explicitly enables inactivity-based travel. Default fallback uses `active_conversation_window = 24h`, `quiet_after_user_action = 20m`, and `quiet_after_agent_action = 5m`.
 
 Read [references/trigger-policy.md](references/trigger-policy.md) before implementing host-side scheduling.
@@ -77,7 +77,26 @@ Read [references/threat-model.md](references/threat-model.md) before changing an
 
 ## Output Contract
 
-Every stored suggestion must include:
+Every stored suggestion file must include a top-level envelope:
+
+- `generated_at`
+- `expires_at`
+- `search_mode`
+- `tool_preference`
+- `source_scope`
+- `thread_scope: active_conversation_only`
+- `problem_fingerprint`
+- `advisory_only: true`
+
+Optional top-level fields:
+
+- `trigger_reason`
+- `visibility`
+- `fingerprint_hash`
+- `reuse_gate`
+- legacy `budget` when an older host still mirrors `search_mode`
+
+Each suggestion item must include:
 
 - `title`
 - `applies_when`
@@ -91,20 +110,6 @@ Every stored suggestion must include:
 - `version_scope`
 - `do_not_apply_when`
 - `evidence`
-- `generated_at`
-- `expires_at`
-- `advisory_only: true`
-- `thread_scope: active_conversation_only`
-- `search_mode`
-- `tool_preference`
-- `source_scope`
-
-Optional fields:
-
-- `trigger_reason`
-- `visibility`
-- `fingerprint_hash`
-- `reuse_gate`
 
 These optional fields should not break older hosts.
 

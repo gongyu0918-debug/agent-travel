@@ -20,6 +20,7 @@ This repository currently ships the protocol layer, trigger gate, output contrac
 - 搜索由宿主工具执行。这个仓库只定义触发、契约、校验和 host adapter。 / Search is executed by the host tools. This repository defines triggers, contracts, validation, and host adapters.
 - 建议通道始终隔离。它不会写进核心 system prompt、persona、长期 memory、AGENT.md/agent.md 核心指令。 / The suggestion channel stays isolated. It does not write into the core system prompt, persona, long-term memory, or core AGENT.md/agent.md instructions.
 - 默认关闭隐式调用。后台运行交给宿主的 heartbeat、cron 或 task-end 配置显式接线。 / Implicit invocation is off by default. Background runs should be wired explicitly through the host's heartbeat, cron, or task-end configuration.
+- `user-invocable: true` 允许操作者手动调用，`disable-model-invocation: true` 保持模型侧自动触发关闭。 / `user-invocable: true` keeps manual invocation available, and `disable-model-invocation: true` keeps automatic model-side invocation off.
 
 ## 扫描说明 / Scan Note
 
@@ -45,7 +46,7 @@ The recommended default is low-frequency, small-scope, and silent by design.
 `medium` and `high` are escalation modes, not the everyday background default.
 
 `idle_fallback` 适合没有 heartbeat 的宿主，或者用户明确开启的场景。默认背景路径优先 heartbeat。
-cron 或 scheduled 触发里，宿主自动生成的 prompt 应该保持中性，只从日志、待办、文档漂移、资料采集结果这些事实生成。手工创建的定时任务可以保留用户原始意图。
+cron 或 scheduled 触发里，调度门默认保持关闭。宿主明确声明 host-managed，或者用户显式开启周期性 travel 之后，定时研究才会放行。宿主自动生成的 prompt 应该保持中性，只从日志、待办、文档漂移、资料采集结果这些事实生成。手工创建的定时任务可以保留用户原始意图。
 `idle_fallback` fits hosts without heartbeat, or hosts where the operator explicitly enabled it. Heartbeat stays the default background path when available.
 
 ## 关键点 / Key Points
