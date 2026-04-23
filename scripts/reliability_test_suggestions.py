@@ -563,6 +563,36 @@ TRIGGER_CASES = [
         "low",
         "ready",
     ),
+    (
+        "should_travel_negative_thread_runs_rejected",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "thread_runs_today": -5,
+        },
+        False,
+        "low",
+        "invalid_integer",
+    ),
+    (
+        "should_travel_negative_related_failures_rejected",
+        {
+            "enabled": True,
+            "event_kind": "failure_recovery",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "related_failures": -1,
+        },
+        False,
+        "low",
+        "invalid_integer",
+    ),
 ]
 
 

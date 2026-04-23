@@ -105,15 +105,19 @@ def as_bool(value: object, default: bool) -> bool:
     raise InputError("invalid_boolean", f"invalid boolean value: {value}")
 
 
-def as_int(value: object, default: int) -> int:
+def as_int(value: object, default: int, *, minimum: int | None = None) -> int:
     if value is None:
-        return default
-    if isinstance(value, bool):
+        parsed = default
+    elif isinstance(value, bool):
         raise InputError("invalid_integer", f"invalid integer value: {value}")
-    try:
-        return int(value)
-    except (TypeError, ValueError) as exc:
-        raise InputError("invalid_integer", f"invalid integer value: {value}") from exc
+    else:
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError) as exc:
+            raise InputError("invalid_integer", f"invalid integer value: {value}") from exc
+    if minimum is not None and parsed < minimum:
+        raise InputError("invalid_integer", f"invalid integer value: {value}")
+    return parsed
 
 
 def get_duration(state: dict[str, object], key: str) -> timedelta:
@@ -180,11 +184,11 @@ def blocked(
 
 def collect_escalation_signals(state: dict[str, object]) -> list[str]:
     signals: list[str] = []
-    if as_int(state.get("related_failures"), 0) >= 2:
+    if as_int(state.get("related_failures"), 0, minimum=0) >= 2:
         signals.append("related_failures")
-    if as_int(state.get("user_corrections"), 0) >= 2:
+    if as_int(state.get("user_corrections"), 0, minimum=0) >= 2:
         signals.append("user_corrections")
-    if as_int(state.get("unresolved_blocker_count"), 0) >= 1:
+    if as_int(state.get("unresolved_blocker_count"), 0, minimum=0) >= 1:
         signals.append("unresolved_blocker_count")
     if as_bool(state.get("version_mismatch_seen"), False):
         signals.append("version_mismatch_seen")
@@ -241,10 +245,12 @@ def decide(state: dict[str, object]) -> Decision:
     max_runs_per_thread = as_int(
         state.get("max_runs_per_thread_per_day"),
         DEFAULTS["max_runs_per_thread_per_day"],
+        minimum=0,
     )
     max_runs_per_user = as_int(
         state.get("max_runs_per_user_per_day"),
         DEFAULTS["max_runs_per_user_per_day"],
+        minimum=0,
     )
 
     if as_bool(state.get("user_operation_in_progress"), False):
@@ -259,9 +265,9 @@ def decide(state: dict[str, object]) -> Decision:
         return blocked(event_kind, "quiet window after user action has not elapsed", "quiet_after_user_action")
     if now - last_agent_action < quiet_after_agent:
         return blocked(event_kind, "quiet window after agent action has not elapsed", "quiet_after_agent_action")
-    if as_int(state.get("thread_runs_today"), 0) >= max_runs_per_thread:
+    if as_int(state.get("thread_runs_today"), 0, minimum=0) >= max_runs_per_thread:
         return blocked(event_kind, "thread run limit reached", "thread_run_limit_reached")
-    if as_int(state.get("user_runs_today"), 0) >= max_runs_per_user:
+    if as_int(state.get("user_runs_today"), 0, minimum=0) >= max_runs_per_user:
         return blocked(event_kind, "user run limit reached", "user_run_limit_reached")
 
     host_supports_heartbeat = as_bool(state.get("host_supports_heartbeat"), True)

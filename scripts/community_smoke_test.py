@@ -226,18 +226,25 @@ def silent_guardrail_score(
         "mode": "silent_guardrail",
         "observed_signals": observed_signals,
     }
-    if trigger_payload.get("should_run") is False:
+    thread_focus_ok = trigger_payload.get("should_run") is False
+    if thread_focus_ok:
         score += 1
-    if trigger_payload.get("error_code") == expected["error_code"]:
+    resolution_ok = trigger_payload.get("error_code") == expected["error_code"]
+    if resolution_ok:
         score += 1
-    if trigger_payload.get("search_mode") == expected["search_mode"]:
+    search_mode_ok = trigger_payload.get("search_mode") == expected["search_mode"]
+    if search_mode_ok:
         score += 1
     expected_signal = eval_cfg.get("expected_signal")
-    if expected_signal and expected_signal in observed_signals:
+    forbidden_ok = True
+    if expected_signal:
+        forbidden_ok = expected_signal in observed_signals
+    if forbidden_ok:
         score += 1
-    breakdown["thread_focus_ok"] = True
-    breakdown["resolution_ok"] = True
-    breakdown["forbidden_ok"] = True
+    breakdown["thread_focus_ok"] = thread_focus_ok
+    breakdown["resolution_ok"] = resolution_ok
+    breakdown["forbidden_ok"] = forbidden_ok
+    breakdown["search_mode_ok"] = search_mode_ok
     breakdown["score"] = score
     return score, breakdown, normalize_text(trigger_payload.get("reason", ""))
 
@@ -311,6 +318,7 @@ def main() -> int:
                     [sys.executable, str(VALIDATOR), str(suggestion_path)]
                 )
                 validator_ok = validator_returncode == 0 and not validator_crashed
+                # The validator checks contract structure only. Semantic fit is scored below.
                 hallucinated_case = copy.deepcopy(case)
                 hallucinated_case["output"] = make_hallucinated_output(case["output"])
                 hallucination_path = temp_dir / f"{case['id']}.hallucinated.md"
@@ -353,8 +361,10 @@ def main() -> int:
                     "sources": case["sources"],
                     "trigger_ok": trigger_ok,
                     "validator_ok": validator_ok,
+                    "validator_scope": "structure_only",
                     "eval_ok": eval_ok,
                     "hallucination_guard_ok": hallucination_guard_ok,
+                    "hallucination_structure_ok": hallucination_validator_ok,
                     "trigger_output": trigger_output,
                     "validator_output": validator_output,
                     "hallucination_validator_output": hallucination_validator_output,

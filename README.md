@@ -81,6 +81,9 @@ For product-side checks, start with these three entry points:
 - `python scripts/validate_suggestions.py references/suggestion-contract.md`
 - `python scripts/community_smoke_test.py`
 
+`validate_suggestions.py` 只负责结构和契约边界。建议是否贴合当前线程、是否真的推进问题、幻觉提示是否会混入，交给 `community_smoke_test.py` 和 `ablation_test_suggestions.py` 评估。
+`validate_suggestions.py` is the structure and contract gate only. Thread fit, actual problem-solving value, and hallucination resistance are evaluated by `community_smoke_test.py` and `ablation_test_suggestions.py`.
+
 ## 文件 / Files
 
 - [SKILL.md](SKILL.md)
