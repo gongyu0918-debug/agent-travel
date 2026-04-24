@@ -1,7 +1,7 @@
 interface:
   display_name: "Agent Travel"
-  short_description: "OpenClaw heartbeat travel with isolated hints / OpenClaw 心跳窗口里的隔离外出提示"
-  default_prompt: "Use $agent-travel during OpenClaw heartbeat, task-end, scheduled, or explicit user windows when the thread needs one external clue. Run a redacted public-first query plan, keep default search_mode low, and write only advisory-only hints into the isolated suggestion channel. / 在 OpenClaw 的 heartbeat、task-end、scheduled 或用户显式窗口里，当线程需要一条外部线索时使用 $agent-travel。执行脱敏、公开来源优先的 query plan，默认 search_mode 保持 low，只把 advisory-only 提示写入隔离建议通道。"
+  short_description: "OpenClaw heartbeat travel with isolated hints"
+  default_prompt: "Use $agent-travel during OpenClaw heartbeat, task-end, scheduled, or explicit user windows when the thread needs one external clue. Run a redacted public-first query plan, keep default search_mode low, and write only advisory-only hints into the isolated suggestion channel."
 
 policy:
   allow_implicit_invocation: false
