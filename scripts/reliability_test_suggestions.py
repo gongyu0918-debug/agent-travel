@@ -9,12 +9,14 @@ import sys
 import tempfile
 from pathlib import Path
 
+from _report_utils import normalize_report_paths
 from _test_mutators import append_suggestions, replace_line, replace_match_reasoning_block, replace_once
 
 
 ROOT = Path(__file__).resolve().parent.parent
 VALIDATOR = ROOT / "scripts" / "validate_suggestions.py"
 SHOULD_TRAVEL = ROOT / "scripts" / "should_travel.py"
+PLAN_TRAVEL = ROOT / "scripts" / "plan_travel.py"
 CANONICAL = ROOT / "references" / "suggestion-contract.md"
 REPORT_PATH = ROOT / "assets" / "reliability_report.json"
 START = "<!-- agent-travel:suggestions:start -->"
@@ -595,6 +597,73 @@ TRIGGER_CASES = [
     ),
 ]
 
+PLAN_CASES = [
+    (
+        "plan_travel_heartbeat_low_query",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "thread_runs_today": 0,
+            "user_runs_today": 0,
+            "host": "OpenClaw",
+            "symptom": "cron digest repeats stale notes",
+            "constraint": "public-only search",
+            "desired_outcome": "fresh advisory hint",
+        },
+        "Host: OpenClaw\nObserved issue: cron digest repeats stale notes\n",
+        True,
+        "low",
+        1,
+        [],
+    ),
+    (
+        "plan_travel_scheduled_blocked_no_queries",
+        {
+            "enabled": True,
+            "event_kind": "scheduled",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "thread_runs_today": 0,
+            "user_runs_today": 0,
+            "host": "Claude Code",
+            "symptom": "scheduled task repeats old log triage",
+        },
+        "",
+        False,
+        "low",
+        0,
+        [],
+    ),
+    (
+        "plan_travel_redacts_state_secrets",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "thread_runs_today": 0,
+            "user_runs_today": 0,
+            "host": "OpenClaw",
+            "symptom": "cron failed with token=sk-test_should_redact_1234567890",
+            "constraint": "public-only search",
+            "desired_outcome": "safe query",
+        },
+        "Internal URL: http://localhost:3000/admin\nPath: C:\\Users\\admin\\private\\repo\\.env\n",
+        True,
+        "low",
+        1,
+        ["sk-test_should_redact", "localhost:3000", "private\\repo"],
+    ),
+]
+
 
 def run_validator_case(name: str, body: str, expected_pass: bool, temp_dir: Path) -> dict[str, object]:
     path = temp_dir / f"{name}.md"
@@ -680,6 +749,70 @@ def run_trigger_case(
     }
 
 
+def run_plan_case(
+    name: str,
+    state: dict[str, object],
+    context: str,
+    expected_should_run: bool,
+    expected_search_mode: str,
+    expected_query_count: int,
+    forbidden_substrings: list[str],
+    temp_dir: Path,
+) -> dict[str, object]:
+    state_path = temp_dir / f"{name}.json"
+    context_path = temp_dir / f"{name}.txt"
+    state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    context_path.write_text(context, encoding="utf-8")
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(PLAN_TRAVEL), str(state_path), "--context", str(context_path)],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=TIMEOUT_SECONDS,
+        )
+        output = (proc.stdout + proc.stderr).strip()
+        crashed = "Traceback" in output
+        try:
+            payload = json.loads(proc.stdout or "{}")
+        except json.JSONDecodeError:
+            payload = {}
+            crashed = True
+    except subprocess.TimeoutExpired:
+        output = f"TIMEOUT after {TIMEOUT_SECONDS}s"
+        crashed = True
+        payload = {}
+        proc = subprocess.CompletedProcess([], 1)
+
+    decision = payload.get("decision", {}) if isinstance(payload.get("decision"), dict) else {}
+    queries = payload.get("queries", [])
+    serialized = json.dumps(payload, ensure_ascii=False)
+    leaked = [text for text in forbidden_substrings if text in serialized]
+    ok = (
+        decision.get("should_run") == expected_should_run
+        and decision.get("search_mode") == expected_search_mode
+        and isinstance(queries, list)
+        and len(queries) == expected_query_count
+        and not leaked
+        and proc.returncode == 0
+        and not crashed
+    )
+    return {
+        "case": name,
+        "kind": "plan",
+        "expected_should_run": expected_should_run,
+        "actual_should_run": decision.get("should_run"),
+        "expected_search_mode": expected_search_mode,
+        "actual_search_mode": decision.get("search_mode"),
+        "expected_query_count": expected_query_count,
+        "actual_query_count": len(queries) if isinstance(queries, list) else None,
+        "leaked_forbidden_substrings": leaked,
+        "ok": ok,
+        "crashed": crashed,
+        "output": output,
+    }
+
+
 def main() -> int:
     canonical = CANONICAL.read_text(encoding="utf-8")
     results: list[dict[str, object]] = []
@@ -698,9 +831,31 @@ def main() -> int:
                     temp_dir,
                 )
             )
+        for (
+            name,
+            state,
+            context,
+            expected_should_run,
+            expected_search_mode,
+            expected_query_count,
+            forbidden_substrings,
+        ) in PLAN_CASES:
+            results.append(
+                run_plan_case(
+                    name,
+                    state,
+                    context,
+                    expected_should_run,
+                    expected_search_mode,
+                    expected_query_count,
+                    forbidden_substrings,
+                    temp_dir,
+                )
+            )
 
     validator_results = [item for item in results if item["kind"] == "validator"]
     trigger_results = [item for item in results if item["kind"] == "trigger"]
+    plan_results = [item for item in results if item["kind"] == "plan"]
     summary = {
         "total_cases": len(results),
         "passed_cases": sum(1 for item in results if item["ok"]),
@@ -709,8 +864,11 @@ def main() -> int:
         "validator_passed": sum(1 for item in validator_results if item["ok"]),
         "trigger_cases": len(trigger_results),
         "trigger_passed": sum(1 for item in trigger_results if item["ok"]),
+        "plan_cases": len(plan_results),
+        "plan_passed": sum(1 for item in plan_results if item["ok"]),
         "results": results,
     }
+    summary = normalize_report_paths(summary)
     REPORT_PATH.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0 if summary["passed_cases"] == summary["total_cases"] and summary["crash_count"] == 0 else 1

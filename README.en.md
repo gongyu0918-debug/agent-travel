@@ -1,31 +1,65 @@
 # agent-travel
 
-The second law of thermodynamics says a closed system drifts toward entropy. Agents do too. An agent that stays trapped inside the same tools, the same context window, and the same stale assumptions will slowly confuse repetition with truth. `agent-travel` gives it a low-noise micro-travel loop: step out only during heartbeat, task wrap-up, failure recovery, scheduled windows, or idle fallback, then bring back what is still useful for the current problem.
+Give an agent a quiet short trip.
 
-It is not a noisy background crawler and it does not make decisions for the user. It compresses outside practice into advisory-only hints, stores them in an isolated channel, and surfaces them only when the next relevant task appears.
+The second law of thermodynamics says a closed system drifts toward entropy. Agents do too. An agent trapped inside the same tools, the same context window, and the same stale assumptions will slowly confuse repetition with truth. `agent-travel` gives it a controlled way to step outside: during heartbeat, task-end, failure-recovery, scheduled, or idle windows, it checks official docs and community practice, cross-validates the useful parts, and brings back one advisory hint for the active thread.
 
-## Current Scope
+The user-facing moment should feel like this:
 
-This repository currently ships the protocol layer, trigger gate, output contract, validator, and host adapters. Real search execution, query redaction, maturity scoring, and candidate ranking still belong to the host agent or a later integration layer.
+> This looks like the OpenClaw cron failure we saw earlier. I have one travel hint: first verify that the host marked the run as `scheduled_trigger_managed_by_host`, then check whether the host-generated prompt stayed neutral. This is grounded in the official automation docs and a cron troubleshooting thread. It applies to scheduled runs; use idle fallback only when the host lacks heartbeat support.
 
-## Why It Is Lightweight
+## What It Solves
 
-- No daemon. Scheduling stays with the host agent through heartbeat, cron, task-end, or failure hooks.
-- No database. State stays in a lightweight `state.json`, and hints stay in an isolated `suggestions.md`.
-- Public search surfaces are the default. Internal docs, private connectors, and private repos require explicit user opt-in.
-- Every script uses Python stdlib only.
-- Search is executed by the host tools. This repository defines triggers, contracts, validation, and host adapters.
-- The suggestion channel stays isolated. It does not write into the core system prompt, persona, long-term memory, or core AGENT.md/agent.md instructions.
-- Implicit invocation is off by default. Background runs should be wired explicitly through the host's heartbeat, cron, or task-end configuration.
-- `user-invocable: true` keeps manual invocation available, and `disable-model-invocation: true` keeps automatic model-side invocation off.
+Many agent failures come from closed context: versions moved, docs changed, the community already found a pattern, and the current thread keeps reasoning from stale assumptions.
 
-## Scan Note
+`agent-travel` owns one small loop:
 
-Some static scans will pay extra attention to the hostile-payload categories inside [references/threat-model.md](references/threat-model.md). They are defensive labels that show what the host should reject, not instructions that the skill should execute.
+- Decide whether the active thread is worth a quiet research pass.
+- Turn the current problem into a redacted fingerprint and low-budget query plan.
+- Require official grounding plus independent cross-validation.
+- Store only isolated advisory hints for the next relevant turn.
 
-## Recommended Default
+Good fits:
 
-The recommended default is low-frequency, small-scope, and silent by design.
+- A coding agent keeps failing around the same tool, framework, hook, or scheduler.
+- A cron or heartbeat job needs to check docs drift, log patterns, or collected research notes.
+- A task-end hook wants one mature external practice for a fresh unresolved question.
+- A user wants community experience without giving it authority over memory or core instructions.
+
+## What It Brings Back
+
+A travel hint is structured, sourced, scoped, and bounded:
+
+```md
+title: Check host-managed scheduled trigger before cron travel
+hint: For scheduled research, first verify the host marks the run as host-managed or the user opted in to periodic travel.
+solves_point: Prevents background travel from running on arbitrary scheduled prompts.
+fit_reason: Matches scheduled trigger, neutral prompt requirement, OpenClaw-style cron workflow, and advisory-only output.
+do_not_apply_when: The run is manual, user-invoked, or outside the active conversation window.
+evidence:
+- primary_docs: https://docs.openclaw.ai/automation
+- secondary_community: https://www.reddit.com/r/clawdbot/...
+```
+
+The hint stays outside the system prompt, persona, long-term memory, and core `AGENT.md` instructions. It acts as a small note beside the active thread.
+
+## Try It
+
+```powershell
+python scripts/should_travel.py examples/states/heartbeat-ready.json
+python scripts/plan_travel.py examples/states/heartbeat-ready.json --context examples/thread-contexts/openclaw-cron-drift.txt
+python scripts/validate_suggestions.py references/suggestion-contract.md
+python scripts/community_smoke_test.py
+```
+
+- `should_travel.py` answers whether the travel window is open.
+- `plan_travel.py` answers what the host would search, after redaction, without using the network.
+- `validate_suggestions.py` checks the returned advisory contract.
+- `community_smoke_test.py` checks thread fit, problem-solving value, and hallucination resistance with realistic workflow fixtures.
+
+## Recommended Defaults
+
+Low-frequency, small-scope, quiet by default:
 
 - `active_conversation_window = 24h`
 - `default_search_mode = low`
@@ -37,41 +71,43 @@ The recommended default is low-frequency, small-scope, and silent by design.
 - `max_runs_per_user_per_day = 3`
 - `visibility = silent_until_relevant`
 
-`medium` and `high` are escalation modes, not the everyday background default.
+`medium` and `high` are escalation modes for repeated failures, version mismatch, explicit research requests, or blockers that survive a medium pass.
 
-`idle_fallback` fits hosts without heartbeat, or hosts where the operator explicitly enabled it. Heartbeat stays the default background path when available.
-For cron or scheduled travel, the scheduling gate stays closed until the host marks the run as host-managed or the operator opts in to periodic travel. Host-generated prompts should stay neutral and fact-derived from logs, backlog deltas, docs drift, or collected materials. Manually created scheduled prompts may preserve the operator's original wording.
+Scheduled travel uses explicit gating: the host marks the run as host-managed, or the operator opts in to periodic travel. Host-generated scheduled prompts should stay neutral and fact-derived from logs, backlog deltas, docs drift, or collected materials. Manual scheduled prompts may preserve the operator's wording.
 
-## Key Points
+## Safety Boundary
 
-- Search uses three tiers: `primary` for official docs, release notes, and official discussions; `secondary` for search engines, GitHub issues, and Stack Overflow; `tertiary` for forums, blogs, and social media.
-- Every suggestion is cross-validated. At least 1 `primary` evidence item is mandatory, plus 1 non-`primary` cross-validation evidence item.
-- Every kept suggestion must include `match_reasoning`, with axis-by-axis notes explaining why it matched at least 4 of the 5 axes.
-- Output is always advisory-only and scoped to `active_conversation_only`.
-- The host should invoke it only inside a quiet window: no user operation, no agent output in progress, and no pending tool approval.
+- Public search surfaces are the default. Internal docs, private connectors, and private repos require explicit opt-in.
+- External pages are always untrusted data.
+- Commands, role instructions, and memory-write requests from pages are rejectable payloads.
+- Every hint needs at least 1 `primary` evidence item and 1 non-`primary` cross-validation item.
+- Every hint includes `match_reasoning` showing at least 4 of 5 fingerprint axes.
+- Output stays `advisory_only: true` and `thread_scope: active_conversation_only`.
 
-## Do Not Use This For
+Some static scanners flag the hostile-payload categories in [references/threat-model.md](references/threat-model.md). Those strings are defensive fixtures that document what the host should reject.
 
-- Autonomous command execution from web pages.
-- Private-data search without explicit user opt-in.
-- Permanent memory, persona, or core-instruction mutation.
-- Replacing user decisions.
+## Current Implementation
+
+This repository ships a lightweight skill package:
+
+- `SKILL.md` / `SKILL.en.md`: runtime instructions.
+- `scripts/should_travel.py`: trigger decision.
+- `scripts/plan_travel.py`: redacted dry-run query plan, no network access.
+- `scripts/validate_suggestions.py`: advisory contract validator.
+- `scripts/community_smoke_test.py`: realistic workflow smoke and hallucination tests.
+- `agents/openai.yaml`, `agents/openclaw.yaml`, `agents/hermes.yaml`: host adapter notes.
+
+Actual search is performed by the host agent's web/search tools. This package provides trigger policy, redaction planning, contract validation, and tests.
+
+## Real Workflow Tests
+
+The fixture set covers 14 workflows: Claude Code task-end refresh, failure recovery, scheduled log collection, scheduled job health audit, manual scheduled `CLAUDE.md` refresh, weekly reference-sheet refresh, OpenClaw heartbeat isolation, cron research digests, daily summary collection, idle-fallback silence guards, Hermes scheduled docs drift, nightly backlog triage, and repeated-fingerprint dedupe.
+
+Sources and scenario notes live in [references/community-workflows.md](references/community-workflows.md). Smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
 
 ## Companion Skill
 
-`agent-travel` is the single-node background research layer today. It pairs with the same author's [agent-compute-mesh](https://github.com/gongyu0918-debug/agent-compute-mesh): this skill compresses outside practice into structured hints, while the mesh skill turns similar `exploration job` units into stricter execution leases.
-
-## Community Workflow Fixtures
-
-This version ships with 14 real-source workflow fixtures that cover Claude Code task-end refresh, failure recovery, scheduled log collection, scheduled job health audits, manual scheduled `CLAUDE.md` refresh, weekly reference-sheet refresh, OpenClaw heartbeat advisory isolation, cron research digests, daily summary collection, idle-fallback silence guards, plus Hermes scheduled doc-drift scans, nightly backlog triage, and repeated-fingerprint dedupe. The scenarios and source links live in [references/community-workflows.md](references/community-workflows.md), and the smoke results live in [assets/community_smoke_report.json](assets/community_smoke_report.json).
-
-For product-side checks, start with these three entry points:
-
-- `python scripts/should_travel.py <state.json>`
-- `python scripts/validate_suggestions.py references/suggestion-contract.md`
-- `python scripts/community_smoke_test.py`
-
-`validate_suggestions.py` is the structure and contract gate only. Thread fit, actual problem-solving value, and hallucination resistance are evaluated by `community_smoke_test.py` and `ablation_test_suggestions.py`.
+`agent-travel` is the single-node background research layer. It pairs with [agent-compute-mesh](https://github.com/gongyu0918-debug/agent-compute-mesh): travel compresses outside practice into structured hints, while the mesh design explores stricter execution leases for `exploration job` units.
 
 ## Files
 
@@ -86,11 +122,15 @@ For product-side checks, start with these three entry points:
 - [references/threat-model.md](references/threat-model.md)
 - [references/host-adapters.md](references/host-adapters.md)
 - [references/community-workflows.md](references/community-workflows.md)
-- [scripts/validate_suggestions.py](scripts/validate_suggestions.py)
 - [scripts/should_travel.py](scripts/should_travel.py)
+- [scripts/plan_travel.py](scripts/plan_travel.py)
+- [scripts/validate_suggestions.py](scripts/validate_suggestions.py)
 - [scripts/reliability_test_suggestions.py](scripts/reliability_test_suggestions.py)
 - [scripts/ablation_test_suggestions.py](scripts/ablation_test_suggestions.py)
 - [scripts/community_smoke_test.py](scripts/community_smoke_test.py)
+- [examples/states/heartbeat-ready.json](examples/states/heartbeat-ready.json)
+- [examples/states/scheduled-host-managed.json](examples/states/scheduled-host-managed.json)
+- [examples/states/failure-recovery.json](examples/states/failure-recovery.json)
 - [assets/reliability_report.json](assets/reliability_report.json)
 - [assets/ablation_report.json](assets/ablation_report.json)
 - [assets/community_smoke_report.json](assets/community_smoke_report.json)

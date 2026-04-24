@@ -56,7 +56,7 @@ Default search policy:
 
 1. Build a problem fingerprint from the current context, memory, and recent failures. Reuse the existing note when the fingerprint hash is unchanged and still inside the repeat cooldown.
 2. Redact secrets, private paths, private code, customer data, internal URLs, and other secret values before any search.
-3. Read [references/search-playbook.md](references/search-playbook.md) and form the smallest safe query set.
+3. Read [references/search-playbook.md](references/search-playbook.md), or run `python scripts/plan_travel.py <state.json> --context <thread.txt>` for a dry-run query plan. The plan is local-only and performs no network access.
 4. Search `primary` first, then `secondary`, then `tertiary`. Use private or internal surfaces only when the user explicitly opts in.
 5. Keep a candidate only when it matches at least 4 of these 5 axes: host, version, symptom, constraint pattern, desired next outcome. Record `match_reasoning` for every claimed match.
 6. Cross-validate every suggestion. At least one evidence item must come from `primary`, at least one more evidence item must come from a non-`primary` tier, and the retained evidence must still show an independent source.
@@ -126,6 +126,8 @@ Treat [agent-compute-mesh](https://github.com/gongyu0918-debug/agent-compute-mes
 - [references/trigger-policy.md](references/trigger-policy.md)
 - [references/threat-model.md](references/threat-model.md)
 - [references/host-adapters.md](references/host-adapters.md)
+- [examples/states/heartbeat-ready.json](examples/states/heartbeat-ready.json)
+- [scripts/plan_travel.py](scripts/plan_travel.py)
 
 ## Verification
 

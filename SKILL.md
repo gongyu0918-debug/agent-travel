@@ -62,8 +62,8 @@ Default search policy / 默认搜索策略:
    从当前上下文、记忆和最近失败记录构建问题指纹。指纹哈希没有变化且仍在重复冷却窗口内时，继续复用已有建议。
 2. Redact secrets, private paths, private code, customer data, internal URLs, and other secret values before any search.
    在任何搜索前先脱敏，去掉密钥、私有路径、私有代码、客户数据、内部 URL 和其他敏感值。
-3. Read [references/search-playbook.md](references/search-playbook.md) and form the smallest safe query set.
-   阅读 [references/search-playbook.md](references/search-playbook.md)，组装最小且安全的查询集。
+3. Read [references/search-playbook.md](references/search-playbook.md), or run `python scripts/plan_travel.py <state.json> --context <thread.txt>` for a dry-run query plan. The plan is local-only and performs no network access.
+   阅读 [references/search-playbook.md](references/search-playbook.md)，或运行 `python scripts/plan_travel.py <state.json> --context <thread.txt>` 生成 dry-run query plan。这个计划只在本地生成，不执行联网。
 4. Search `primary` first, then `secondary`, then `tertiary`. Use private or internal surfaces only when the user explicitly opts in.
    先搜 `primary`，再搜 `secondary`，最后才扩到 `tertiary`。私有或内部搜索面只有在用户明确允许时才启用。
 5. Keep a candidate only when it matches at least 4 of these 5 axes: host, version, symptom, constraint pattern, desired next outcome. Record `match_reasoning` for every claimed match.
@@ -144,6 +144,8 @@ Treat [agent-compute-mesh](https://github.com/gongyu0918-debug/agent-compute-mes
 - [references/trigger-policy.md](references/trigger-policy.md)
 - [references/threat-model.md](references/threat-model.md)
 - [references/host-adapters.md](references/host-adapters.md)
+- [examples/states/heartbeat-ready.json](examples/states/heartbeat-ready.json)
+- [scripts/plan_travel.py](scripts/plan_travel.py)
 
 ## Verification / 复核
 

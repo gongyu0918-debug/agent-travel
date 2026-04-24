@@ -11,6 +11,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from _report_utils import normalize_report_paths
+
 
 ROOT = Path(__file__).resolve().parent.parent
 VALIDATOR = ROOT / "scripts" / "validate_suggestions.py"
@@ -391,6 +393,7 @@ def main() -> int:
         "ablation_positive": sum(1 for item in results if item["score_delta"] > 0),
         "results": results,
     }
+    summary = normalize_report_paths(summary)
     REPORT_PATH.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     all_passed = (

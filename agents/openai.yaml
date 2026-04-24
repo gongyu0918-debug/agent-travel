@@ -1,7 +1,7 @@
 interface:
   display_name: "Agent Travel"
-  short_description: "Low-noise micro-travel hints / 低噪声外出学习提示"
-  default_prompt: "Use $agent-travel to run small-scope micro-travel in quiet windows, search public sources first, keep official grounding, and store only advisory-only hints for the next relevant task. / 用 $agent-travel 在安静窗口里执行小范围 micro-travel，先查公开来源并保留官方锚点，只为下一次相关任务存储 advisory-only 提示。"
+  short_description: "Quiet research trips for active agent threads / 给活跃线程的一次安静外出取经"
+  default_prompt: "Use $agent-travel when an active thread has a quiet window and would benefit from one redacted, public-first query plan. Keep the run low-budget by default, require official grounding plus cross-validation, and store only advisory-only hints for the next relevant turn. / 当活跃线程进入安静窗口，并且需要一份脱敏、公开来源优先的搜索计划时使用 $agent-travel。默认低预算，要求官方锚点和交叉验证，只为下一次相关回合保存 advisory-only 提示。"
 
 policy:
   allow_implicit_invocation: false
