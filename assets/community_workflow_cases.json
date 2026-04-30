@@ -33,7 +33,7 @@
     "expected": {
       "should_run": true,
       "search_mode": "medium",
-      "error_code": "ready",
+      "error_code": null,
       "trigger_reason": "task_end"
     },
     "eval": {
@@ -123,7 +123,7 @@
     "expected": {
       "should_run": true,
       "search_mode": "medium",
-      "error_code": "ready",
+      "error_code": null,
       "trigger_reason": "failure_recovery"
     },
     "eval": {
@@ -213,7 +213,7 @@
     "expected": {
       "should_run": true,
       "search_mode": "low",
-      "error_code": "ready",
+      "error_code": null,
       "trigger_reason": "heartbeat"
     },
     "eval": {
@@ -353,7 +353,7 @@
     "expected": {
       "should_run": true,
       "search_mode": "low",
-      "error_code": "ready",
+      "error_code": null,
       "trigger_reason": "scheduled"
     },
     "eval": {
@@ -495,7 +495,7 @@
     "expected": {
       "should_run": true,
       "search_mode": "low",
-      "error_code": "ready",
+      "error_code": null,
       "trigger_reason": "scheduled"
     },
     "eval": {
@@ -639,7 +639,7 @@
     "expected": {
       "should_run": true,
       "search_mode": "low",
-      "error_code": "ready",
+      "error_code": null,
       "trigger_reason": "scheduled"
     },
     "eval": {
@@ -737,7 +737,7 @@
     "expected": {
       "should_run": true,
       "search_mode": "low",
-      "error_code": "ready",
+      "error_code": null,
       "trigger_reason": "scheduled"
     },
     "eval": {
@@ -835,7 +835,7 @@
     "expected": {
       "should_run": true,
       "search_mode": "low",
-      "error_code": "ready",
+      "error_code": null,
       "trigger_reason": "scheduled"
     },
     "eval": {
@@ -934,7 +934,7 @@
     "expected": {
       "should_run": true,
       "search_mode": "low",
-      "error_code": "ready",
+      "error_code": null,
       "trigger_reason": "scheduled"
     },
     "eval": {
@@ -1027,7 +1027,7 @@
     "expected": {
       "should_run": true,
       "search_mode": "low",
-      "error_code": "ready",
+      "error_code": null,
       "trigger_reason": "scheduled"
     },
     "eval": {
@@ -1119,7 +1119,7 @@
     "expected": {
       "should_run": true,
       "search_mode": "low",
-      "error_code": "ready",
+      "error_code": null,
       "trigger_reason": "scheduled"
     },
     "eval": {

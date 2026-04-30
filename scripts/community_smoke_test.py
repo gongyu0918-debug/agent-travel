@@ -11,10 +11,14 @@ import sys
 import tempfile
 from pathlib import Path
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
 from _report_utils import normalize_report_paths
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = SCRIPT_DIR.parent
 VALIDATOR = ROOT / "scripts" / "validate_suggestions.py"
 SHOULD_TRAVEL = ROOT / "scripts" / "should_travel.py"
 CASES_PATH = ROOT / "assets" / "community_workflow_cases.json"
@@ -29,53 +33,61 @@ DEFAULT_FORBIDDEN_TERMS = [
     "deep crawl",
     "permanent",
 ]
+TOP_LEVEL_OUTPUT_FIELDS = [
+    "generated_at",
+    "expires_at",
+    "search_mode",
+    "tool_preference",
+    "source_scope",
+    "thread_scope",
+    "problem_fingerprint",
+    "advisory_only",
+    "trigger_reason",
+    "visibility",
+    "fingerprint_hash",
+    "reuse_gate",
+]
+SUGGESTION_SCALAR_FIELDS = [
+    "title",
+    "applies_when",
+    "hint",
+    "confidence",
+    "manual_check",
+    "solves_point",
+    "new_idea",
+    "fit_reason",
+]
+
+
+def render_top_level(output: dict[str, object]) -> list[str]:
+    return [
+        START,
+        "# agent-travel suggestions",
+        *[f"{field}: {output[field]}" for field in TOP_LEVEL_OUTPUT_FIELDS],
+    ]
+
+
+def render_suggestion(index: int, item: dict[str, object]) -> list[str]:
+    lines = ["", f"## suggestion-{index}"]
+    lines.extend(f"{field}: {item[field]}" for field in SUGGESTION_SCALAR_FIELDS)
+    lines.append("match_reasoning:")
+    lines.extend(f"- {reasoning}" for reasoning in item["match_reasoning"])
+    lines.extend(
+        [
+            f"version_scope: {item['version_scope']}",
+            f"do_not_apply_when: {item['do_not_apply_when']}",
+            "evidence:",
+        ]
+    )
+    lines.extend(f"- {evidence}" for evidence in item["evidence"])
+    return lines
 
 
 def render_case_markdown(case: dict[str, object]) -> str:
     output = case["output"]
-    suggestion_lines = [
-        START,
-        "# agent-travel suggestions",
-        f"generated_at: {output['generated_at']}",
-        f"expires_at: {output['expires_at']}",
-        f"search_mode: {output['search_mode']}",
-        f"tool_preference: {output['tool_preference']}",
-        f"source_scope: {output['source_scope']}",
-        f"thread_scope: {output['thread_scope']}",
-        f"problem_fingerprint: {output['problem_fingerprint']}",
-        f"advisory_only: {output['advisory_only']}",
-        f"trigger_reason: {output['trigger_reason']}",
-        f"visibility: {output['visibility']}",
-        f"fingerprint_hash: {output['fingerprint_hash']}",
-        f"reuse_gate: {output['reuse_gate']}",
-    ]
+    suggestion_lines = render_top_level(output)
     for index, item in enumerate(output["suggestions"], start=1):
-        suggestion_lines.extend(
-            [
-                "",
-                f"## suggestion-{index}",
-                f"title: {item['title']}",
-                f"applies_when: {item['applies_when']}",
-                f"hint: {item['hint']}",
-                f"confidence: {item['confidence']}",
-                f"manual_check: {item['manual_check']}",
-                f"solves_point: {item['solves_point']}",
-                f"new_idea: {item['new_idea']}",
-                f"fit_reason: {item['fit_reason']}",
-                "match_reasoning:",
-            ]
-        )
-        for reasoning in item["match_reasoning"]:
-            suggestion_lines.append(f"- {reasoning}")
-        suggestion_lines.extend(
-            [
-                f"version_scope: {item['version_scope']}",
-                f"do_not_apply_when: {item['do_not_apply_when']}",
-                "evidence:",
-            ]
-        )
-        for evidence in item["evidence"]:
-            suggestion_lines.append(f"- {evidence}")
+        suggestion_lines.extend(render_suggestion(index, item))
     suggestion_lines.append(END)
     return "\n".join(suggestion_lines) + "\n"
 
@@ -134,6 +146,77 @@ def extract_evidence_tiers(output: dict[str, object]) -> set[str]:
     return tiers
 
 
+def list_value(value: object) -> list[object]:
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple, set)):
+        return list(value)
+    return [value]
+
+
+def normalized_terms(eval_cfg: dict[str, object], key: str, fallback: list[object]) -> list[str]:
+    return [normalize_text(str(term)) for term in list_value(eval_cfg.get(key, fallback))]
+
+
+def minimum_hits(eval_cfg: dict[str, object], key: str, terms: list[str]) -> int:
+    default = max(1, len(terms) - 1) if terms else 0
+    return int(eval_cfg.get(key, default))
+
+
+def count_hits(terms: list[str], text: str) -> int:
+    return sum(1 for term in terms if term and term in text)
+
+
+def positive_term_metrics(output: dict[str, object], eval_cfg: dict[str, object]) -> tuple[dict[str, object], str]:
+    text = content_blob(output)
+    fallback_terms = list_value(eval_cfg.get("pain_terms"))
+    thread_focus_terms = normalized_terms(eval_cfg, "thread_focus_terms", fallback_terms)
+    resolution_terms = normalized_terms(eval_cfg, "resolution_terms", fallback_terms)
+    forbidden_terms = normalized_terms(eval_cfg, "forbidden_terms", DEFAULT_FORBIDDEN_TERMS)
+    required_tiers = set(eval_cfg.get("required_evidence_tiers", []))
+    actual_tiers = extract_evidence_tiers(output)
+    thread_focus_min = minimum_hits(eval_cfg, "min_thread_focus_hits", thread_focus_terms)
+    resolution_min = minimum_hits(eval_cfg, "min_resolution_hits", resolution_terms)
+    forbidden_max = int(eval_cfg.get("max_forbidden_hits", 0))
+    return {
+        "thread_focus_hits": count_hits(thread_focus_terms, text),
+        "thread_focus_total": len(thread_focus_terms),
+        "resolution_hits": count_hits(resolution_terms, text),
+        "resolution_total": len(resolution_terms),
+        "forbidden_hits": count_hits(forbidden_terms, text),
+        "forbidden_total": len(forbidden_terms),
+        "required_evidence_tiers": sorted(required_tiers),
+        "actual_evidence_tiers": sorted(actual_tiers),
+        "thread_focus_min": thread_focus_min,
+        "resolution_min": resolution_min,
+        "forbidden_max": forbidden_max,
+        "tiers_ok": required_tiers <= actual_tiers,
+    }, text
+
+
+def positive_contract_checks(
+    case: dict[str, object],
+    output: dict[str, object],
+    suggestion: dict[str, object],
+    trigger_payload: dict[str, object],
+    metrics: dict[str, object],
+    eval_cfg: dict[str, object],
+) -> list[bool]:
+    expected_trigger_reason = case["expected"].get("trigger_reason") or case["state"].get("event_kind")
+    return [
+        output["advisory_only"] == "true" and output["thread_scope"] == "active_conversation_only",
+        output["visibility"] == eval_cfg.get("expected_visibility", "silent_until_relevant"),
+        output["reuse_gate"] == "min_4_of_5_axes_and_ttl_valid",
+        len(suggestion["match_reasoning"]) >= 4,
+        bool(metrics["tiers_ok"]),
+        bool(metrics["thread_focus_ok"]),
+        bool(metrics["resolution_ok"]),
+        bool(metrics["forbidden_ok"]),
+        bool(suggestion["manual_check"] and suggestion["do_not_apply_when"] and suggestion["version_scope"]),
+        trigger_payload.get("trigger_reason") == expected_trigger_reason,
+    ]
+
+
 def positive_usefulness_score(
     case: dict[str, object],
     trigger_payload: dict[str, object],
@@ -141,77 +224,12 @@ def positive_usefulness_score(
     output = case["output"]
     suggestion = output["suggestions"][0]
     eval_cfg = case.get("eval", {})
-    text = content_blob(output)
-    fallback_terms = eval_cfg.get("pain_terms", [])
-    thread_focus_terms = [normalize_text(term) for term in eval_cfg.get("thread_focus_terms", fallback_terms)]
-    resolution_terms = [normalize_text(term) for term in eval_cfg.get("resolution_terms", fallback_terms)]
-    forbidden_terms = [
-        normalize_text(term) for term in eval_cfg.get("forbidden_terms", DEFAULT_FORBIDDEN_TERMS)
-    ]
-    thread_focus_hits = sum(1 for term in thread_focus_terms if term and term in text)
-    resolution_hits = sum(1 for term in resolution_terms if term and term in text)
-    forbidden_hits = sum(1 for term in forbidden_terms if term and term in text)
-    required_tiers = set(eval_cfg.get("required_evidence_tiers", []))
-    actual_tiers = extract_evidence_tiers(output)
-    thread_focus_min = int(
-        eval_cfg.get(
-            "min_thread_focus_hits",
-            max(1, len(thread_focus_terms) - 1) if thread_focus_terms else 0,
-        )
-    )
-    resolution_min = int(
-        eval_cfg.get(
-            "min_resolution_hits",
-            max(1, len(resolution_terms) - 1) if resolution_terms else 0,
-        )
-    )
-    forbidden_max = int(eval_cfg.get("max_forbidden_hits", 0))
-    score = 0
-    breakdown: dict[str, object] = {
-        "mode": "positive",
-        "thread_focus_hits": thread_focus_hits,
-        "thread_focus_total": len(thread_focus_terms),
-        "resolution_hits": resolution_hits,
-        "resolution_total": len(resolution_terms),
-        "forbidden_hits": forbidden_hits,
-        "forbidden_total": len(forbidden_terms),
-        "required_evidence_tiers": sorted(required_tiers),
-        "actual_evidence_tiers": sorted(actual_tiers),
-        "thread_focus_min": thread_focus_min,
-        "resolution_min": resolution_min,
-        "forbidden_max": forbidden_max,
-    }
-
-    if output["advisory_only"] == "true" and output["thread_scope"] == "active_conversation_only":
-        score += 1
-    if output["visibility"] == eval_cfg.get("expected_visibility", "silent_until_relevant"):
-        score += 1
-    if output["reuse_gate"] == "min_4_of_5_axes_and_ttl_valid":
-        score += 1
-    if len(suggestion["match_reasoning"]) >= 4:
-        score += 1
-    tiers_ok = required_tiers <= actual_tiers
-    if tiers_ok:
-        score += 1
-    thread_focus_ok = thread_focus_hits >= thread_focus_min
-    if thread_focus_ok:
-        score += 1
-    resolution_ok = resolution_hits >= resolution_min
-    if resolution_ok:
-        score += 1
-    forbidden_ok = forbidden_hits <= forbidden_max
-    if forbidden_ok:
-        score += 1
-    if suggestion["manual_check"] and suggestion["do_not_apply_when"] and suggestion["version_scope"]:
-        score += 1
-    expected_trigger_reason = case["expected"].get("trigger_reason") or case["state"].get("event_kind")
-    if trigger_payload.get("trigger_reason") == expected_trigger_reason:
-        score += 1
-
-    breakdown["tiers_ok"] = tiers_ok
-    breakdown["thread_focus_ok"] = thread_focus_ok
-    breakdown["resolution_ok"] = resolution_ok
-    breakdown["forbidden_ok"] = forbidden_ok
+    breakdown, text = positive_term_metrics(output, eval_cfg)
+    breakdown["mode"] = "positive"
+    breakdown["thread_focus_ok"] = breakdown["thread_focus_hits"] >= breakdown["thread_focus_min"]
+    breakdown["resolution_ok"] = breakdown["resolution_hits"] >= breakdown["resolution_min"]
+    breakdown["forbidden_ok"] = breakdown["forbidden_hits"] <= breakdown["forbidden_max"]
+    score = sum(positive_contract_checks(case, output, suggestion, trigger_payload, breakdown, eval_cfg))
     breakdown["score"] = score
     return score, breakdown, text
 
@@ -275,6 +293,17 @@ def make_hallucinated_output(output: dict[str, object]) -> dict[str, object]:
     return mutated
 
 
+def without_skill_baseline_score(case: dict[str, object]) -> tuple[int, dict[str, object]]:
+    mode = case.get("eval", {}).get("mode", "positive" if case.get("output") else "silent_guardrail")
+    return 0, {
+        "mode": "without_skill_baseline",
+        "case_mode": mode,
+        "emits_isolated_suggestion": False,
+        "has_contract_validation": False,
+        "has_cross_validation": False,
+    }
+
+
 def evaluate_case(
     case: dict[str, object],
     trigger_payload: dict[str, object],
@@ -289,99 +318,137 @@ def evaluate_case(
     return score, breakdown, score >= min_score, text
 
 
-def main() -> int:
-    cases = json.loads(CASES_PATH.read_text(encoding="utf-8"))
-    results = []
-    with tempfile.TemporaryDirectory(prefix="agent-travel-community-") as temp:
-        temp_dir = Path(temp)
-        for case in cases:
-            state_path = temp_dir / f"{case['id']}.state.json"
-            state_path.write_text(json.dumps(case["state"], ensure_ascii=False, indent=2), encoding="utf-8")
-            trigger_returncode, trigger_output, trigger_crashed = run_command(
-                [sys.executable, str(SHOULD_TRAVEL), str(state_path)]
-            )
-            try:
-                trigger_payload = json.loads(trigger_output) if trigger_output else {}
-            except json.JSONDecodeError:
-                trigger_payload = {}
-                trigger_crashed = True
+def run_trigger_for_case(
+    case: dict[str, object],
+    temp_dir: Path,
+) -> tuple[int, str, bool, dict[str, object]]:
+    state_path = temp_dir / f"{case['id']}.state.json"
+    state_path.write_text(json.dumps(case["state"], ensure_ascii=False, indent=2), encoding="utf-8")
+    returncode, output, crashed = run_command([sys.executable, str(SHOULD_TRAVEL), str(state_path)])
+    try:
+        payload = json.loads(output) if output else {}
+    except json.JSONDecodeError:
+        payload = {}
+        crashed = True
+    return returncode, output, crashed, payload
 
-            validator_ok = True
-            validator_output = "SKIPPED: no output fixture for blocked case"
-            hallucination_validator_ok = True
-            hallucination_validator_output = "SKIPPED: no output fixture for blocked case"
-            hallucinated_score = 0
-            hallucination_guard_ok = True
-            hallucination_breakdown: dict[str, object] | None = None
-            if "output" in case:
-                suggestion_path = temp_dir / f"{case['id']}.suggestions.md"
-                suggestion_path.write_text(render_case_markdown(case), encoding="utf-8")
-                validator_returncode, validator_output, validator_crashed = run_command(
-                    [sys.executable, str(VALIDATOR), str(suggestion_path)]
-                )
-                validator_ok = validator_returncode == 0 and not validator_crashed
-                # The validator checks contract structure only. Semantic fit is scored below.
-                hallucinated_case = copy.deepcopy(case)
-                hallucinated_case["output"] = make_hallucinated_output(case["output"])
-                hallucination_path = temp_dir / f"{case['id']}.hallucinated.md"
-                hallucination_path.write_text(render_case_markdown(hallucinated_case), encoding="utf-8")
-                hallucination_returncode, hallucination_validator_output, hallucination_validator_crashed = run_command(
-                    [sys.executable, str(VALIDATOR), str(hallucination_path)]
-                )
-                hallucination_validator_ok = (
-                    hallucination_returncode == 0 and not hallucination_validator_crashed
-                )
 
-            expected = case["expected"]
-            trigger_ok = (
-                trigger_returncode == 0
-                and not trigger_crashed
-                and trigger_payload.get("should_run") == expected["should_run"]
-                and trigger_payload.get("search_mode") == expected["search_mode"]
-                and trigger_payload.get("error_code") == expected["error_code"]
-            )
-            with_skill_score, score_breakdown, eval_ok, returned_text = evaluate_case(case, trigger_payload)
-            without_skill_score = 0
-            if "output" in case:
-                hallucinated_score, hallucination_breakdown, _, hallucinated_text = evaluate_case(
-                    hallucinated_case,
-                    trigger_payload,
-                )
-                hallucination_min_gap = int(case.get("eval", {}).get("min_hallucination_gap", 3))
-                hallucination_guard_ok = (
-                    hallucination_validator_ok
-                    and with_skill_score - hallucinated_score >= hallucination_min_gap
-                    and hallucinated_score < with_skill_score
-                )
-            else:
-                hallucinated_text = ""
-            results.append(
-                {
-                    "id": case["id"],
-                    "title": case["title"],
-                    "host": case["host"],
-                    "sources": case["sources"],
-                    "trigger_ok": trigger_ok,
-                    "validator_ok": validator_ok,
-                    "validator_scope": "structure_only",
-                    "eval_ok": eval_ok,
-                    "hallucination_guard_ok": hallucination_guard_ok,
-                    "hallucination_structure_ok": hallucination_validator_ok,
-                    "trigger_output": trigger_output,
-                    "validator_output": validator_output,
-                    "hallucination_validator_output": hallucination_validator_output,
-                    "with_skill_score": with_skill_score,
-                    "hallucinated_score": hallucinated_score,
-                    "without_skill_score": without_skill_score,
-                    "score_delta": with_skill_score - without_skill_score,
-                    "score_breakdown": score_breakdown,
-                    "hallucination_breakdown": hallucination_breakdown,
-                    "thread_focus_ok": bool(score_breakdown.get("thread_focus_ok", False)),
-                    "resolution_ok": bool(score_breakdown.get("resolution_ok", False)),
-                    "forbidden_ok": bool(score_breakdown.get("forbidden_ok", False)),
-                }
-            )
+def validate_output_fixture(case: dict[str, object], temp_dir: Path) -> dict[str, object]:
+    result: dict[str, object] = {
+        "validator_ok": True,
+        "validator_output": "SKIPPED: no output fixture for blocked case",
+        "hallucination_validator_ok": True,
+        "hallucination_validator_output": "SKIPPED: no output fixture for blocked case",
+        "hallucinated_case": None,
+    }
+    if "output" not in case:
+        return result
 
+    suggestion_path = temp_dir / f"{case['id']}.suggestions.md"
+    suggestion_path.write_text(render_case_markdown(case), encoding="utf-8")
+    validator_returncode, validator_output, validator_crashed = run_command(
+        [sys.executable, str(VALIDATOR), str(suggestion_path)]
+    )
+
+    hallucinated_case = copy.deepcopy(case)
+    hallucinated_case["output"] = make_hallucinated_output(case["output"])
+    hallucination_path = temp_dir / f"{case['id']}.hallucinated.md"
+    hallucination_path.write_text(render_case_markdown(hallucinated_case), encoding="utf-8")
+    hallucination_returncode, hallucination_output, hallucination_crashed = run_command(
+        [sys.executable, str(VALIDATOR), str(hallucination_path)]
+    )
+
+    result.update(
+        {
+            "validator_ok": validator_returncode == 0 and not validator_crashed,
+            "validator_output": validator_output,
+            "hallucination_validator_ok": hallucination_returncode == 0 and not hallucination_crashed,
+            "hallucination_validator_output": hallucination_output,
+            "hallucinated_case": hallucinated_case,
+        }
+    )
+    return result
+
+
+def trigger_matches_expected(
+    returncode: int,
+    crashed: bool,
+    payload: dict[str, object],
+    expected: dict[str, object],
+) -> bool:
+    return (
+        returncode == 0
+        and not crashed
+        and payload.get("should_run") == expected["should_run"]
+        and payload.get("search_mode") == expected["search_mode"]
+        and payload.get("error_code") == expected["error_code"]
+    )
+
+
+def evaluate_hallucination_guard(
+    case: dict[str, object],
+    fixture: dict[str, object],
+    trigger_payload: dict[str, object],
+    with_skill_score: int,
+) -> tuple[int, dict[str, object] | None, bool]:
+    hallucinated_case = fixture["hallucinated_case"]
+    if not isinstance(hallucinated_case, dict):
+        return 0, None, True
+
+    hallucinated_score, hallucination_breakdown, _, _ = evaluate_case(
+        hallucinated_case,
+        trigger_payload,
+    )
+    hallucination_min_gap = int(case.get("eval", {}).get("min_hallucination_gap", 3))
+    hallucination_guard_ok = (
+        bool(fixture["hallucination_validator_ok"])
+        and with_skill_score - hallucinated_score >= hallucination_min_gap
+        and hallucinated_score < with_skill_score
+    )
+    return hallucinated_score, hallucination_breakdown, hallucination_guard_ok
+
+
+def build_case_result(case: dict[str, object], temp_dir: Path) -> dict[str, object]:
+    trigger_returncode, trigger_output, trigger_crashed, trigger_payload = run_trigger_for_case(case, temp_dir)
+    fixture = validate_output_fixture(case, temp_dir)
+    expected = case["expected"]
+    with_skill_score, score_breakdown, eval_ok, _ = evaluate_case(case, trigger_payload)
+    without_skill_score, without_skill_breakdown = without_skill_baseline_score(case)
+    hallucinated_score, hallucination_breakdown, hallucination_guard_ok = evaluate_hallucination_guard(
+        case,
+        fixture,
+        trigger_payload,
+        with_skill_score,
+    )
+
+    return {
+        "id": case["id"],
+        "title": case["title"],
+        "host": case["host"],
+        "sources": case["sources"],
+        "trigger_ok": trigger_matches_expected(trigger_returncode, trigger_crashed, trigger_payload, expected),
+        "validator_ok": fixture["validator_ok"],
+        "validator_scope": "structure_only",
+        "eval_ok": eval_ok,
+        "hallucination_guard_ok": hallucination_guard_ok,
+        "hallucination_structure_ok": fixture["hallucination_validator_ok"],
+        "trigger_output": trigger_output,
+        "validator_output": fixture["validator_output"],
+        "hallucination_validator_output": fixture["hallucination_validator_output"],
+        "with_skill_score": with_skill_score,
+        "hallucinated_score": hallucinated_score,
+        "without_skill_score": without_skill_score,
+        "without_skill_breakdown": without_skill_breakdown,
+        "score_delta": with_skill_score - without_skill_score,
+        "score_breakdown": score_breakdown,
+        "hallucination_breakdown": hallucination_breakdown,
+        "thread_focus_ok": bool(score_breakdown.get("thread_focus_ok", False)),
+        "resolution_ok": bool(score_breakdown.get("resolution_ok", False)),
+        "forbidden_ok": bool(score_breakdown.get("forbidden_ok", False)),
+    }
+
+
+def summarize_results(results: list[dict[str, object]]) -> dict[str, object]:
     summary = {
         "total_cases": len(results),
         "smoke_passed": sum(1 for item in results if item["trigger_ok"] and item["validator_ok"]),
@@ -393,10 +460,11 @@ def main() -> int:
         "ablation_positive": sum(1 for item in results if item["score_delta"] > 0),
         "results": results,
     }
-    summary = normalize_report_paths(summary)
-    REPORT_PATH.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
-    all_passed = (
+    return normalize_report_paths(summary)
+
+
+def all_checks_passed(summary: dict[str, object]) -> bool:
+    return (
         summary["smoke_passed"] == summary["total_cases"]
         and summary["eval_passed"] == summary["total_cases"]
         and summary["thread_focus_passed"] == summary["total_cases"]
@@ -405,7 +473,18 @@ def main() -> int:
         and summary["hallucination_guard_passed"] == summary["total_cases"]
         and summary["ablation_positive"] == summary["total_cases"]
     )
-    return 0 if all_passed else 1
+
+
+def main() -> int:
+    cases = json.loads(CASES_PATH.read_text(encoding="utf-8"))
+    with tempfile.TemporaryDirectory(prefix="agent-travel-community-") as temp:
+        temp_dir = Path(temp)
+        results = [build_case_result(case, temp_dir) for case in cases]
+
+    summary = summarize_results(results)
+    REPORT_PATH.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    return 0 if all_checks_passed(summary) else 1
 
 
 if __name__ == "__main__":

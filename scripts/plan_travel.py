@@ -7,10 +7,15 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
-from should_travel import Decision, InputError, decide, get_event_kind
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from should_travel import Decision, InputError, decide, decision_payload, get_event_kind
 
 
 KNOWN_HOSTS = [
@@ -55,7 +60,32 @@ SECRET_PATTERNS = [
         "email",
         re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
     ),
+    (
+        "ipv4_address",
+        re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b"),
+    ),
+    (
+        "phone_number",
+        re.compile(
+            r"\b(?:\+?86[-\s]?)?1[3-9]\d[-\s]?\d{4}[-\s]?\d{4}\b|"
+            r"\b(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}\b"
+        ),
+    ),
 ]
+QUERY_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "at",
+    "for",
+    "from",
+    "in",
+    "of",
+    "or",
+    "the",
+    "to",
+    "with",
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -121,7 +151,7 @@ def redact_value(value: Any) -> tuple[Any, dict[str, int]]:
 
 def clean_term(value: object, fallback: str) -> str:
     text = str(value or "").strip()
-    text = re.sub(r"\[REDACTED_[A-Z_]+\]", "", text)
+    text = re.sub(r"\[REDACTED_[A-Z0-9_]+\]", "", text)
     text = re.sub(r"\s+", " ", text)
     text = re.sub(r"\b(?:with|at|from|to|for|and|or)\s*$", "", text, flags=re.I)
     text = text.strip("`'\" ")
@@ -214,7 +244,13 @@ def compact_query(*parts: str) -> str:
             continue
         seen.add(key)
         kept.append(cleaned)
-    return " ".join(kept)
+    tokens = " ".join(kept).split()
+    filtered = [
+        token
+        for token in tokens
+        if re.sub(r"^\W+|\W+$", "", token.lower()) not in QUERY_STOPWORDS
+    ]
+    return " ".join(filtered)
 
 
 def build_queries(terms: dict[str, str], search_mode: str) -> list[dict[str, str]]:
@@ -251,20 +287,6 @@ def build_queries(terms: dict[str, str], search_mode: str) -> list[dict[str, str
         },
     ]
     return candidates[: QUERY_LIMITS.get(search_mode, 1)]
-
-
-def decision_payload(decision: Decision) -> dict[str, Any]:
-    payload: dict[str, Any] = {
-        "should_run": decision.should_run,
-        "search_mode": decision.search_mode,
-        "trigger_reason": decision.trigger_reason,
-        "reason": decision.reason,
-    }
-    if decision.error_code is not None:
-        payload["error_code"] = decision.error_code
-    if decision.observed_signals:
-        payload["observed_signals"] = decision.observed_signals
-    return payload
 
 
 def build_plan(state: dict[str, Any], context: str) -> dict[str, Any]:

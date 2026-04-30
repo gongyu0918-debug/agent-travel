@@ -9,11 +9,15 @@ import sys
 import tempfile
 from pathlib import Path
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
 from _report_utils import normalize_report_paths
 from _test_mutators import append_suggestions, replace_line, replace_match_reasoning_block, replace_once
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = SCRIPT_DIR.parent
 VALIDATOR = ROOT / "scripts" / "validate_suggestions.py"
 SHOULD_TRAVEL = ROOT / "scripts" / "should_travel.py"
 PLAN_TRAVEL = ROOT / "scripts" / "plan_travel.py"
@@ -146,6 +150,10 @@ def mutate_malformed_evidence_item(text: str) -> str:
     )
 
 
+def mutate_malformed_evidence_tier(text: str) -> str:
+    return replace_once(text, "primary_official_discussion:", "primarydocs:")
+
+
 VALIDATOR_CASES = [
     ("canonical", lambda text: text, True),
     ("missing_markers", mutate_missing_markers, False),
@@ -171,6 +179,7 @@ VALIDATOR_CASES = [
     ("empty_fit_reason", mutate_empty_fit_reason, False),
     ("misplaced_top_level_visibility", mutate_misplaced_top_level_visibility, False),
     ("malformed_evidence_item", mutate_malformed_evidence_item, False),
+    ("malformed_evidence_tier", mutate_malformed_evidence_tier, False),
     ("valid_optional_fields", mutate_valid_optional_fields, True),
 ]
 
@@ -199,7 +208,7 @@ TRIGGER_CASES = [
         },
         True,
         "low",
-        "ready",
+        None,
     ),
     (
         "should_travel_required_timestamp_null_is_missing",
@@ -257,7 +266,7 @@ TRIGGER_CASES = [
         },
         True,
         "medium",
-        "ready",
+        None,
     ),
     (
         "should_travel_failure_recovery_bypasses_repeat_cooldown",
@@ -281,7 +290,7 @@ TRIGGER_CASES = [
         },
         True,
         "medium",
-        "ready",
+        None,
     ),
     (
         "should_travel_explicit_deep_request_high",
@@ -301,7 +310,7 @@ TRIGGER_CASES = [
         },
         True,
         "high",
-        "ready",
+        None,
     ),
     (
         "should_travel_single_failure_stays_blocked",
@@ -343,7 +352,7 @@ TRIGGER_CASES = [
         },
         True,
         "medium",
-        "ready",
+        None,
     ),
     (
         "should_travel_invalid_duration",
@@ -405,7 +414,7 @@ TRIGGER_CASES = [
         },
         True,
         "low",
-        "ready",
+        None,
     ),
     (
         "should_travel_duplicate_fingerprint_cooldown",
@@ -441,7 +450,7 @@ TRIGGER_CASES = [
         },
         True,
         "low",
-        "ready",
+        None,
     ),
     (
         "should_travel_manual_scheduled_prompt_may_keep_emotion",
@@ -463,7 +472,7 @@ TRIGGER_CASES = [
         },
         True,
         "low",
-        "ready",
+        None,
     ),
     (
         "should_travel_host_managed_schedule_runs_without_manual_opt_in",
@@ -485,7 +494,7 @@ TRIGGER_CASES = [
         },
         True,
         "low",
-        "ready",
+        None,
     ),
     (
         "should_travel_scheduled_defaults_closed_without_host_signal",
@@ -563,7 +572,7 @@ TRIGGER_CASES = [
         },
         True,
         "low",
-        "ready",
+        None,
     ),
     (
         "should_travel_negative_thread_runs_rejected",
@@ -662,35 +671,77 @@ PLAN_CASES = [
         1,
         ["sk-test_should_redact", "localhost:3000", "private\\repo"],
     ),
+    (
+        "plan_travel_redacts_contact_and_ip",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "thread_runs_today": 0,
+            "user_runs_today": 0,
+            "host": "OpenClaw",
+            "symptom": "call 13800138000 and inspect 203.0.113.42 after cron failed",
+            "constraint": "public-only search",
+            "desired_outcome": "safe query",
+        },
+        "",
+        True,
+        "low",
+        1,
+        ["13800138000", "203.0.113.42", "REDACTED_IPV4_ADDRESS", "REDACTED_PHONE_NUMBER"],
+    ),
 ]
 
 
-def run_validator_case(name: str, body: str, expected_pass: bool, temp_dir: Path) -> dict[str, object]:
-    path = temp_dir / f"{name}.md"
-    path.write_text(body, encoding="utf-8")
+def invoke_script(args: list[str]) -> dict[str, object]:
     try:
         proc = subprocess.run(
-            [sys.executable, str(VALIDATOR), str(path)],
+            args,
             capture_output=True,
             text=True,
             check=False,
             timeout=TIMEOUT_SECONDS,
         )
         output = (proc.stdout + proc.stderr).strip()
-        crashed = "Traceback" in output
-        actual_pass = proc.returncode == 0
+        return {
+            "returncode": proc.returncode,
+            "stdout": proc.stdout,
+            "output": output,
+            "crashed": "Traceback" in output,
+        }
     except subprocess.TimeoutExpired:
-        output = f"TIMEOUT after {TIMEOUT_SECONDS}s"
-        crashed = True
-        actual_pass = False
+        return {
+            "returncode": 1,
+            "stdout": "",
+            "output": f"TIMEOUT after {TIMEOUT_SECONDS}s",
+            "crashed": True,
+        }
+
+
+def parse_stdout_json(result: dict[str, object]) -> dict[str, object]:
+    try:
+        return json.loads(str(result.get("stdout") or "{}"))
+    except json.JSONDecodeError:
+        result["crashed"] = True
+        return {}
+
+
+def run_validator_case(name: str, body: str, expected_pass: bool, temp_dir: Path) -> dict[str, object]:
+    path = temp_dir / f"{name}.md"
+    path.write_text(body, encoding="utf-8")
+    result = invoke_script([sys.executable, str(VALIDATOR), str(path)])
+    actual_pass = result["returncode"] == 0
     return {
         "case": name,
         "kind": "validator",
         "expected_pass": expected_pass,
         "actual_pass": actual_pass,
-        "ok": actual_pass == expected_pass and not crashed,
-        "crashed": crashed,
-        "output": output,
+        "ok": actual_pass == expected_pass and not result["crashed"],
+        "crashed": result["crashed"],
+        "output": result["output"],
     }
 
 
@@ -699,31 +750,13 @@ def run_trigger_case(
     state: dict[str, object],
     expected_should_run: bool,
     expected_search_mode: str,
-    expected_error_code: str,
+    expected_error_code: str | None,
     temp_dir: Path,
 ) -> dict[str, object]:
     path = temp_dir / f"{name}.json"
     path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-    try:
-        proc = subprocess.run(
-            [sys.executable, str(SHOULD_TRAVEL), str(path)],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=TIMEOUT_SECONDS,
-        )
-        output = (proc.stdout + proc.stderr).strip()
-        crashed = "Traceback" in output
-        try:
-            payload = json.loads(proc.stdout or "{}")
-        except json.JSONDecodeError:
-            payload = {}
-            crashed = True
-    except subprocess.TimeoutExpired:
-        output = f"TIMEOUT after {TIMEOUT_SECONDS}s"
-        crashed = True
-        payload = {}
-        proc = subprocess.CompletedProcess([], 1)
+    result = invoke_script([sys.executable, str(SHOULD_TRAVEL), str(path)])
+    payload = parse_stdout_json(result)
     actual_should_run = payload.get("should_run")
     actual_search_mode = payload.get("search_mode")
     actual_error_code = payload.get("error_code")
@@ -731,8 +764,8 @@ def run_trigger_case(
         actual_should_run == expected_should_run
         and actual_search_mode == expected_search_mode
         and actual_error_code == expected_error_code
-        and proc.returncode == 0
-        and not crashed
+        and result["returncode"] == 0
+        and not result["crashed"]
     )
     return {
         "case": name,
@@ -744,8 +777,8 @@ def run_trigger_case(
         "expected_error_code": expected_error_code,
         "actual_error_code": actual_error_code,
         "ok": ok,
-        "crashed": crashed,
-        "output": output,
+        "crashed": result["crashed"],
+        "output": result["output"],
     }
 
 
@@ -763,27 +796,8 @@ def run_plan_case(
     context_path = temp_dir / f"{name}.txt"
     state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
     context_path.write_text(context, encoding="utf-8")
-    try:
-        proc = subprocess.run(
-            [sys.executable, str(PLAN_TRAVEL), str(state_path), "--context", str(context_path)],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=TIMEOUT_SECONDS,
-        )
-        output = (proc.stdout + proc.stderr).strip()
-        crashed = "Traceback" in output
-        try:
-            payload = json.loads(proc.stdout or "{}")
-        except json.JSONDecodeError:
-            payload = {}
-            crashed = True
-    except subprocess.TimeoutExpired:
-        output = f"TIMEOUT after {TIMEOUT_SECONDS}s"
-        crashed = True
-        payload = {}
-        proc = subprocess.CompletedProcess([], 1)
-
+    result = invoke_script([sys.executable, str(PLAN_TRAVEL), str(state_path), "--context", str(context_path)])
+    payload = parse_stdout_json(result)
     decision = payload.get("decision", {}) if isinstance(payload.get("decision"), dict) else {}
     queries = payload.get("queries", [])
     serialized = json.dumps(payload, ensure_ascii=False)
@@ -794,8 +808,8 @@ def run_plan_case(
         and isinstance(queries, list)
         and len(queries) == expected_query_count
         and not leaked
-        and proc.returncode == 0
-        and not crashed
+        and result["returncode"] == 0
+        and not result["crashed"]
     )
     return {
         "case": name,
@@ -808,67 +822,76 @@ def run_plan_case(
         "actual_query_count": len(queries) if isinstance(queries, list) else None,
         "leaked_forbidden_substrings": leaked,
         "ok": ok,
-        "crashed": crashed,
-        "output": output,
+        "crashed": result["crashed"],
+        "output": result["output"],
     }
+
+
+def collect_results(canonical: str, temp_dir: Path) -> list[dict[str, object]]:
+    results: list[dict[str, object]] = []
+    for name, mutator, expected_pass in VALIDATOR_CASES:
+        results.append(run_validator_case(name, mutator(canonical), expected_pass, temp_dir))
+    for name, state, expected_should_run, expected_search_mode, expected_error_code in TRIGGER_CASES:
+        results.append(
+            run_trigger_case(
+                name,
+                state,
+                expected_should_run,
+                expected_search_mode,
+                expected_error_code,
+                temp_dir,
+            )
+        )
+    for (
+        name,
+        state,
+        context,
+        expected_should_run,
+        expected_search_mode,
+        expected_query_count,
+        forbidden_substrings,
+    ) in PLAN_CASES:
+        results.append(
+            run_plan_case(
+                name,
+                state,
+                context,
+                expected_should_run,
+                expected_search_mode,
+                expected_query_count,
+                forbidden_substrings,
+                temp_dir,
+            )
+        )
+    return results
+
+
+def summarize_results(results: list[dict[str, object]]) -> dict[str, object]:
+    validator_results = [item for item in results if item["kind"] == "validator"]
+    trigger_results = [item for item in results if item["kind"] == "trigger"]
+    plan_results = [item for item in results if item["kind"] == "plan"]
+    return normalize_report_paths(
+        {
+            "total_cases": len(results),
+            "passed_cases": sum(1 for item in results if item["ok"]),
+            "crash_count": sum(1 for item in results if item["crashed"]),
+            "validator_cases": len(validator_results),
+            "validator_passed": sum(1 for item in validator_results if item["ok"]),
+            "trigger_cases": len(trigger_results),
+            "trigger_passed": sum(1 for item in trigger_results if item["ok"]),
+            "plan_cases": len(plan_results),
+            "plan_passed": sum(1 for item in plan_results if item["ok"]),
+            "results": results,
+        }
+    )
 
 
 def main() -> int:
     canonical = CANONICAL.read_text(encoding="utf-8")
-    results: list[dict[str, object]] = []
     with tempfile.TemporaryDirectory(prefix="agent-travel-reliability-") as temp:
-        temp_dir = Path(temp)
-        for name, mutator, expected_pass in VALIDATOR_CASES:
-            results.append(run_validator_case(name, mutator(canonical), expected_pass, temp_dir))
-        for name, state, expected_should_run, expected_search_mode, expected_error_code in TRIGGER_CASES:
-            results.append(
-                run_trigger_case(
-                    name,
-                    state,
-                    expected_should_run,
-                    expected_search_mode,
-                    expected_error_code,
-                    temp_dir,
-                )
-            )
-        for (
-            name,
-            state,
-            context,
-            expected_should_run,
-            expected_search_mode,
-            expected_query_count,
-            forbidden_substrings,
-        ) in PLAN_CASES:
-            results.append(
-                run_plan_case(
-                    name,
-                    state,
-                    context,
-                    expected_should_run,
-                    expected_search_mode,
-                    expected_query_count,
-                    forbidden_substrings,
-                    temp_dir,
-                )
-            )
+        results = collect_results(canonical, Path(temp))
 
-    validator_results = [item for item in results if item["kind"] == "validator"]
-    trigger_results = [item for item in results if item["kind"] == "trigger"]
-    plan_results = [item for item in results if item["kind"] == "plan"]
-    summary = {
-        "total_cases": len(results),
-        "passed_cases": sum(1 for item in results if item["ok"]),
-        "crash_count": sum(1 for item in results if item["crashed"]),
-        "validator_cases": len(validator_results),
-        "validator_passed": sum(1 for item in validator_results if item["ok"]),
-        "trigger_cases": len(trigger_results),
-        "trigger_passed": sum(1 for item in trigger_results if item["ok"]),
-        "plan_cases": len(plan_results),
-        "plan_passed": sum(1 for item in plan_results if item["ok"]),
-        "results": results,
-    }
-    summary = normalize_report_paths(summary)
+    summary = summarize_results(results)
     REPORT_PATH.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0 if summary["passed_cases"] == summary["total_cases"] and summary["crash_count"] == 0 else 1

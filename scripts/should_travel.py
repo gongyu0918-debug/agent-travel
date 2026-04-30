@@ -20,6 +20,14 @@ DEFAULTS = {
     "max_runs_per_user_per_day": 3,
 }
 EVENTS = {"heartbeat", "scheduled", "task_end", "failure_recovery", "idle_fallback"}
+RECOVERY_SIGNAL_NAMES = {
+    "related_failures",
+    "user_corrections",
+    "unresolved_blocker_count",
+    "version_mismatch_seen",
+    "user_explicit_search_request",
+    "user_explicit_deep_research_request",
+}
 
 
 @dataclass
@@ -32,6 +40,22 @@ class Decision:
     observed_signals: list[str] | None = None
 
 
+@dataclass
+class ActivityClock:
+    now: datetime
+    last_thread_activity: datetime
+    last_user_action: datetime
+    last_agent_action: datetime
+
+
+@dataclass
+class TriggerContext:
+    signals: list[str]
+    cooldown_bypassed: bool
+    scheduled_trigger_managed_by_host: bool
+    user_configured_periodic_travel: bool
+
+
 class InputError(Exception):
     """Raised when a readable state file has malformed fields."""
 
@@ -41,18 +65,29 @@ class InputError(Exception):
         self.message = message
 
 
-def emit(decision: Decision) -> None:
-    payload = {
+def decision_status(decision: Decision) -> str:
+    if decision.trigger_reason == "error":
+        return "error"
+    return "ready" if decision.should_run else "blocked"
+
+
+def decision_payload(decision: Decision) -> dict[str, object]:
+    payload: dict[str, object] = {
         "should_run": decision.should_run,
         "search_mode": decision.search_mode,
         "trigger_reason": decision.trigger_reason,
         "reason": decision.reason,
+        "status": decision_status(decision),
     }
     if decision.error_code is not None:
         payload["error_code"] = decision.error_code
     if decision.observed_signals:
         payload["observed_signals"] = decision.observed_signals
-    print(json.dumps(payload, ensure_ascii=False))
+    return payload
+
+
+def emit(decision: Decision) -> None:
+    print(json.dumps(decision_payload(decision), ensure_ascii=False))
 
 
 def parse_duration(value: str) -> timedelta:
@@ -182,6 +217,20 @@ def blocked(
     return Decision(False, "low", event_kind, reason, error_code, observed_signals or [])
 
 
+def parse_activity_clock(state: dict[str, object]) -> ActivityClock:
+    now = parse_timestamp("now", get_required_raw(state, "now"))
+    last_thread_activity = parse_timestamp(
+        "last_thread_activity",
+        get_required_raw(state, "last_thread_activity"),
+    )
+    return ActivityClock(
+        now=now,
+        last_thread_activity=last_thread_activity,
+        last_user_action=get_fallback_timestamp(state, "last_user_action", last_thread_activity),
+        last_agent_action=get_fallback_timestamp(state, "last_agent_action", last_thread_activity),
+    )
+
+
 def collect_escalation_signals(state: dict[str, object]) -> list[str]:
     signals: list[str] = []
     if as_int(state.get("related_failures"), 0, minimum=0) >= 2:
@@ -219,29 +268,14 @@ def infer_search_mode(event_kind: str, signals: list[str]) -> tuple[str, list[st
     return "low", [f"{event_kind}_default"]
 
 
-def decide(state: dict[str, object]) -> Decision:
-    event_kind = get_event_kind(state)
-    if event_kind not in EVENTS:
-        return blocked(event_kind or "unknown", "unsupported event_kind", "unsupported_event_kind")
-
-    if not as_bool(state.get("enabled"), True):
-        return blocked(event_kind, "travel is disabled", "disabled")
-
-    try:
-        now = parse_timestamp("now", get_required_raw(state, "now"))
-        last_thread_activity = parse_timestamp(
-            "last_thread_activity",
-            get_required_raw(state, "last_thread_activity"),
-        )
-        last_user_action = get_fallback_timestamp(state, "last_user_action", last_thread_activity)
-        last_agent_action = get_fallback_timestamp(state, "last_agent_action", last_thread_activity)
-    except KeyError as exc:
-        return blocked(event_kind, f"missing required field: {exc.args[0]}", "missing_required_field")
-
+def check_quiet_gates(
+    state: dict[str, object],
+    event_kind: str,
+    clock: ActivityClock,
+) -> Decision | None:
     active_window = get_duration(state, "active_conversation_window")
     quiet_after_user = get_duration(state, "quiet_after_user_action")
     quiet_after_agent = get_duration(state, "quiet_after_agent_action")
-    repeat_fingerprint_cooldown = get_duration(state, "repeat_fingerprint_cooldown")
     max_runs_per_thread = as_int(
         state.get("max_runs_per_thread_per_day"),
         DEFAULTS["max_runs_per_thread_per_day"],
@@ -259,111 +293,204 @@ def decide(state: dict[str, object]) -> Decision:
         return blocked(event_kind, "agent response in progress", "agent_response_in_progress")
     if as_bool(state.get("tool_approval_pending"), False):
         return blocked(event_kind, "tool approval pending", "tool_approval_pending")
-    if now - last_thread_activity > active_window:
+    if clock.now - clock.last_thread_activity > active_window:
         return blocked(event_kind, "active conversation window expired", "active_window_expired")
-    if now - last_user_action < quiet_after_user:
+    if clock.now - clock.last_user_action < quiet_after_user:
         return blocked(event_kind, "quiet window after user action has not elapsed", "quiet_after_user_action")
-    if now - last_agent_action < quiet_after_agent:
+    if clock.now - clock.last_agent_action < quiet_after_agent:
         return blocked(event_kind, "quiet window after agent action has not elapsed", "quiet_after_agent_action")
     if as_int(state.get("thread_runs_today"), 0, minimum=0) >= max_runs_per_thread:
         return blocked(event_kind, "thread run limit reached", "thread_run_limit_reached")
     if as_int(state.get("user_runs_today"), 0, minimum=0) >= max_runs_per_user:
         return blocked(event_kind, "user run limit reached", "user_run_limit_reached")
+    return None
 
+
+def check_idle_fallback_gate(state: dict[str, object], event_kind: str) -> Decision | None:
+    if event_kind != "idle_fallback":
+        return None
     host_supports_heartbeat = as_bool(state.get("host_supports_heartbeat"), True)
     user_prefers_idle_fallback = as_bool(state.get("user_prefers_idle_fallback"), False)
     idle_fallback_enabled = as_bool(state.get("idle_fallback_enabled"), False)
-    if event_kind == "idle_fallback" and not (
-        idle_fallback_enabled or not host_supports_heartbeat or user_prefers_idle_fallback
-    ):
-        return blocked(
-            event_kind,
-            "idle fallback needs explicit opt-in or a host without heartbeat support",
-            "idle_fallback_not_enabled",
-            [
-                "host_supports_heartbeat" if host_supports_heartbeat else "host_without_heartbeat",
-                "idle_fallback_not_opted_in",
-            ],
-        )
+    if idle_fallback_enabled or not host_supports_heartbeat or user_prefers_idle_fallback:
+        return None
+    return blocked(
+        event_kind,
+        "idle fallback needs explicit opt-in or a host without heartbeat support",
+        "idle_fallback_not_enabled",
+        [
+            "host_supports_heartbeat" if host_supports_heartbeat else "host_without_heartbeat",
+            "idle_fallback_not_opted_in",
+        ],
+    )
 
-    signals = collect_escalation_signals(state)
+
+def check_repeat_fingerprint_gate(
+    state: dict[str, object],
+    event_kind: str,
+    clock: ActivityClock,
+    signals: list[str],
+) -> tuple[Decision | None, bool]:
     current_fingerprint_hash = str(state.get("current_fingerprint_hash", "")).strip()
     last_travel_fingerprint_hash = str(state.get("last_travel_fingerprint_hash", "")).strip()
     last_travel_generated_at = get_optional_timestamp(state, "last_travel_generated_at")
+    repeat_fingerprint_cooldown = get_duration(state, "repeat_fingerprint_cooldown")
     cooldown_active = bool(
         current_fingerprint_hash
         and last_travel_fingerprint_hash
         and current_fingerprint_hash == last_travel_fingerprint_hash
         and last_travel_generated_at is not None
-        and now - last_travel_generated_at < repeat_fingerprint_cooldown
+        and clock.now - last_travel_generated_at < repeat_fingerprint_cooldown
     )
     cooldown_bypassed = cooldown_active and bool(signals)
     if cooldown_active and not cooldown_bypassed:
-        return blocked(
-            event_kind,
-            "repeat fingerprint cooldown is still active",
-            "duplicate_fingerprint_cooldown",
-            ["fingerprint_repeat_window_active"],
+        return (
+            blocked(
+                event_kind,
+                "repeat fingerprint cooldown is still active",
+                "duplicate_fingerprint_cooldown",
+                ["fingerprint_repeat_window_active"],
+            ),
+            False,
         )
-    user_configured_periodic_travel = as_bool(state.get("user_configured_periodic_travel"), False)
-    scheduled_trigger_managed_by_host = as_bool(
-        state.get("scheduled_trigger_managed_by_host"),
-        False,
+    return None, cooldown_bypassed
+
+
+def check_failure_recovery_gate(event_kind: str, signals: list[str]) -> Decision | None:
+    if event_kind != "failure_recovery":
+        return None
+    if RECOVERY_SIGNAL_NAMES.intersection(signals):
+        return None
+    return blocked(
+        event_kind,
+        "failure recovery needs 2 related failures, 2 user corrections, 1 blocker, or version mismatch",
+        "recovery_signal_missing",
+        signals,
     )
 
-    if event_kind == "failure_recovery":
-        has_recovery_signal = any(
-            [
-                "related_failures" in signals,
-                "user_corrections" in signals,
-                "unresolved_blocker_count" in signals,
-                "version_mismatch_seen" in signals,
-                "user_explicit_search_request" in signals,
-                "user_explicit_deep_research_request" in signals,
-            ]
-        )
-        if not has_recovery_signal:
-            return blocked(
-                event_kind,
-                "failure recovery needs 2 related failures, 2 user corrections, 1 blocker, or version mismatch",
-                "recovery_signal_missing",
-                signals,
-            )
 
-    if event_kind == "scheduled" and not (
-        scheduled_trigger_managed_by_host or user_configured_periodic_travel
-    ):
+def scheduled_ownership(state: dict[str, object]) -> tuple[bool, bool]:
+    return (
+        as_bool(state.get("scheduled_trigger_managed_by_host"), False),
+        as_bool(state.get("user_configured_periodic_travel"), False),
+    )
+
+
+def check_scheduled_gate(
+    state: dict[str, object],
+    event_kind: str,
+    signals: list[str],
+    scheduled_trigger_managed_by_host: bool,
+    user_configured_periodic_travel: bool,
+) -> Decision | None:
+    if event_kind != "scheduled":
+        return None
+    if not (scheduled_trigger_managed_by_host or user_configured_periodic_travel):
         return blocked(
             event_kind,
             "scheduled travel needs a host-managed schedule or explicit periodic travel",
             "scheduled_opt_in_required",
             signals,
         )
-    if event_kind == "scheduled":
-        scheduled_prompt_origin = normalize_label(state.get("scheduled_prompt_origin"), "manual")
-        scheduled_prompt_emotion = normalize_label(state.get("scheduled_prompt_emotion"), "neutral")
-        if scheduled_prompt_origin != "manual" and scheduled_prompt_emotion not in {"neutral", "none"}:
-            return blocked(
-                event_kind,
-                "host-generated scheduled prompts must stay neutral",
-                "scheduled_prompt_must_be_neutral",
-                ["host_generated_scheduled_prompt", f"scheduled_prompt_emotion:{scheduled_prompt_emotion}"],
-            )
+    scheduled_prompt_origin = normalize_label(state.get("scheduled_prompt_origin"), "manual")
+    scheduled_prompt_emotion = normalize_label(state.get("scheduled_prompt_emotion"), "neutral")
+    if scheduled_prompt_origin != "manual" and scheduled_prompt_emotion not in {"neutral", "none"}:
+        return blocked(
+            event_kind,
+            "host-generated scheduled prompts must stay neutral",
+            "scheduled_prompt_must_be_neutral",
+            ["host_generated_scheduled_prompt", f"scheduled_prompt_emotion:{scheduled_prompt_emotion}"],
+        )
+    return None
 
-    search_mode, observed_signals = infer_search_mode(event_kind, signals)
-    if event_kind == "scheduled":
-        if scheduled_trigger_managed_by_host:
-            observed_signals = ["scheduled_trigger_managed_by_host", *observed_signals]
-        elif user_configured_periodic_travel:
-            observed_signals = ["user_configured_periodic_travel", *observed_signals]
-    if cooldown_bypassed:
+
+def add_scheduled_signals(
+    event_kind: str,
+    observed_signals: list[str],
+    scheduled_trigger_managed_by_host: bool,
+    user_configured_periodic_travel: bool,
+) -> list[str]:
+    if event_kind != "scheduled":
+        return observed_signals
+    if scheduled_trigger_managed_by_host:
+        return ["scheduled_trigger_managed_by_host", *observed_signals]
+    if user_configured_periodic_travel:
+        return ["user_configured_periodic_travel", *observed_signals]
+    return observed_signals
+
+
+def build_trigger_context(
+    state: dict[str, object],
+    event_kind: str,
+    clock: ActivityClock,
+) -> tuple[Decision | None, TriggerContext | None]:
+    quiet_block = check_quiet_gates(state, event_kind, clock)
+    if quiet_block is not None:
+        return quiet_block, None
+    idle_block = check_idle_fallback_gate(state, event_kind)
+    if idle_block is not None:
+        return idle_block, None
+
+    signals = collect_escalation_signals(state)
+    repeat_block, cooldown_bypassed = check_repeat_fingerprint_gate(state, event_kind, clock, signals)
+    if repeat_block is not None:
+        return repeat_block, None
+    failure_block = check_failure_recovery_gate(event_kind, signals)
+    if failure_block is not None:
+        return failure_block, None
+    scheduled_trigger_managed_by_host, user_configured_periodic_travel = scheduled_ownership(state)
+    scheduled_block = check_scheduled_gate(
+        state,
+        event_kind,
+        signals,
+        scheduled_trigger_managed_by_host,
+        user_configured_periodic_travel,
+    )
+    if scheduled_block is not None:
+        return scheduled_block, None
+
+    return None, TriggerContext(
+        signals,
+        cooldown_bypassed,
+        scheduled_trigger_managed_by_host,
+        user_configured_periodic_travel,
+    )
+
+
+def decide(state: dict[str, object]) -> Decision:
+    event_kind = get_event_kind(state)
+    if event_kind not in EVENTS:
+        return blocked(event_kind or "unknown", "unsupported event_kind", "unsupported_event_kind")
+
+    if not as_bool(state.get("enabled"), True):
+        return blocked(event_kind, "travel is disabled", "disabled")
+
+    try:
+        clock = parse_activity_clock(state)
+    except KeyError as exc:
+        return blocked(event_kind, f"missing required field: {exc.args[0]}", "missing_required_field")
+
+    gate_block, context = build_trigger_context(state, event_kind, clock)
+    if gate_block is not None:
+        return gate_block
+    if context is None:
+        return blocked(event_kind, "internal trigger context missing", "internal_error")
+
+    search_mode, observed_signals = infer_search_mode(event_kind, context.signals)
+    observed_signals = add_scheduled_signals(
+        event_kind,
+        observed_signals,
+        context.scheduled_trigger_managed_by_host,
+        context.user_configured_periodic_travel,
+    )
+    if context.cooldown_bypassed:
         observed_signals = ["repeat_fingerprint_escalation_bypass", *observed_signals]
     return Decision(
         True,
         search_mode,
         event_kind,
         "active conversation, quiet window, within cooldown",
-        "ready",
+        None,
         observed_signals,
     )
 

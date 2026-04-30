@@ -53,9 +53,11 @@ Use version labels whenever the toolchain moves quickly.
 - private repo names when not public
 - private file paths
 - customer names
+- phone numbers, email addresses, or direct contact handles
 - full code blocks
 - access secrets
 - internal URLs
+- public or private IP addresses unless the user explicitly asks for infrastructure-specific lookup
 
 ## Search Coverage Matrix
 

@@ -1,13 +1,13 @@
 {
-  "total_cases": 50,
-  "passed_cases": 50,
+  "total_cases": 52,
+  "passed_cases": 52,
   "crash_count": 0,
-  "validator_cases": 25,
-  "validator_passed": 25,
+  "validator_cases": 26,
+  "validator_passed": 26,
   "trigger_cases": 22,
   "trigger_passed": 22,
-  "plan_cases": 3,
-  "plan_passed": 3,
+  "plan_cases": 4,
+  "plan_passed": 4,
   "results": [
     {
       "case": "canonical",
@@ -226,6 +226,15 @@
       "output": "ERROR: suggestion-1 evidence items must use source_label: reference format"
     },
     {
+      "case": "malformed_evidence_tier",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: suggestion-1 evidence tier primarydocs is unsupported; use primary_, secondary_, or tertiary_ labels"
+    },
+    {
       "case": "valid_optional_fields",
       "kind": "validator",
       "expected_pass": true,
@@ -241,11 +250,11 @@
       "actual_should_run": true,
       "expected_search_mode": "low",
       "actual_search_mode": "low",
-      "expected_error_code": "ready",
-      "actual_error_code": "ready",
+      "expected_error_code": null,
+      "actual_error_code": null,
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"heartbeat_default\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"status\": \"ready\", \"observed_signals\": [\"heartbeat_default\"]}"
     },
     {
       "case": "should_travel_required_timestamp_null_is_missing",
@@ -258,7 +267,7 @@
       "actual_error_code": "missing_required_field",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"missing required field: last_thread_activity\", \"error_code\": \"missing_required_field\"}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"missing required field: last_thread_activity\", \"status\": \"blocked\", \"error_code\": \"missing_required_field\"}"
     },
     {
       "case": "should_travel_user_active",
@@ -271,7 +280,7 @@
       "actual_error_code": "user_operation_in_progress",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"user operation in progress\", \"error_code\": \"user_operation_in_progress\"}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"user operation in progress\", \"status\": \"blocked\", \"error_code\": \"user_operation_in_progress\"}"
     },
     {
       "case": "should_travel_failure_recovery_medium",
@@ -280,11 +289,11 @@
       "actual_should_run": true,
       "expected_search_mode": "medium",
       "actual_search_mode": "medium",
-      "expected_error_code": "ready",
-      "actual_error_code": "ready",
+      "expected_error_code": null,
+      "actual_error_code": null,
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"failure_recovery_default\", \"related_failures\", \"unresolved_blocker_count\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"active conversation, quiet window, within cooldown\", \"status\": \"ready\", \"observed_signals\": [\"failure_recovery_default\", \"related_failures\", \"unresolved_blocker_count\"]}"
     },
     {
       "case": "should_travel_failure_recovery_bypasses_repeat_cooldown",
@@ -293,11 +302,11 @@
       "actual_should_run": true,
       "expected_search_mode": "medium",
       "actual_search_mode": "medium",
-      "expected_error_code": "ready",
-      "actual_error_code": "ready",
+      "expected_error_code": null,
+      "actual_error_code": null,
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"repeat_fingerprint_escalation_bypass\", \"failure_recovery_default\", \"related_failures\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"active conversation, quiet window, within cooldown\", \"status\": \"ready\", \"observed_signals\": [\"repeat_fingerprint_escalation_bypass\", \"failure_recovery_default\", \"related_failures\"]}"
     },
     {
       "case": "should_travel_explicit_deep_request_high",
@@ -306,11 +315,11 @@
       "actual_should_run": true,
       "expected_search_mode": "high",
       "actual_search_mode": "high",
-      "expected_error_code": "ready",
-      "actual_error_code": "ready",
+      "expected_error_code": null,
+      "actual_error_code": null,
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"high\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"user_explicit_deep_research_request\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"high\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"status\": \"ready\", \"observed_signals\": [\"user_explicit_deep_research_request\"]}"
     },
     {
       "case": "should_travel_single_failure_stays_blocked",
@@ -323,7 +332,7 @@
       "actual_error_code": "recovery_signal_missing",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"failure recovery needs 2 related failures, 2 user corrections, 1 blocker, or version mismatch\", \"error_code\": \"recovery_signal_missing\"}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"failure recovery needs 2 related failures, 2 user corrections, 1 blocker, or version mismatch\", \"status\": \"blocked\", \"error_code\": \"recovery_signal_missing\"}"
     },
     {
       "case": "should_travel_task_end_defaults_medium",
@@ -332,11 +341,11 @@
       "actual_should_run": true,
       "expected_search_mode": "medium",
       "actual_search_mode": "medium",
-      "expected_error_code": "ready",
-      "actual_error_code": "ready",
+      "expected_error_code": null,
+      "actual_error_code": null,
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"task_end\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"task_end_default\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"medium\", \"trigger_reason\": \"task_end\", \"reason\": \"active conversation, quiet window, within cooldown\", \"status\": \"ready\", \"observed_signals\": [\"task_end_default\"]}"
     },
     {
       "case": "should_travel_invalid_duration",
@@ -349,7 +358,7 @@
       "actual_error_code": "invalid_duration",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"invalid duration: abc\", \"error_code\": \"invalid_duration\"}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"invalid duration: abc\", \"status\": \"blocked\", \"error_code\": \"invalid_duration\"}"
     },
     {
       "case": "should_travel_negative_duration",
@@ -362,7 +371,7 @@
       "actual_error_code": "invalid_duration",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"duration must be a positive integer with unit: -5m\", \"error_code\": \"invalid_duration\"}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"duration must be a positive integer with unit: -5m\", \"status\": \"blocked\", \"error_code\": \"invalid_duration\"}"
     },
     {
       "case": "should_travel_idle_fallback_needs_opt_in",
@@ -375,7 +384,7 @@
       "actual_error_code": "idle_fallback_not_enabled",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"idle fallback needs explicit opt-in or a host without heartbeat support\", \"error_code\": \"idle_fallback_not_enabled\", \"observed_signals\": [\"host_supports_heartbeat\", \"idle_fallback_not_opted_in\"]}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"idle fallback needs explicit opt-in or a host without heartbeat support\", \"status\": \"blocked\", \"error_code\": \"idle_fallback_not_enabled\", \"observed_signals\": [\"host_supports_heartbeat\", \"idle_fallback_not_opted_in\"]}"
     },
     {
       "case": "should_travel_idle_fallback_without_heartbeat_runs",
@@ -384,11 +393,11 @@
       "actual_should_run": true,
       "expected_search_mode": "low",
       "actual_search_mode": "low",
-      "expected_error_code": "ready",
-      "actual_error_code": "ready",
+      "expected_error_code": null,
+      "actual_error_code": null,
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"idle_fallback_default\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"active conversation, quiet window, within cooldown\", \"status\": \"ready\", \"observed_signals\": [\"idle_fallback_default\"]}"
     },
     {
       "case": "should_travel_duplicate_fingerprint_cooldown",
@@ -401,7 +410,7 @@
       "actual_error_code": "duplicate_fingerprint_cooldown",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"repeat fingerprint cooldown is still active\", \"error_code\": \"duplicate_fingerprint_cooldown\", \"observed_signals\": [\"fingerprint_repeat_window_active\"]}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"repeat fingerprint cooldown is still active\", \"status\": \"blocked\", \"error_code\": \"duplicate_fingerprint_cooldown\", \"observed_signals\": [\"fingerprint_repeat_window_active\"]}"
     },
     {
       "case": "should_travel_duplicate_fingerprint_after_cooldown_runs",
@@ -410,11 +419,11 @@
       "actual_should_run": true,
       "expected_search_mode": "low",
       "actual_search_mode": "low",
-      "expected_error_code": "ready",
-      "actual_error_code": "ready",
+      "expected_error_code": null,
+      "actual_error_code": null,
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"heartbeat_default\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"status\": \"ready\", \"observed_signals\": [\"heartbeat_default\"]}"
     },
     {
       "case": "should_travel_manual_scheduled_prompt_may_keep_emotion",
@@ -423,11 +432,11 @@
       "actual_should_run": true,
       "expected_search_mode": "low",
       "actual_search_mode": "low",
-      "expected_error_code": "ready",
-      "actual_error_code": "ready",
+      "expected_error_code": null,
+      "actual_error_code": null,
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"user_configured_periodic_travel\", \"scheduled_default\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"status\": \"ready\", \"observed_signals\": [\"user_configured_periodic_travel\", \"scheduled_default\"]}"
     },
     {
       "case": "should_travel_host_managed_schedule_runs_without_manual_opt_in",
@@ -436,11 +445,11 @@
       "actual_should_run": true,
       "expected_search_mode": "low",
       "actual_search_mode": "low",
-      "expected_error_code": "ready",
-      "actual_error_code": "ready",
+      "expected_error_code": null,
+      "actual_error_code": null,
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_trigger_managed_by_host\", \"scheduled_default\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"status\": \"ready\", \"observed_signals\": [\"scheduled_trigger_managed_by_host\", \"scheduled_default\"]}"
     },
     {
       "case": "should_travel_scheduled_defaults_closed_without_host_signal",
@@ -453,7 +462,7 @@
       "actual_error_code": "scheduled_opt_in_required",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"scheduled travel needs a host-managed schedule or explicit periodic travel\", \"error_code\": \"scheduled_opt_in_required\"}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"scheduled travel needs a host-managed schedule or explicit periodic travel\", \"status\": \"blocked\", \"error_code\": \"scheduled_opt_in_required\"}"
     },
     {
       "case": "should_travel_scheduled_without_host_or_opt_in_blocks",
@@ -466,7 +475,7 @@
       "actual_error_code": "scheduled_opt_in_required",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"scheduled travel needs a host-managed schedule or explicit periodic travel\", \"error_code\": \"scheduled_opt_in_required\"}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"scheduled travel needs a host-managed schedule or explicit periodic travel\", \"status\": \"blocked\", \"error_code\": \"scheduled_opt_in_required\"}"
     },
     {
       "case": "should_travel_host_generated_scheduled_prompt_stays_neutral",
@@ -479,7 +488,7 @@
       "actual_error_code": "scheduled_prompt_must_be_neutral",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"host-generated scheduled prompts must stay neutral\", \"error_code\": \"scheduled_prompt_must_be_neutral\", \"observed_signals\": [\"host_generated_scheduled_prompt\", \"scheduled_prompt_emotion:frustrated\"]}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"host-generated scheduled prompts must stay neutral\", \"status\": \"blocked\", \"error_code\": \"scheduled_prompt_must_be_neutral\", \"observed_signals\": [\"host_generated_scheduled_prompt\", \"scheduled_prompt_emotion:frustrated\"]}"
     },
     {
       "case": "should_travel_idle_fallback_stays_low_with_passive_signals",
@@ -488,11 +497,11 @@
       "actual_should_run": true,
       "expected_search_mode": "low",
       "actual_search_mode": "low",
-      "expected_error_code": "ready",
-      "actual_error_code": "ready",
+      "expected_error_code": null,
+      "actual_error_code": null,
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"idle_fallback_default\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"active conversation, quiet window, within cooldown\", \"status\": \"ready\", \"observed_signals\": [\"idle_fallback_default\"]}"
     },
     {
       "case": "should_travel_negative_thread_runs_rejected",
@@ -505,7 +514,7 @@
       "actual_error_code": "invalid_integer",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"invalid integer value: -5\", \"error_code\": \"invalid_integer\"}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"invalid integer value: -5\", \"status\": \"blocked\", \"error_code\": \"invalid_integer\"}"
     },
     {
       "case": "should_travel_negative_related_failures_rejected",
@@ -518,7 +527,7 @@
       "actual_error_code": "invalid_integer",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"invalid integer value: -1\", \"error_code\": \"invalid_integer\"}"
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"invalid integer value: -1\", \"status\": \"blocked\", \"error_code\": \"invalid_integer\"}"
     },
     {
       "case": "plan_travel_heartbeat_low_query",
@@ -532,7 +541,7 @@
       "leaked_forbidden_substrings": [],
       "ok": true,
       "crashed": false,
-      "output": "{\n  \"dry_run\": true,\n  \"network_used\": false,\n  \"decision\": {\n    \"should_run\": true,\n    \"search_mode\": \"low\",\n    \"trigger_reason\": \"heartbeat\",\n    \"reason\": \"active conversation, quiet window, within cooldown\",\n    \"error_code\": \"ready\",\n    \"observed_signals\": [\n      \"heartbeat_default\"\n    ]\n  },\n  \"problem_fingerprint\": \"OpenClaw|current-version|cron digest repeats stale notes|public-only search|fresh advisory hint\",\n  \"fingerprint_hash\": \"h64:5e02c6953f60c9f7b626ad5fcca2dee8ec3d3e2bf5cf91a46fb519efce4fbe80\",\n  \"redaction_summary\": {\n    \"context_chars_seen\": 63,\n    \"context_chars_used\": 63,\n    \"context_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"token_like\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"email\": 0\n    },\n    \"state_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    },\n    \"total_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    }\n  },\n  \"query_budget\": {\n    \"search_mode\": \"low\",\n    \"max_queries\": 1\n  },\n  \"queries\": [\n    {\n      \"tier\": \"primary\",\n      \"surface\": \"official docs / release notes\",\n      \"purpose\": \"Anchor the suggestion in official behavior before considering community advice.\",\n      \"query\": \"OpenClaw current-version cron digest repeats stale notes official docs\"\n    }\n  ],\n  \"notes\": [\n    \"This is a dry-run plan. The host agent performs any web/search calls.\",\n    \"Review queries before executing them with private connectors or internal search tools.\",\n    \"Store only cross-validated advisory hints in the isolated suggestion channel.\"\n  ]\n}"
+      "output": "{\n  \"dry_run\": true,\n  \"network_used\": false,\n  \"decision\": {\n    \"should_run\": true,\n    \"search_mode\": \"low\",\n    \"trigger_reason\": \"heartbeat\",\n    \"reason\": \"active conversation, quiet window, within cooldown\",\n    \"status\": \"ready\",\n    \"observed_signals\": [\n      \"heartbeat_default\"\n    ]\n  },\n  \"problem_fingerprint\": \"OpenClaw|current-version|cron digest repeats stale notes|public-only search|fresh advisory hint\",\n  \"fingerprint_hash\": \"h64:5e02c6953f60c9f7b626ad5fcca2dee8ec3d3e2bf5cf91a46fb519efce4fbe80\",\n  \"redaction_summary\": {\n    \"context_chars_seen\": 63,\n    \"context_chars_used\": 63,\n    \"context_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"token_like\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"email\": 0,\n      \"ipv4_address\": 0,\n      \"phone_number\": 0\n    },\n    \"state_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"ipv4_address\": 0,\n      \"phone_number\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    },\n    \"total_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"ipv4_address\": 0,\n      \"phone_number\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    }\n  },\n  \"query_budget\": {\n    \"search_mode\": \"low\",\n    \"max_queries\": 1\n  },\n  \"queries\": [\n    {\n      \"tier\": \"primary\",\n      \"surface\": \"official docs / release notes\",\n      \"purpose\": \"Anchor the suggestion in official behavior before considering community advice.\",\n      \"query\": \"OpenClaw current-version cron digest repeats stale notes official docs\"\n    }\n  ],\n  \"notes\": [\n    \"This is a dry-run plan. The host agent performs any web/search calls.\",\n    \"Review queries before executing them with private connectors or internal search tools.\",\n    \"Store only cross-validated advisory hints in the isolated suggestion channel.\"\n  ]\n}"
     },
     {
       "case": "plan_travel_scheduled_blocked_no_queries",
@@ -546,7 +555,7 @@
       "leaked_forbidden_substrings": [],
       "ok": true,
       "crashed": false,
-      "output": "{\n  \"dry_run\": true,\n  \"network_used\": false,\n  \"decision\": {\n    \"should_run\": false,\n    \"search_mode\": \"low\",\n    \"trigger_reason\": \"scheduled\",\n    \"reason\": \"scheduled travel needs a host-managed schedule or explicit periodic travel\",\n    \"error_code\": \"scheduled_opt_in_required\"\n  },\n  \"problem_fingerprint\": \"Claude Code|current-version|scheduled task repeats old log triage|current thread constraints|next useful answer\",\n  \"fingerprint_hash\": \"h64:cddd60a95c207c91b9fc47cb166c9974558e28d6bbed8158759f47093913729a\",\n  \"redaction_summary\": {\n    \"context_chars_seen\": 0,\n    \"context_chars_used\": 0,\n    \"context_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"token_like\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"email\": 0\n    },\n    \"state_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    },\n    \"total_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    }\n  },\n  \"query_budget\": {\n    \"search_mode\": \"low\",\n    \"max_queries\": 1\n  },\n  \"queries\": [],\n  \"notes\": [\n    \"This is a dry-run plan. The host agent performs any web/search calls.\",\n    \"Review queries before executing them with private connectors or internal search tools.\",\n    \"Store only cross-validated advisory hints in the isolated suggestion channel.\"\n  ]\n}"
+      "output": "{\n  \"dry_run\": true,\n  \"network_used\": false,\n  \"decision\": {\n    \"should_run\": false,\n    \"search_mode\": \"low\",\n    \"trigger_reason\": \"scheduled\",\n    \"reason\": \"scheduled travel needs a host-managed schedule or explicit periodic travel\",\n    \"status\": \"blocked\",\n    \"error_code\": \"scheduled_opt_in_required\"\n  },\n  \"problem_fingerprint\": \"Claude Code|current-version|scheduled task repeats old log triage|current thread constraints|next useful answer\",\n  \"fingerprint_hash\": \"h64:cddd60a95c207c91b9fc47cb166c9974558e28d6bbed8158759f47093913729a\",\n  \"redaction_summary\": {\n    \"context_chars_seen\": 0,\n    \"context_chars_used\": 0,\n    \"context_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"token_like\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"email\": 0,\n      \"ipv4_address\": 0,\n      \"phone_number\": 0\n    },\n    \"state_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"ipv4_address\": 0,\n      \"phone_number\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    },\n    \"total_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"ipv4_address\": 0,\n      \"phone_number\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    }\n  },\n  \"query_budget\": {\n    \"search_mode\": \"low\",\n    \"max_queries\": 1\n  },\n  \"queries\": [],\n  \"notes\": [\n    \"This is a dry-run plan. The host agent performs any web/search calls.\",\n    \"Review queries before executing them with private connectors or internal search tools.\",\n    \"Store only cross-validated advisory hints in the isolated suggestion channel.\"\n  ]\n}"
     },
     {
       "case": "plan_travel_redacts_state_secrets",
@@ -560,7 +569,21 @@
       "leaked_forbidden_substrings": [],
       "ok": true,
       "crashed": false,
-      "output": "{\n  \"dry_run\": true,\n  \"network_used\": false,\n  \"decision\": {\n    \"should_run\": true,\n    \"search_mode\": \"low\",\n    \"trigger_reason\": \"heartbeat\",\n    \"reason\": \"active conversation, quiet window, within cooldown\",\n    \"error_code\": \"ready\",\n    \"observed_signals\": [\n      \"heartbeat_default\"\n    ]\n  },\n  \"problem_fingerprint\": \"OpenClaw|current-version|cron failed|public-only search|safe query\",\n  \"fingerprint_hash\": \"h64:ded1aa1340b05f831c60bbaaa71832a01469bd879cee01b34ff80b73633c2bc3\",\n  \"redaction_summary\": {\n    \"context_chars_seen\": 81,\n    \"context_chars_used\": 79,\n    \"context_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"token_like\": 0,\n      \"internal_url\": 1,\n      \"private_path\": 1,\n      \"email\": 0\n    },\n    \"state_redacted_items\": {\n      \"credential_assignment\": 1,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    },\n    \"total_redacted_items\": {\n      \"credential_assignment\": 1,\n      \"email\": 0,\n      \"internal_url\": 1,\n      \"private_path\": 1,\n      \"token_like\": 0\n    }\n  },\n  \"query_budget\": {\n    \"search_mode\": \"low\",\n    \"max_queries\": 1\n  },\n  \"queries\": [\n    {\n      \"tier\": \"primary\",\n      \"surface\": \"official docs / release notes\",\n      \"purpose\": \"Anchor the suggestion in official behavior before considering community advice.\",\n      \"query\": \"OpenClaw current-version cron failed official docs\"\n    }\n  ],\n  \"notes\": [\n    \"This is a dry-run plan. The host agent performs any web/search calls.\",\n    \"Review queries before executing them with private connectors or internal search tools.\",\n    \"Store only cross-validated advisory hints in the isolated suggestion channel.\"\n  ]\n}"
+      "output": "{\n  \"dry_run\": true,\n  \"network_used\": false,\n  \"decision\": {\n    \"should_run\": true,\n    \"search_mode\": \"low\",\n    \"trigger_reason\": \"heartbeat\",\n    \"reason\": \"active conversation, quiet window, within cooldown\",\n    \"status\": \"ready\",\n    \"observed_signals\": [\n      \"heartbeat_default\"\n    ]\n  },\n  \"problem_fingerprint\": \"OpenClaw|current-version|cron failed|public-only search|safe query\",\n  \"fingerprint_hash\": \"h64:ded1aa1340b05f831c60bbaaa71832a01469bd879cee01b34ff80b73633c2bc3\",\n  \"redaction_summary\": {\n    \"context_chars_seen\": 81,\n    \"context_chars_used\": 79,\n    \"context_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"token_like\": 0,\n      \"internal_url\": 1,\n      \"private_path\": 1,\n      \"email\": 0,\n      \"ipv4_address\": 0,\n      \"phone_number\": 0\n    },\n    \"state_redacted_items\": {\n      \"credential_assignment\": 1,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"ipv4_address\": 0,\n      \"phone_number\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    },\n    \"total_redacted_items\": {\n      \"credential_assignment\": 1,\n      \"email\": 0,\n      \"internal_url\": 1,\n      \"ipv4_address\": 0,\n      \"phone_number\": 0,\n      \"private_path\": 1,\n      \"token_like\": 0\n    }\n  },\n  \"query_budget\": {\n    \"search_mode\": \"low\",\n    \"max_queries\": 1\n  },\n  \"queries\": [\n    {\n      \"tier\": \"primary\",\n      \"surface\": \"official docs / release notes\",\n      \"purpose\": \"Anchor the suggestion in official behavior before considering community advice.\",\n      \"query\": \"OpenClaw current-version cron failed official docs\"\n    }\n  ],\n  \"notes\": [\n    \"This is a dry-run plan. The host agent performs any web/search calls.\",\n    \"Review queries before executing them with private connectors or internal search tools.\",\n    \"Store only cross-validated advisory hints in the isolated suggestion channel.\"\n  ]\n}"
+    },
+    {
+      "case": "plan_travel_redacts_contact_and_ip",
+      "kind": "plan",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_query_count": 1,
+      "actual_query_count": 1,
+      "leaked_forbidden_substrings": [],
+      "ok": true,
+      "crashed": false,
+      "output": "{\n  \"dry_run\": true,\n  \"network_used\": false,\n  \"decision\": {\n    \"should_run\": true,\n    \"search_mode\": \"low\",\n    \"trigger_reason\": \"heartbeat\",\n    \"reason\": \"active conversation, quiet window, within cooldown\",\n    \"status\": \"ready\",\n    \"observed_signals\": [\n      \"heartbeat_default\"\n    ]\n  },\n  \"problem_fingerprint\": \"OpenClaw|current-version|call and inspect after cron failed|public-only search|safe query\",\n  \"fingerprint_hash\": \"h64:f0c4c6a2a60987db1c0841b23bfdb61d96548c7857cadef624c7a8816416f7f8\",\n  \"redaction_summary\": {\n    \"context_chars_seen\": 0,\n    \"context_chars_used\": 0,\n    \"context_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"token_like\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"email\": 0,\n      \"ipv4_address\": 0,\n      \"phone_number\": 0\n    },\n    \"state_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"ipv4_address\": 1,\n      \"phone_number\": 1,\n      \"private_path\": 0,\n      \"token_like\": 0\n    },\n    \"total_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"ipv4_address\": 1,\n      \"phone_number\": 1,\n      \"private_path\": 0,\n      \"token_like\": 0\n    }\n  },\n  \"query_budget\": {\n    \"search_mode\": \"low\",\n    \"max_queries\": 1\n  },\n  \"queries\": [\n    {\n      \"tier\": \"primary\",\n      \"surface\": \"official docs / release notes\",\n      \"purpose\": \"Anchor the suggestion in official behavior before considering community advice.\",\n      \"query\": \"OpenClaw current-version call inspect after cron failed official docs\"\n    }\n  ],\n  \"notes\": [\n    \"This is a dry-run plan. The host agent performs any web/search calls.\",\n    \"Review queries before executing them with private connectors or internal search tools.\",\n    \"Store only cross-validated advisory hints in the isolated suggestion channel.\"\n  ]\n}"
     }
   ]
 }

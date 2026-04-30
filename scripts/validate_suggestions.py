@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlparse
@@ -47,6 +48,7 @@ ALLOWED_LEVELS = {"low", "medium", "high"}
 ALLOWED_TOOL_PREFERENCES = {"public-only", "all-available", "custom"}
 ALLOWED_VISIBILITY = {"silent_until_relevant", "show_on_next_relevant_turn"}
 ALLOWED_SOURCE_SCOPE_PARTS = {"primary", "secondary", "tertiary"}
+ALLOWED_EVIDENCE_TIERS = ALLOWED_SOURCE_SCOPE_PARTS
 ALLOWED_TRIGGER_REASONS = {
     "heartbeat",
     "scheduled",
@@ -68,6 +70,8 @@ MATCH_AXES = {
 MATCH_AXIS_ALIASES = {
     "constraint": "constraint_pattern",
 }
+KEY_PATTERN = re.compile(r"^([a-z_]+):\s*(.*)$")
+SUGGESTION_HEADING_PATTERN = re.compile(r"^##\s+suggestion-\d+\s*$")
 
 
 def parse_args() -> argparse.Namespace:
@@ -120,6 +124,53 @@ def parse_evidence_source(item: str) -> tuple[str, str]:
     return normalized_label, normalized_reference
 
 
+@dataclass
+class SuggestionBlockParser:
+    top_level: dict[str, str] = field(default_factory=dict)
+    suggestions: list[dict[str, object]] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    current_suggestion: dict[str, object] | None = None
+    active_child_list: str | None = None
+
+    def start_suggestion(self) -> None:
+        self.current_suggestion = {"evidence": [], "match_reasoning": []}
+        self.suggestions.append(self.current_suggestion)
+        self.active_child_list = None
+
+    def start_child_list(self, name: str) -> None:
+        if self.current_suggestion is None:
+            self.errors.append(f"found {name} block before any suggestion heading")
+            return
+        self.active_child_list = name
+
+    def add_list_item(self, line: str) -> None:
+        if self.current_suggestion is None or self.active_child_list is None:
+            self.errors.append(f"unexpected list item outside block: {line}")
+            return
+        target = self.current_suggestion.get(self.active_child_list)
+        if not isinstance(target, list):
+            self.errors.append(f"{self.active_child_list} block is not a list")
+            return
+        target.append(line[2:].strip())
+
+    def add_key_value(self, key: str, value: str) -> None:
+        self.active_child_list = None
+        if self.current_suggestion is None:
+            if key in ITEM_REQUIRED:
+                self.errors.append(f"suggestion field {key} must appear under a suggestion heading")
+                return
+            self.top_level[key] = value
+            return
+        if key in TOP_LEVEL_REQUIRED or key in TOP_LEVEL_OPTIONAL:
+            self.errors.append(f"top-level field {key} must appear before the first suggestion heading")
+            return
+        self.current_suggestion[key] = value
+
+    def reject_line(self, line: str) -> None:
+        self.active_child_list = None
+        self.errors.append(f"unrecognized line: {line}")
+
+
 def parse_block(path: Path) -> tuple[dict[str, str], list[dict[str, object]], list[str]]:
     text = path.read_text(encoding="utf-8")
     start = text.rfind(START)
@@ -129,72 +180,34 @@ def parse_block(path: Path) -> tuple[dict[str, str], list[dict[str, object]], li
 
     block = text[start + len(START) : end].strip()
     lines = [line.rstrip() for line in block.splitlines()]
-    errors: list[str] = []
-    top_level: dict[str, str] = {}
-    suggestions: list[dict[str, object]] = []
-    current: dict[str, object] | None = None
-    current_evidence: list[str] | None = None
-    current_match_reasoning: list[str] | None = None
-
-    key_pattern = re.compile(r"^([a-z_]+):\s*(.*)$")
-    heading_pattern = re.compile(r"^##\s+suggestion-\d+\s*$")
+    parser = SuggestionBlockParser()
 
     for raw_line in lines:
         line = raw_line.strip()
         if not line or line.startswith("# agent-travel suggestions"):
             continue
-        if heading_pattern.match(line):
-            current = {"evidence": [], "match_reasoning": []}
-            suggestions.append(current)
-            current_evidence = None
-            current_match_reasoning = None
+        if SUGGESTION_HEADING_PATTERN.match(line):
+            parser.start_suggestion()
             continue
         if line == "evidence:":
-            if current is None:
-                errors.append("found evidence block before any suggestion heading")
-                continue
-            current_evidence = current["evidence"]  # type: ignore[assignment]
-            current_match_reasoning = None
+            parser.start_child_list("evidence")
             continue
         if line == "match_reasoning:":
-            if current is None:
-                errors.append("found match_reasoning block before any suggestion heading")
-                continue
-            current_match_reasoning = current["match_reasoning"]  # type: ignore[assignment]
-            current_evidence = None
+            parser.start_child_list("match_reasoning")
             continue
         if line.startswith("- "):
-            if current_evidence is not None:
-                current_evidence.append(line[2:].strip())
-                continue
-            if current_match_reasoning is not None:
-                current_match_reasoning.append(line[2:].strip())
-                continue
-            errors.append(f"unexpected list item outside block: {line}")
+            parser.add_list_item(line)
             continue
 
-        match = key_pattern.match(line)
+        match = KEY_PATTERN.match(line)
         if not match:
-            errors.append(f"unrecognized line: {line}")
-            current_evidence = None
-            current_match_reasoning = None
+            parser.reject_line(line)
             continue
 
         key, value = match.groups()
-        current_evidence = None
-        current_match_reasoning = None
-        if current is None:
-            if key in ITEM_REQUIRED:
-                errors.append(f"suggestion field {key} must appear under a suggestion heading")
-                continue
-            top_level[key] = value
-        else:
-            if key in TOP_LEVEL_REQUIRED or key in TOP_LEVEL_OPTIONAL:
-                errors.append(f"top-level field {key} must appear before the first suggestion heading")
-                continue
-            current[key] = value
+        parser.add_key_value(key, value)
 
-    return top_level, suggestions, errors
+    return parser.top_level, parser.suggestions, parser.errors
 
 
 def suggestion_limit(top_level: dict[str, str]) -> int | None:
@@ -206,13 +219,8 @@ def suggestion_limit(top_level: dict[str, str]) -> int | None:
     return min(values) if values else None
 
 
-def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list[str]:
+def validate_top_level_required_fields(top_level: dict[str, str]) -> list[str]:
     errors: list[str] = []
-    missing = sorted(TOP_LEVEL_REQUIRED - set(top_level))
-    if missing:
-        errors.append(f"missing top-level fields: {', '.join(missing)}")
-        return errors
-
     if top_level.get("advisory_only", "").lower() != "true":
         errors.append("advisory_only must be true")
     if top_level.get("thread_scope") != "active_conversation_only":
@@ -220,7 +228,11 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
     for field in sorted(TOP_LEVEL_REQUIRED - {"advisory_only"}):
         if not top_level.get(field, "").strip():
             errors.append(f"{field} must be non-empty")
+    return errors
 
+
+def validate_top_level_mode_fields(top_level: dict[str, str]) -> list[str]:
+    errors: list[str] = []
     budget = top_level.get("budget", "")
     if budget and budget not in ALLOWED_LEVELS:
         errors.append("budget must be one of: low, medium, high")
@@ -232,14 +244,22 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
     tool_preference = top_level.get("tool_preference", "")
     if tool_preference not in ALLOWED_TOOL_PREFERENCES:
         errors.append("tool_preference must be one of: all-available, custom, public-only")
+    return errors
 
+
+def validate_source_scope(top_level: dict[str, str]) -> list[str]:
+    errors: list[str] = []
     source_scope = split_scope(top_level.get("source_scope", ""))
     if "primary" not in source_scope:
         errors.append("source_scope must include primary")
     invalid_source_scope = sorted(source_scope - ALLOWED_SOURCE_SCOPE_PARTS)
     if invalid_source_scope:
         errors.append(f"source_scope contains unsupported tiers: {', '.join(invalid_source_scope)}")
+    return errors
 
+
+def validate_optional_top_level_fields(top_level: dict[str, str]) -> list[str]:
+    errors: list[str] = []
     visibility = top_level.get("visibility")
     if visibility and visibility not in ALLOWED_VISIBILITY:
         errors.append("visibility must be one of: show_on_next_relevant_turn, silent_until_relevant")
@@ -253,7 +273,11 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
     reuse_gate = top_level.get("reuse_gate")
     if reuse_gate and reuse_gate not in ALLOWED_REUSE_GATES:
         errors.append("reuse_gate must be: min_4_of_5_axes_and_ttl_valid")
+    return errors
 
+
+def validate_fingerprint_fields(top_level: dict[str, str]) -> list[str]:
+    errors: list[str] = []
     fingerprint_hash = top_level.get("fingerprint_hash", "")
     if fingerprint_hash and not FINGERPRINT_HASH_PATTERN.fullmatch(fingerprint_hash):
         errors.append("fingerprint_hash must be formatted as h64:<64 lowercase hex chars>")
@@ -261,7 +285,11 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
     fingerprint_parts = [part.strip() for part in top_level.get("problem_fingerprint", "").split("|") if part.strip()]
     if len(fingerprint_parts) < 4:
         errors.append("problem_fingerprint must contain at least 4 non-empty segments")
+    return errors
 
+
+def validate_timestamp_window(top_level: dict[str, str]) -> list[str]:
+    errors: list[str] = []
     if {"generated_at", "expires_at"} <= set(top_level):
         try:
             generated = parse_iso(top_level["generated_at"])
@@ -272,25 +300,30 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
                 errors.append("expires_at must be within 14 days of generated_at")
         except (TypeError, ValueError) as exc:
             errors.append(f"invalid ISO date: {exc}")
+    return errors
 
+
+def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list[str]:
+    missing = sorted(TOP_LEVEL_REQUIRED - set(top_level))
+    if missing:
+        return [f"missing top-level fields: {', '.join(missing)}"]
+
+    errors: list[str] = []
+    errors.extend(validate_top_level_required_fields(top_level))
+    errors.extend(validate_top_level_mode_fields(top_level))
+    errors.extend(validate_source_scope(top_level))
+    errors.extend(validate_optional_top_level_fields(top_level))
+    errors.extend(validate_fingerprint_fields(top_level))
+    errors.extend(validate_timestamp_window(top_level))
     limit = suggestion_limit(top_level)
     if limit is not None and suggestion_count > limit:
-        errors.append(f"{search_mode} allows at most {limit} suggestion(s)")
+        errors.append(f"{top_level.get('search_mode', '')} allows at most {limit} suggestion(s)")
 
     return errors
 
 
-def validate_suggestion(
-    index: int,
-    suggestion: dict[str, object],
-    declared_source_scope: set[str],
-) -> list[str]:
+def validate_required_suggestion_fields(index: int, suggestion: dict[str, object]) -> list[str]:
     errors: list[str] = []
-    missing = sorted(ITEM_REQUIRED - set(suggestion))
-    if missing:
-        errors.append(f"suggestion-{index} is missing fields: {', '.join(missing)}")
-        return errors
-
     for field in sorted(ITEM_REQUIRED - {"match_reasoning"}):
         value = str(suggestion.get(field, "")).strip()
         if not value:
@@ -299,61 +332,91 @@ def validate_suggestion(
     confidence = str(suggestion.get("confidence", ""))
     if confidence not in ALLOWED_LEVELS:
         errors.append(f"suggestion-{index} confidence must be one of: low, medium, high")
+    return errors
 
-    evidence = suggestion.get("evidence", [])
+
+def validate_evidence(
+    index: int,
+    evidence: object,
+    declared_source_scope: set[str],
+) -> list[str]:
+    errors: list[str] = []
     if not isinstance(evidence, list) or len(evidence) < 2:
         errors.append(f"suggestion-{index} needs at least 2 evidence items")
-    else:
-        evidence_tiers = set()
-        evidence_sources = set()
-        evidence_format_error = False
-        for item in evidence:
-            if ":" not in str(item):
-                errors.append(f"suggestion-{index} evidence items must use source_label: reference format")
-                evidence_format_error = True
-                continue
-            label, source_key = parse_evidence_source(str(item))
-            if not label or not source_key:
-                errors.append(f"suggestion-{index} evidence items must include a non-empty source label and reference")
-                evidence_format_error = True
-                continue
-            tier = label.split("_", 1)[0]
-            evidence_tiers.add(tier)
-            evidence_sources.add(source_key)
-            if tier not in declared_source_scope:
-                errors.append(
-                    f"suggestion-{index} evidence tier {tier} must be declared in source_scope"
-                )
-        if evidence_format_error:
-            evidence_tiers.clear()
-            evidence_sources.clear()
-        if not evidence_format_error and "primary" not in evidence_tiers:
-            errors.append(f"suggestion-{index} needs at least 1 primary evidence item")
-        if not evidence_format_error and not any(tier != "primary" for tier in evidence_tiers):
-            errors.append(f"suggestion-{index} needs at least 1 non-primary cross-validation evidence item")
-        if not evidence_format_error and len(evidence_sources) < 2:
-            errors.append(f"suggestion-{index} needs at least 1 independent evidence source")
+        return errors
 
-    match_reasoning = suggestion.get("match_reasoning", [])
+    evidence_tiers = set()
+    evidence_sources = set()
+    evidence_format_error = False
+    for item in evidence:
+        if ":" not in str(item):
+            errors.append(f"suggestion-{index} evidence items must use source_label: reference format")
+            evidence_format_error = True
+            continue
+        label, source_key = parse_evidence_source(str(item))
+        if not label or not source_key:
+            errors.append(f"suggestion-{index} evidence items must include a non-empty source label and reference")
+            evidence_format_error = True
+            continue
+        tier = label.split("_", 1)[0]
+        evidence_tiers.add(tier)
+        evidence_sources.add(source_key)
+        if tier not in ALLOWED_EVIDENCE_TIERS:
+            errors.append(
+                f"suggestion-{index} evidence tier {tier} is unsupported; use primary_, secondary_, or tertiary_ labels"
+            )
+            evidence_format_error = True
+            continue
+        if tier not in declared_source_scope:
+            errors.append(f"suggestion-{index} evidence tier {tier} must be declared in source_scope")
+
+    if evidence_format_error:
+        return errors
+    if "primary" not in evidence_tiers:
+        errors.append(f"suggestion-{index} needs at least 1 primary evidence item")
+    if not any(tier != "primary" for tier in evidence_tiers):
+        errors.append(f"suggestion-{index} needs at least 1 non-primary cross-validation evidence item")
+    if len(evidence_sources) < 2:
+        errors.append(f"suggestion-{index} needs at least 1 independent evidence source")
+    return errors
+
+
+def validate_match_reasoning(index: int, match_reasoning: object) -> list[str]:
+    errors: list[str] = []
     if not isinstance(match_reasoning, list) or len(match_reasoning) < 4:
         errors.append(f"suggestion-{index} needs at least 4 match_reasoning items")
-    else:
-        axes = set()
-        for item in match_reasoning:
-            if ":" not in str(item):
-                errors.append(f"suggestion-{index} match_reasoning items must use axis: explanation format")
-                break
-            axis, explanation = str(item).split(":", 1)
-            normalized_axis = canonicalize_axis(axis)
-            if normalized_axis not in MATCH_AXES:
-                continue
-            if not explanation.strip():
-                errors.append(f"suggestion-{index} match_reasoning explanations must be non-empty")
-                break
-            axes.add(normalized_axis)
-        if len(axes) < 4:
-            errors.append(f"suggestion-{index} needs at least 4 distinct match_reasoning axes")
+        return errors
 
+    axes = set()
+    for item in match_reasoning:
+        if ":" not in str(item):
+            errors.append(f"suggestion-{index} match_reasoning items must use axis: explanation format")
+            break
+        axis, explanation = str(item).split(":", 1)
+        normalized_axis = canonicalize_axis(axis)
+        if normalized_axis not in MATCH_AXES:
+            continue
+        if not explanation.strip():
+            errors.append(f"suggestion-{index} match_reasoning explanations must be non-empty")
+            break
+        axes.add(normalized_axis)
+    if len(axes) < 4:
+        errors.append(f"suggestion-{index} needs at least 4 distinct match_reasoning axes")
+    return errors
+
+
+def validate_suggestion(
+    index: int,
+    suggestion: dict[str, object],
+    declared_source_scope: set[str],
+) -> list[str]:
+    missing = sorted(ITEM_REQUIRED - set(suggestion))
+    if missing:
+        return [f"suggestion-{index} is missing fields: {', '.join(missing)}"]
+
+    errors = validate_required_suggestion_fields(index, suggestion)
+    errors.extend(validate_evidence(index, suggestion.get("evidence", []), declared_source_scope))
+    errors.extend(validate_match_reasoning(index, suggestion.get("match_reasoning", [])))
     return errors
 
 
